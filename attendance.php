@@ -30,8 +30,8 @@ session_start();
 
     <div class="page">
         <div class="header-area">
-           <div class="logo-area"> <h2 class="logo">ATTENDANCE APP</h2> </div>
-           <div class="logout-area">  <button class="btnlogout" id="btnLogout">LOGOUT</button> </div>
+           <div class="logo-area"> <h2 class="logo">ATTENDANCE TRACKER</h2> </div>
+           <div class="logout-area">  <button class="btnlogout" id="btnLogout"><span>LOGOUT</span></button> </div>
         </div>
 
         <div class="session-area">

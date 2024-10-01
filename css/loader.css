@@ -18,18 +18,12 @@
   
   .spinner {
     display: inline-block;
-    transform: translateZ(1px);
-  }
-  
-  .spinner:after {
-    content: '';
-    display: inline-block;
-    width: 48px;
+    width: 48px; /* adjust the width and height to match your image size */
     height: 48px;
     margin: 8px;
-    border-radius: 50%;
-    background: #fff;
-    animation: coin-flip 2.4s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+    background-image: url('../icon/nobglogo.ico'); /* assuming the icon folder is one level up from the CSS file */
+    background-size: contain; /* scale the image to fit the container */
+    animation: coin-flip 2.4s infinite; 
   }
   
   @keyframes coin-flip {
@@ -50,5 +44,5 @@
 
   .lblwait
   {
-    color: white;
+    color: black;
   }

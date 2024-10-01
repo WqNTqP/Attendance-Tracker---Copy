@@ -13,6 +13,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+
  }
 
  .page
@@ -344,5 +345,96 @@
         display: flex;
         justify-content: center;
         align-items: center;
+    }
+}
+
+.btnlogout {
+    position: relative; /* Add this */
+}
+
+.btnlogout {
+    padding: 0.5em 1em;
+    border: none;
+    user-select: none;
+    cursor: pointer;
+    font-size: 20px;
+    text-transform: uppercase;
+    transition: all 0.5s linear;
+    color: #fff;
+    position: relative;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    background-image: url('../icon/logout.ico');
+    background-size: 20px 20px;
+    background-position: 10px 50%;
+    background-repeat: no-repeat;
+    padding-left: 40px;
+  }
+
+  .btnlogout span {
+    font-size: 14px;
+  }
+
+.btnlogout:hover::after, .btnlogout:hover::before {
+    content: '';
+    background: linear-gradient(90deg, #FC466B 0%, #3F5EFB 100%);
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+
+    animation: move-right-side 1s ease infinite;
+}
+
+.btnlogout:hover::before {
+    background: linear-gradient(90deg, #00C9FF 0%, #92FE9D 100%);
+    inset: 0;
+    animation: move-left-side 1s ease infinite;
+    z-index: -2;
+}
+
+.btnlogout:hover {
+    background-color: #fff;
+    color: #00C9FF;
+}
+
+@keyframes move-right-side {
+    0% {
+        inset: 0.3em 0 0 0.3em; /*top | left */
+    }
+
+    33% {
+        inset: 0 0.3em 0.3em 0; /*right| bottom*/
+    }
+        
+    66% {
+        /* top | right | bottom | left */
+        inset: 1em 0 0 0.5em; /*top | right */
+    }
+
+    100% {
+        inset:0  1em 0.5em 0;
+    }
+}
+
+@keyframes move-left-side {
+    0% {
+        right: -1em;
+        top: -0.5em;
+    }
+
+    33% {
+        bottom: -1em;
+        left: -0.5em;
+    }
+
+    66% {
+        top: 0;
+        right:-0.7;
+    }
+
+    100% {
+        right: -1em;
+        top: -0.5em;
     }
 }
