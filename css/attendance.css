@@ -38,17 +38,36 @@
     100%{opacity: 1;}
 }
 
- .header-area
- {
+.header-area {
     grid-area: header-area;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas: "logo-area logout-area";
-    /*border:solid 1px black;*/
-    gap:var(--gap);
+    grid-template-columns: 1fr auto auto; /* Space for logo, coordinator button, and logout */
+    grid-template-areas: "logo-area coordinator-button-area logout-area"; /* Define areas */
+    gap: var(--gap);
     padding: var(--padding);
     border-bottom: solid 1px pink;
- }
+    align-items: center; /* Center items vertically */
+}
+
+
+.coordinator-button-area {
+    display: flex; /* Allows for better alignment */
+    justify-content: flex-start; /* Align the button to the left */
+}
+
+.btnShowCoordinator {
+    padding: 10px 15px; /* Add some padding */
+    background-color: #4CAF50; /* Green background */
+    color: white; /* White text */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    margin-right: 20px; /* Add some space between the button and logout */
+}
+
+.btnShowCoordinator:hover {
+    background-color: #45a049; /* Darker green on hover */
+}
 
 .logo-area
 {
@@ -262,6 +281,15 @@
     color: white;
 }
 
+.btnReport
+{
+    width: 6rem;
+    padding:var(--padding);
+    background-color: pink;
+    border: solid 1px rgb(218, 11, 45);
+    border-radius: .2rem;
+}
+
 .checkbox-area
 {
     display: flex;
@@ -335,10 +363,10 @@
     .studentdetails
     {
         display: grid;
-        grid-template-columns: 1fr 2fr 3fr 1fr;
+        grid-template-columns: 1fr 2fr 3fr 2fr;
         grid-template-rows: 1fr;
         grid-template-areas: 
-        "slno-area rollno-area name-area checkbox-area";
+        "slno-area rollno-area name-area timein-area timeout-area";
     }
     .studentdetails>*
     {
@@ -437,4 +465,299 @@
         right: -1em;
         top: -0.5em;
     }
+}
+
+
+
+/* Styles for the report section */
+.reportsection {
+    display: flex; 
+    justify-content: space-between; /* Push buttons to opposite sides */ 
+    align-items: center; 
+    padding: 10px 0; 
+}
+
+/* Styles for the REPORT button */
+.report-buttons {
+    display: flex; 
+    gap: 10px; /* Add spacing between buttons */
+}
+
+.report-buttons button { 
+    padding: 10px 20px; 
+    background-color: #4CAF50; /* Example background color for REPORT */ 
+    color: white; 
+    border: none; 
+    cursor: pointer; 
+    font-size: 14px; 
+}
+
+.report-buttons button:hover { 
+    background-color: #45a049; 
+}
+
+/* Styles for the ADD button */
+.btnAdd { 
+    padding: 10px 20px; 
+    background-color: #007BFF; /* Example background color for ADD */ 
+    color: white; 
+    border: none; 
+    cursor: pointer; 
+    font-size: 14px; 
+    transition: background-color 0.3s; /* Smooth transition on hover */
+}
+
+.btnAdd:hover { 
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+
+/* Modal Background */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensures modal is on top */
+}
+
+/* Form Container */
+#addStudentForm {
+    background-color: white; /* White background for form */
+    border-radius: 8px; /* Rounded corners */
+    padding: var(--padding); /* Consistent padding */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow */
+    width: 90%; /* Responsive width */
+    max-width: 500px; /* Max width for larger screens */
+    animation: fadein 300ms ease-in-out; /* Fade in effect */
+}
+
+/* Form Header */
+#addStudentForm h2 {
+    font-size: calc(var(--fontsize) * 1.2);
+    margin-bottom: var(--gap);
+}
+
+/* Input Fields */
+#addStudentForm label {
+    font-size: calc(var(--fontsize));
+    margin-bottom: 0.5rem; /* Spacing between label and input */
+    display: block; /* Ensure label is on its own line */
+}
+
+#addStudentForm input,
+#addStudentForm select {
+    width: 100%; /* Full width */
+    padding: var(--padding); /* Consistent padding */
+    border: solid 1px #ccc; /* Light gray border */
+    border-radius: 4px; /* Rounded corners */
+    margin-bottom: var(--gap); /* Spacing between inputs */
+    font-size: var(--fontsize); /* Consistent font size */
+}
+
+/* Button Styles */
+#addStudentForm button[type="submit"],
+#addStudentForm button[type="button"] {
+    background-color: rgb(65, 69, 211); /* Primary button color */
+    color: white; /* Text color */
+    padding: var(--padding); /* Consistent padding */
+    border: none; /* Remove border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor */
+    transition: background-color 300ms; /* Smooth transition for hover effect */
+    width: 48%; /* Adjust button width */
+}
+
+#addStudentForm button[type="submit"]:hover,
+#addStudentForm button[type="button"]:hover {
+    background-color: rgb(50, 55, 180); /* Darker shade on hover */
+}
+
+/* Close Button */
+#closeForm {
+    background-color: rgb(218, 11, 45); /* Red for close button */
+}
+
+#closeForm:hover {
+    background-color: rgb(180, 9, 30); /* Darker red on hover */
+}
+
+/* Fade-in Keyframe */
+@keyframes fadein {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* Form Container */
+#addStudentForm, #addHTEForm {
+    background-color: white;
+    border-radius: 8px;
+    padding: var(--padding);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 500px;
+    animation: fadein 300ms ease-in-out;
+}
+
+/* Form Header */
+#addStudentForm h2, #addHTEForm h2 {
+    font-size: calc(var(--fontsize) * 1.2);
+    margin-bottom: var(--gap);
+}
+
+/* Input Fields */
+#addStudentForm label, #addHTEForm label {
+    font-size: calc(var(--fontsize));
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+#addStudentForm input,
+#addStudentForm select,
+#addHTEForm input,
+#addHTEForm select {
+    width: 100%;
+    padding: var(--padding);
+    border: solid 1px #ccc;
+    border-radius: 4px;
+    margin-bottom: var(--gap);
+    font-size: var(--fontsize);
+}
+
+/* Button Styles */
+#addStudentForm button[type="submit"],
+#addStudentForm button[type="button"],
+#addHTEForm button[type="submit"],
+#addHTEForm button[type="button"] {
+    background-color: rgb(65, 69, 211);
+    color: white;
+    padding: var(--padding);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 300ms;
+    width: 48%;
+}
+
+#addStudentForm button[type="submit"]:hover,
+#addStudentForm button[type="button"]:hover,
+#addHTEForm button[type="submit"]:hover,
+#addHTEForm button[type="button"]:hover {
+    background-color: rgb(50, 55, 180);
+}
+
+/* Close Button */
+#closeForm, #closeHTEForm {
+    background-color: rgb(218, 11, 45);
+}
+
+#closeForm:hover, #closeHTEForm:hover {
+    background-color: rgb(180, 9, 30);
+}
+
+/* Fade-in Keyframe */
+@keyframes fadein {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* Styles for the ADD NEW HTE button */
+.btnAddHTE {
+    padding: 10px 20px;
+    background-color: #007BFF; /* Using the same blue as your ADD button */
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+    border-radius: 4px; /* Adding rounded corners for consistency */
+}
+
+.btnAddHTE:hover {
+    background-color: #0056b3; /* Same hover color as your ADD button */
+}
+
+/* If you want to align it to the right side */
+.reportsection:last-child {
+    justify-content: flex-end;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    font-weight: bold;
+    display: inline-block;
+    width: 150px;
+}
+
+/* Coordinator Details Modal Styles */
+#coordinatorDetailsModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+#coordinatorDetailsModal .modal-content {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 500px;
+    animation: fadein 300ms ease-in-out;
+}
+
+#coordinatorDetailsModal h2 {
+    font-size: 1.2em;
+    margin-bottom: 15px;
+}
+
+#coordinatorDetailsModal .form-group {
+    margin-bottom: 15px;
+}
+
+#coordinatorDetailsModal .form-group label {
+    font-weight: bold;
+    display: inline-block;
+    width: 150px;
+    margin-right: 10px;
+}
+
+#coordinatorDetailsModal .form-group span {
+    display: inline-block;
+}
+
+#coordinatorDetailsModal button {
+    background-color: rgb(65, 69, 211);
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 300ms;
+    width: 100%;
+    margin-top: 15px;
+}
+
+#coordinatorDetailsModal button:hover {
+    background-color: rgb(50, 55, 180);
+}
+
+@keyframes fadein {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
 }

@@ -25,14 +25,20 @@ session_start();
 <body>
 
 
-    <!--<h1>Hello</h1>
-    <button id="btnLogout">LOGOUT</button>-->
 
     <div class="page">
-        <div class="header-area">
-           <div class="logo-area"> <h2 class="logo">ATTENDANCE TRACKER</h2> </div>
-           <div class="logout-area">  <button class="btnlogout" id="btnLogout"><span>LOGOUT</span></button> </div>
-        </div>
+    <div class="header-area">
+            <div class="logo-area">
+                <h2 class="logo">ATTENDANCE TRACKER</h2>
+            </div>
+            <div class="coordinator-button-area">
+                <button class="btnShowCoordinator" id="btnShowCoordinator">Show Coordinator Details</button>
+            </div>
+            <div class="logout-area">
+                <button class="btnlogout" id="btnLogout"><span>LOGOUT</span></button>
+            </div>
+    </div>
+
 
         <div class="session-area">
             <div class="label-area"><label>SESSION</label></div>
@@ -65,7 +71,6 @@ session_start();
         </div>
 
         <div class="studentlist-area" id="studentlistarea">
-
         <!--
             <div class="studentlist"><labe> STUDENT LIST</label></div>
                 
@@ -159,7 +164,7 @@ session_start();
                 </div>
                 -->
         </div>
-        
+ 
     </div>
     <input type="hidden" id="hiddencdrid" value="<?php echo($cdrid)?>">
     <input type="hidden" id="hiddenSelectedHteID" value="-1">

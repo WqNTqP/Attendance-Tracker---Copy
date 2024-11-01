@@ -1,0 +1,217 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    --fontsize: .8rem;
+    --gap: .3rem;
+    --padding: .4rem;
+    transition: all 300ms;
+}
+
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+.page {
+    width: 100%;
+    max-width: 1200px;
+    margin: auto;
+    overflow: hidden;
+    padding: calc(var(--padding) * 3);
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.header-area {
+    background: linear-gradient(to right, #2c3e50, #3498db);
+    color: #fff;
+    padding: calc(var(--padding) * 2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 10px;
+    margin-bottom: calc(var(--gap) * 3);
+    text-align: center;
+}
+
+.logo {
+    font-size: calc(var(--fontsize) * 1.5);
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-bottom: calc(var(--gap) * 2);
+}
+
+.btnlogout {
+    font-size: calc(var(--fontsize) * 0.9);
+    padding: calc(var(--padding) * 1) calc(var(--padding) * 2);
+    background-color: rgba(255,255,255,0.1);
+    color: white;
+    border: 2px solid white;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    max-width: 100%;
+}
+
+.btnlogout:hover {
+    background-color: white;
+    color: #3498db;
+}
+
+.student-details-area,
+.internship-details-area,
+.attendance-area {
+    background: #fff;
+    margin: calc(var(--gap) * 2) 0;
+    padding: calc(var(--padding) * 3);
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.student-details-area:hover,
+.internship-details-area:hover,
+.attendance-area:hover {
+    transform: translateY(-5px);
+}
+
+h3 {
+    margin-bottom: calc(var(--gap) * 2);
+    color: #2c3e50;
+    font-size: calc(var(--fontsize) * 1.3);
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+p {
+    margin-bottom: calc(var(--gap) * 1.5);
+    font-size: var(--fontsize);
+    color: #34495e;
+}
+
+strong {
+    font-weight: bold;
+    color: #2980b9;
+}
+
+.btn {
+    font-size: var(--fontsize);
+    padding: calc(var(--padding) * 1.2) calc(var(--padding) * 2.5);
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-right: calc(var(--gap) * 2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+    display: inline-block; /* Ensure buttons are inline */
+}
+
+#timeInButton {
+    background-color: #2ecc71;
+    color: white;
+}
+
+#timeInButton:hover {
+    background-color: #27ae60;
+    transform: translateY(-2px);
+}
+
+#timeOutButton {
+    background-color: #e74c3c;
+    color: white;
+}
+
+#timeOutButton:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+ }
+
+#attendanceStatusMessage {
+    margin-top: calc(var(--gap) * 2);
+    padding: var(--padding);
+    border-radius: 5px;
+    font-size: var(--fontsize);
+    background-color: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#attendanceStatusMessage.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+#attendanceStatusMessage.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+
+@media only screen and (max-width: 320px) {
+    .btn {
+        font-size: calc(var(--fontsize) * 0.8); /* Reduce font size */
+        padding: calc(var(--padding) * 1) calc(var(--padding) * 2); /* Reduce padding */
+        margin-right: 0; /* Remove right margin */
+        margin-bottom: calc(var(--gap) * 2); /* Add bottom margin */
+        width: 100%; /* Make buttons full width */
+        display: block; /* Stack buttons vertically */
+    }
+
+    #timeInButton {
+        margin-bottom: calc(var(--gap) * 2); /* Add space between buttons */
+    }
+
+    .attendance-area {
+        text-align: center; /* Center the buttons within their container */
+    }
+}
+
+@media only screen and (min-width: 600px) {
+    * {
+        --fontsize: .9rem;
+    }
+    .page {
+        width: 80%;
+    }
+    .header-area {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .logo {
+        margin-bottom: 0;
+    }
+}
+
+@media only screen and (min-width: 900px) {
+    * {
+        --fontsize: 1rem;
+    }
+    .page {
+        width: 70%;
+    }
+    .header-area {
+        padding: calc(var(--padding) * 3);
+    }
+    .student-details-area,
+    .internship-details-area,
+    .attendance-area {
+        margin: calc(var(--gap) * 3) 0;
+        padding: calc(var(--padding) * 4);
+    }
+}

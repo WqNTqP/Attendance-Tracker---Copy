@@ -1,8 +1,10 @@
 <?php
 
 $path=$_SERVER['DOCUMENT_ROOT'];
-require_once $path."/Attendance Tracker/database/database.php";
+require_once $path."/Attendance Tracker - Copy - NP/database/database.php";
  $dbo=new Database();
+
+
 
 /////////////////////////////////////////////
 //DUMMY TABLE
@@ -268,19 +270,19 @@ require_once $path."/Attendance Tracker/database/database.php";
 // //INSERT COORDINATOR DATA HERE
 
 
-// $c = "INSERT INTO internship_needs (INTERNS_ID, HTE_ID, COORDINATOR_ID,SESSION_ID)
-//       VALUES 
-//       (1,1 , 59828996,1),
-//       (3,2 , 59828996,1)";
+$c = "INSERT INTO internship_needs (INTERNS_ID, HTE_ID, COORDINATOR_ID, SESSION_ID)
+        VALUES 
+        (1, 1, 59828996, 2),
+        (3, 2, 59828996, 2)";
 
-// $s = $dbo->conn->prepare($c);
+$s = $dbo->conn->prepare($c);
 
-// try {
-//     $s->execute();
-//     echo "<br>DATA HAS BEEN ADDED!";
-// } catch (PDOException $e) {
-//     echo "<br>Error adding data: " . $e->getMessage();
-// }
+try {
+    $s->execute();
+    echo "<br>DATA HAS BEEN ADDED!";
+} catch (PDOException $e) {
+    echo "<br>Error adding data: " . $e->getMessage();
+}
 
 //////////////////////////////////////////////////////
 // INSERT TASK DATA HERE
@@ -399,18 +401,12 @@ require_once $path."/Attendance Tracker/database/database.php";
 // $s = $dbo->conn->prepare($c);
 
 // $data = [
-//     [1, 1, 1],
-//     [2, 1, 1],
-//     [3, 1, 1],
-//     [1, 1, 2],
-//     [2, 1, 2],
-//     [3, 1, 2],
-//     [1, 2, 1],
-//     [2, 2, 1],
-//     [3, 2, 1],
-//     [1, 2, 2],
-//     [2, 2, 2],
-//     [3, 2, 2],
+//     [6, 1, 1],
+//     [7, 1, 1],
+//     [8, 1, 1],
+//     [6, 1, 2],
+//     [7, 1, 2],
+//     [8, 1, 2],
 // ];
 
 // foreach ($data as $row) {

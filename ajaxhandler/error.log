@@ -1,0 +1,2 @@
+[2024-10-22 05:07:26] ERROR: Error recording attendance: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[2024-10-22 05:07:33] ERROR: Error recording attendance: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens

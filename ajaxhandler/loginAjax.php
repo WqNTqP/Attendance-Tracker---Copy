@@ -1,7 +1,7 @@
 <?php
 $path=$_SERVER['DOCUMENT_ROOT'];
-require_once $path."/Attendance Tracker/database/database.php";
-require_once $path."/Attendance Tracker/database/coordinator.php";
+require_once $path."/Attendance Tracker - Copy - NP/database/database.php";
+require_once $path."/Attendance Tracker - Copy - NP/database/coordinator.php";
 $action=$_REQUEST["action"];
 if(!empty($action))
 {
@@ -20,6 +20,7 @@ if(!empty($action))
         {
             session_start();
             $_SESSION['current_user']=$rv['id'];
+            
         }
 
         for($i=0;$i<100000;$i++)

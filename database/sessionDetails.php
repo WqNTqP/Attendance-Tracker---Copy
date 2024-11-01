@@ -1,6 +1,6 @@
 <?php
 $path=$_SERVER['DOCUMENT_ROOT'];
-require_once $path."/Attendance Tracker/database/database.php";
+require_once $path."/Attendance Tracker - Copy - NP/database/database.php";
 
 class SessionDetails
 {
