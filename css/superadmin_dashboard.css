@@ -1,0 +1,205 @@
+/* General Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f9; /* Softer background for reduced strain */
+    margin: 0;
+    padding: 0;
+    color: #333; /* Darker text color for better contrast */
+}
+
+/* Header Styles */
+h1 {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+/* Add Coordinator Button */
+#btnAddCoordinator {
+    display: block;
+    margin: 0 auto 20px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    color: #fff;
+    background-color: #3498db;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+#btnAddCoordinator:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    border-collapse: collapse;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+table thead {
+    background: #2c3e50;
+    color: #fff;
+}
+
+table th, table td {
+    padding: 15px;
+    text-align: left;
+    font-size: 1rem;
+    border-bottom: 1px solid #ddd;
+}
+
+table th {
+    font-weight: 600;
+}
+
+table tr:hover {
+    background: #f1f4f8;
+}
+
+table tr:last-child td {
+    border-bottom: none;
+}
+
+table td button {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    color: #fff;
+    background: #e74c3c;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+table td button:hover {
+    background: #c0392b;
+    transform: scale(1.05);
+}
+
+/* Modal Styles */
+#addCoordinatorModal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    width: 90%;
+    max-width: 500px;
+    padding: 20px;
+    z-index: 1000;
+    display: none; /* Hidden by default */
+}
+
+#addCoordinatorModal form {
+    display: flex;
+    flex-direction: column;
+}
+
+#addCoordinatorModal h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #ffffff;
+    text-align: center;
+}
+
+#addCoordinatorModal label {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    color: #ffffff;
+}
+
+#addCoordinatorModal input, 
+#addCoordinatorModal select {
+    padding: 10px;
+    margin-bottom: 15px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+#addCoordinatorModal input:focus,
+#addCoordinatorModal select:focus {
+    border-color: #3498db;
+}
+
+#addCoordinatorModal button[type="submit"] {
+    padding: 10px;
+    font-size: 1rem;
+    color: #fff;
+    background-color: #3498db;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+#addCoordinatorModal button[type="submit"]:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+#addCoordinatorModal #closeModal {
+    padding: 10px;
+    font-size: 1rem;
+    color: #555;
+    background-color: #f0f4f9;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+#addCoordinatorModal #closeModal:hover {
+    background-color: #ddd;
+    transform: translateY(-2px);
+}
+
+/* Overlay for Modal */
+#addCoordinatorModal::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
+
+    table th, table td {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+
+    #btnAddCoordinator {
+        font-size: 0.9rem;
+        padding: 8px 16px;
+    }
+}

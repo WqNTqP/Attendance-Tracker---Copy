@@ -69,7 +69,6 @@ body {
 }
 
 .student-details-area,
-.internship-details-area,
 .attendance-area {
     background: #fff;
     margin: calc(var(--gap) * 2) 0;
@@ -80,7 +79,6 @@ body {
 }
 
 .student-details-area:hover,
-.internship-details-area:hover,
 .attendance-area:hover {
     transform: translateY(-5px);
 }
@@ -209,9 +207,80 @@ strong {
         padding: calc(var(--padding) * 3);
     }
     .student-details-area,
-    .internship-details-area,
     .attendance-area {
         margin: calc(var(--gap) * 3) 0;
         padding: calc(var(--padding) * 4);
+    }
+}
+
+.attendance-history-area {
+    background: #fff; /* White background for the attendance area */
+    margin: calc(var(--gap) * 3) 0; /* Spacing around the area */
+    padding: calc(var(--padding) * 3); /* Padding inside the area */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    transition: transform 0.3s ease; /* Smooth hover effect */
+}
+
+.attendance-history-area:hover {
+    transform: translateY(-5px); /* Slight lift on hover */
+}
+
+.attendance-history-area h3 {
+    margin-bottom: calc(var(--gap) * 2); /* Space below the heading */
+    color: #2c3e50; /* Dark color for the heading */
+    font-size: calc(var(--fontsize) * 1.3); /* Responsive font size */
+    font-weight: bold; /* Bold text */
+    text-transform: uppercase; /* Uppercase text */
+    letter-spacing: 1px; /* Spacing between letters */
+}
+
+.attendance-history-area table {
+    width: 100%; /* Full width of the area */
+    border-collapse: collapse; /* Remove space between table cells */
+    margin-top: calc(var(--gap) * 2); /* Space above the table */
+}
+
+.attendance-history-area th, 
+.attendance-history-area td {
+    padding: calc(var(--padding) * 1); /* Padding inside table cells */
+    text-align: left; /* Left align text */
+    border-bottom: 1px solid #ddd; /* Light border below cells */
+}
+
+.attendance-history-area th {
+    background-color: #f0f2f5; /* Light background for header */
+    color: #34495e; /* Dark text color for header */
+    font-weight: bold; /* Bold text for header */
+}
+
+.attendance-history-area tr:hover {
+    background-color: #f9f9f9; /* Light gray background on row hover */
+}
+
+.attendance-history-area p {
+    margin: calc(var(--gap) * 1.5) 0; /* Space above and below paragraphs */
+    font-size: var(--fontsize); /* Responsive font size */
+    color: #34495e; /* Dark text color */
+}
+
+.current-week-area {
+    margin: 20px; /* Space around the element */
+    font-size: 18px; /* Font size */
+    font-weight: bold; /* Bold text */
+    color: #333; /* Text color */
+    background-color: #f9f9f9; /* Light background color */
+    border: 1px solid #ddd; /* Light border */
+    border-radius: 5px; /* Rounded corners */
+    padding: 15px; /* Inner space */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    text-align: center; /* Center the text */
+}
+
+/* Optional: Responsive design */
+@media (max-width: 600px) {
+    .current-week-area {
+        font-size: 16px; /* Adjust font size for smaller screens */
+        padding: 10px; /* Adjust padding for smaller screens */
     }
 }

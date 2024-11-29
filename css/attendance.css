@@ -243,13 +243,13 @@
     outline: none;
 }
 
-.studentlist
-{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-}
+    .studentlist
+    {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+    }
 
 .studentlist >label
 {
@@ -477,39 +477,7 @@
     padding: 10px 0; 
 }
 
-/* Styles for the REPORT button */
-.report-buttons {
-    display: flex; 
-    gap: 10px; /* Add spacing between buttons */
-}
 
-.report-buttons button { 
-    padding: 10px 20px; 
-    background-color: #4CAF50; /* Example background color for REPORT */ 
-    color: white; 
-    border: none; 
-    cursor: pointer; 
-    font-size: 14px; 
-}
-
-.report-buttons button:hover { 
-    background-color: #45a049; 
-}
-
-/* Styles for the ADD button */
-.btnAdd { 
-    padding: 10px 20px; 
-    background-color: #007BFF; /* Example background color for ADD */ 
-    color: white; 
-    border: none; 
-    cursor: pointer; 
-    font-size: 14px; 
-    transition: background-color 0.3s; /* Smooth transition on hover */
-}
-
-.btnAdd:hover { 
-    background-color: #0056b3; /* Darker shade on hover */
-}
 
 
 /* Modal Background */
@@ -666,21 +634,7 @@
     100% { opacity: 1; }
 }
 
-/* Styles for the ADD NEW HTE button */
-.btnAddHTE {
-    padding: 10px 20px;
-    background-color: #007BFF; /* Using the same blue as your ADD button */
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s;
-    border-radius: 4px; /* Adding rounded corners for consistency */
-}
 
-.btnAddHTE:hover {
-    background-color: #0056b3; /* Same hover color as your ADD button */
-}
 
 /* If you want to align it to the right side */
 .reportsection:last-child {
@@ -757,6 +711,270 @@
     background-color: rgb(50, 55, 180);
 }
 
+@keyframes fadein {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+
+/* Style for the delete button */
+.btnDelete {
+    display: none; /* Initially hide the button */
+    margin-left: 10px; /* Space between name and delete button */
+    padding: 6px 12px; /* Button padding */
+    background-color: rgb(190, 22, 22); /* Bright red background color */
+    color: white; /* White text color */
+    border: none; /* Remove border */
+    border-radius: 25px; /* Rounded corners for pill shape */
+    font-size: calc(var(--fontsize) * 0.9); /* Responsive font size */
+    cursor: pointer; /* Pointer cursor for UX */
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s; /* Smooth transition */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    position: relative; /* Allow positioning relative to name area */
+    z-index: 1; /* Appear above other elements */
+    width: 80px; /* Fixed width to reserve space */
+    text-align: center; /* Center text within button */
+}
+
+/* Hover effect for the delete button */
+.btnDelete:hover {
+    background-color: rgb(190, 22, 22); /* Hover color */
+    transform: translateY(-2px); /* Lift effect on hover */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+}
+
+/* Show the delete button on student details row hover */
+.studentdetails:hover .btnDelete {
+    display: inline-block; /* Show button on row hover */
+}
+
+/* Name area styling */
+.name-area {
+    display: flex; /* Flex layout */
+    align-items: center; /* Center items vertically */
+    justify-content: space-between; /* Distribute space evenly */
+    width: 100%; /* Full width */
+    padding-right: 80px; /* Match delete button width to reserve space */
+}
+
+
+/* Styles for the Edit button */
+.btnEdit {
+    padding: 10px 20px; /* Add some padding */
+    background-color: #007BFF; /* Blue background */
+    color: white; /* White text */
+    border: none; /* Remove border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    font-size: 14px; /* Font size */
+    transition: background-color 0.3s; /* Smooth transition */
+    margin-left: 10px; /* Space between name and edit button */
+}
+
+/* Hover effect for the Edit button */
+.btnEdit:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* If you want the edit button to be hidden initially */
+.btnEdit {
+    display: none; /* Initially hide the button */
+}
+
+/* Show the Edit button on student details row hover */
+.studentdetails:hover .btnEdit {
+    display: inline-block; /* Show button on row hover */
+}
+
+
+
+/* Form Container */
+#editStudentForm {
+    background-color: white; /* White background for form */
+    border-radius: 8px; /* Rounded corners */
+    padding: var(--padding); /* Consistent padding */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow */
+    width: 90%; /* Responsive width */
+    max-width: 500px; /* Max width for larger screens */
+    animation: fadein 300ms ease-in-out; /* Fade in effect */
+}
+
+/* Form Header */
+#editStudentForm h2 {
+    font-size: calc(var(--fontsize) * 1.2);
+    margin-bottom: var(--gap);
+}
+
+/* Input Fields */
+#editStudentForm label {
+    font-size: calc(var(--fontsize));
+    margin-bottom: 0.5rem; /* Spacing between label and input */
+    display: block; /* Ensure label is on its own line */
+}
+
+#editStudentForm input,
+#editStudentForm select {
+    width: 100%; /* Full width */
+    padding: var(--padding); /* Consistent padding */
+    border: solid 1px #ccc; /* Light gray border */
+    border-radius: 4px; /* Rounded corners */
+    margin-bottom: var(--gap); /* Spacing between inputs */
+    font-size: var(--fontsize); /* Consistent font size */
+}
+
+/* Button Styles */
+#editStudentForm button[type="submit"],
+#editStudentForm button[type="button"] {
+    background-color: rgb(65, 69, 211); /* Primary button color */
+    color: white; /* Text color */
+    padding: var(--padding); /* Consistent padding */
+    border: none; /* Remove border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor */
+    transition: background-color 300ms; /* Smooth transition for hover effect */
+    width: 48%; /* Adjust button width */
+}
+
+#editStudentForm button[type="submit"]:hover,
+#editStudentForm button[type="button"]:hover {
+    background-color: rgb(50, 55, 180); /* Darker shade on hover */
+}
+
+/* Close Button */
+#closeEditForm {
+    background-color: rgb(218, 11, 45); /* Red for close button */
+}
+
+#closeEditForm:hover {
+    background-color: rgb(180, 9, 30); /* Darker red on hover */
+}
+
+/* Fade-in Keyframe */
+@keyframes fadein {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* Common button styles */
+.common-button {
+    padding: 10px; /* Consistent padding */
+    color: white; /* Text color */
+    border: none; /* Remove border */
+    cursor: pointer; /* Pointer cursor */
+    font-size: 14px; /* Font size */
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transition on hover and transform */
+    border-radius: 4px; /* Rounded corners for consistency */
+    position: relative; /* Ensure positioning for pseudo-elements */
+    width: 100px; /* Fixed width for all buttons */
+    height: 30px; /* Fixed height for all buttons */
+    text-align: center; /* Center text within the button */
+}
+
+/* Specific button styles */
+.btnReport {
+    background-color: #4CAF50; /* Green background for REPORT button */
+}
+
+.btnAdd {
+    background-color: #007BFF; /* Blue background for ADD button */
+}
+
+.btnAddHTE {
+    background-color: #28A745; /* Different shade of green for ADD HTE button */
+}
+
+.btnDeleteHTE {
+    background-color: #FF4D4D; /* Red background for DELETE button */
+}
+
+/* Hover effects for all buttons */
+.common-button:hover {
+    opacity: 0.9; /* Slightly darken all buttons on hover */
+    transform: translateY(-2px); /* Lift effect on hover */
+}
+
+/* Specific hover effects */
+.btnReport:hover {
+    background-color: #45a049; /* Darker green for REPORT button on hover */
+}
+
+.btnAdd:hover {
+    background-color: #0056b3; /* Darker blue for ADD button on hover */
+}
+
+.btnAddHTE:hover {
+    background-color: #218838; /* Darker green for ADD HTE button on hover */
+}
+
+.btnDeleteHTE:hover {
+    background-color: #FF7A7A; /* Lighter red for DELETE button on hover */
+}
+
+/* Form Container */
+#addCoordinatorForm {
+    background-color: white; /* White background for form */
+    border-radius: 8px; /* Rounded corners */
+    padding: var(--padding); /* Consistent padding */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow */
+    width: 90%; /* Responsive width */
+    max-width: 500px; /* Max width for larger screens */
+    animation: fadein 300ms ease-in-out; /* Fade in effect */
+}
+
+/* Form Header */
+#addCoordinatorForm h2 {
+    font-size: calc(var(--fontsize) * 1.2); /* Font size based on your variable */
+    margin-bottom: 20px; /* Space below the heading */
+    text-align: center; /* Center the header text */
+    color: #333; /* Dark color for visibility */
+    font-weight: bold; /* Make the header bold */
+}
+
+/* Input Fields */
+#addCoordinatorForm label {
+    font-size: calc(var(--fontsize)); /* Font size based on your variable */
+    margin-bottom: 0.5rem; /* Spacing between label and input */
+    display: block; /* Ensure label is on its own line */
+}
+
+#addCoordinatorForm input,
+#addCoordinatorForm select {
+    width: 100%; /* Full width */
+    padding: var(--padding); /* Consistent padding */
+    border: solid 1px #ccc; /* Light gray border */
+    border-radius: 4px; /* Rounded corners */
+    margin-bottom: var(--gap); /* Spacing between inputs */
+    font-size: var(--fontsize); /* Consistent font size */
+}
+
+/* Button Styles */
+#addCoordinatorForm button[type="submit"],
+#addCoordinatorForm button[type="button"] {
+    background-color: rgb(65, 69, 211); /* Primary button color */
+    color: white; /* Text color */
+    padding: var(--padding); /* Consistent padding */
+    border: none; /* Remove border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor */
+    transition: background-color 300ms; /* Smooth transition for hover effect */
+    width: 48%; /* Adjust button width */
+}
+
+#addCoordinatorForm button[type="button"] {
+    background-color: rgb(218, 11, 45); /* Red for close button */
+}
+
+#addCoordinatorForm button[type="submit"]:hover,
+#addCoordinatorForm button[type="button"]:hover {
+    background-color: rgb(50, 55, 180); /* Darker shade on hover */
+}
+
+/* Close Button */
+#closeCoordinatorForm:hover {
+    background-color: rgb(180, 9, 30); /* Darker red on hover */
+}
+
+/* Fade-in Keyframe */
 @keyframes fadein {
     0% { opacity: 0; }
     100% { opacity: 1; }

@@ -1,11 +1,11 @@
 function tryLogin() {
-    let un = $("#txtUsername").val(); // Get username input
-    let pw = $("#txtPassword").val(); // Get password input
+    let un = $("#txtAdminEmail").val(); // Change to the correct ID for email
+    let pw = $("#txtAdminPassword").val(); // Change to the correct ID for password
     
     // Check if username and password are not empty
     if (un.trim() !== "" && pw.trim() !== "") {
         $.ajax({
-            url: "ajaxhandler/loginAjax.php", // Adjust path if needed
+            url: "ajaxhandler/adminLoginAjax.php", // Adjust path if needed
             type: "POST",
             dataType: "json",
             data: { user_name: un, password: pw, action: "verifyUser" }, // Send username, password, and action
@@ -15,15 +15,13 @@ function tryLogin() {
             },
             success: function(rv) {
                 $("#lockscreen").removeClass("applylockscreen");
-                console.log(rv);
+                
                 // Check response status for login validation
                 if (rv.status === "ALL OK") {
                     // Redirect based on user role
-                    if (rv.data.role === 'SUPERADMIN') {
-                        document.location.replace("superadmin_dashboard.php"); // For Coordinator
-                    } else if (rv.data.role === 'COORDINATOR') {
-                        document.location.replace("attendance.php");
-                    }
+                    if (rv.data.role === 'ADMIN') {
+                        document.location.replace("admindashboard.php"); // For Coordinator
+                    } 
                 } else {
                     $("#diverror").addClass("applyerrordiv");
                     $("#diverror").text(rv.status); // Show the error message from the server
@@ -44,7 +42,7 @@ function tryLogin() {
 
 $(document).ready(function() {
     // Trigger login on button click
-    $("#btnLogin").on("click", function(e) {
+    $("#btnAdminLogin").on("click", function(e) {  // Use correct button ID
         e.preventDefault(); // Prevent the default form submission behavior
         tryLogin(); // Call the login function
     });

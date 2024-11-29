@@ -7,6 +7,9 @@ require_once $path."/Attendance Tracker - Copy - NP/database/coordinator.php";
 require_once $path."/Attendance Tracker - Copy - NP/database/buildingRegistrationDetails.php";
 require_once $path."/Attendance Tracker - Copy - NP/database/attendanceDetails.php";
 require('C:/xampp/htdocs/Attendance Tracker - Copy - NP/fpdf/fpdf.php');
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+header('Content-Type: application/json');
 
 
 
@@ -186,11 +189,9 @@ function createPDFReport($list, $filename) {
     }
     
     
-
-    
     if (isset($_POST['action'])) {
         $action = $_POST['action'];
-    
+            
         if ($action == "addStudent") {
             // Collect all necessary data from POST
             $intern_id = $_POST['internId'] ?? null;
@@ -338,6 +339,59 @@ function createPDFReport($list, $filename) {
         echo json_encode($response);
         exit;
     }
+
+    
+
+
+    if ($action == "deleteStudent") {
+    $studentId = $_POST['studentId'] ?? null;
+    if (!$studentId) {
+        echo json_encode(['success' => false, 'message' => 'Student ID is required.']);
+        exit;
+    }
+    $dbo = new Database();
+    $ado = new attendanceDetails();
+    $response = $ado->deleteStudent($dbo, $studentId);
+    echo json_encode($response);
+}
+
+
+
+
+// Assuming you're handling the deleteHTE action in PHP
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'deleteHTE') {
+    $hteId = $_POST['hteId'];
+
+    // Database connection
+    $dbo = new Database(); // Assuming you have a Database class to handle connections
+    $response = [];
+
+    try {
+        // Prepare the SQL statement to delete from host_training_establishment
+        $stmt = $dbo->conn->prepare("DELETE FROM host_training_establishment WHERE HTE_ID = :hteId");
+        $stmt->bindParam(':hteId', $hteId, PDO::PARAM_INT);
+        
+        // Execute the deletion
+        if ($stmt->execute()) {
+            $response['success'] = true;
+            $response['message'] = 'HTE deleted successfully.';
+        } else {
+            $response['success'] = false;
+            $response['message'] = 'Failed to delete HTE.';
+        }
+    } catch (PDOException $e) {
+        $response['success'] = false;
+        $response['message'] = 'Error: ' . $e->getMessage();
+    }
+
+    // Return a JSON response
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    exit;
+}
+
+
+
 
 
 

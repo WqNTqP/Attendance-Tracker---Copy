@@ -16,7 +16,7 @@ try {
     $stmt->execute([$student_id]);
     $internDetails = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($internDetails) {
+    if ($internDetails) {   
         $sessionId = $internDetails['SESSION_ID'];
         $hteId = $internDetails['HTE_ID'];
     } else {
@@ -30,6 +30,8 @@ try {
     error_log("Database error: " . $e->getMessage());
     // You might want to redirect the student or show an error message
 }
+
+$currentDate = date('Y-m-d'); // Current date for attendance checks
 ?>
 
 <!DOCTYPE html>
@@ -55,7 +57,7 @@ try {
         <div class="attendance-area" id="attendanceArea">
             <h3>Today's Attendance</h3>
             <div class="attendance-date" id="currentDate"></div>
-            <p id="attendanceStatus" class="attendance-status"></p>
+            <p id="attendanceStatus" class="attendance-status">Not Checked In</p>
             <div class="attendance-times">
                 <div class="attendance-time">
                     <span>Time In</span>
@@ -77,9 +79,12 @@ try {
             <!-- Student details will be populated here -->
         </div>
 
-        <div class="internship-details-area" id="internshipDetailsArea">
-            <!-- Internship details will be populated here -->
+        <div class="current-week-area" id="currentWeek" style="margin: 20px; font-size: 16px; font-weight: bold;"></div>
+
+        <div class="attendance-history-area" id="attendanceHistoryArea">
+            <!-- Attendance history will be populated here -->
         </div>
+
     </div>
 
     <input type="hidden" id="hiddenStudentId" value="<?php echo htmlspecialchars($student_id); ?>">

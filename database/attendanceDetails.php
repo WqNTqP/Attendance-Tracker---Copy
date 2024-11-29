@@ -1,9 +1,88 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+header('Content-Type: application/json');
+
+// $response = ['success' => true, 'message' => 'Student added successfully!'];
+
+// echo json_encode($response);
+// exit;
+
 $path=$_SERVER['DOCUMENT_ROOT'];
 require_once $path."/Attendance Tracker - Copy - NP/database/database.php";
 
+
 class attendanceDetails
 {
+
+    public function getStudentsByHteId($dbo, $hteId) {
+        try {
+            $stmt = $dbo->conn->prepare("SELECT id.INTERNS_ID, id.STUDENT_ID, id.NAME, id.GENDER, id.EMAIL, id.CONTACT_NUMBER 
+                                          FROM interns_details AS id 
+                                          JOIN intern_details AS itd ON id.INTERNS_ID = itd.INTERNS_ID 
+                                          WHERE itd.HTE_ID = :hteId");
+            $stmt->execute([':hteId' => $hteId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return ["success" => false, "message" => "Error: " . $e->getMessage()];
+        }
+    }
+    
+    
+
+
+    public function getStudentById($dbo, $studentId) {
+        try {
+            // Debugging: check if studentId is passed correctly
+            echo "Student ID received: " . $studentId . "<br>";
+    
+            $stmt = $dbo->prepare("SELECT * FROM interns_details WHERE STUDENT_ID = :studentId");
+            $stmt->execute(['studentId' => $studentId]);
+    
+            // Debugging: check if the query was executed and if any result is fetched
+            if ($stmt->rowCount() > 0) {
+                $student = $stmt->fetch(); // Fetch the student data
+                // Debugging: log or print the student data
+                echo "<pre>";
+                print_r($student);
+                echo "</pre>";
+                return $student;
+            } else {
+                // Debugging: check when no result is found
+                echo "No student found with ID: " . $studentId . "<br>";
+                return false;
+            }
+        } catch (PDOException $e) {
+            // Log the exception message for debugging
+            echo "Error: " . $e->getMessage();
+            return false;
+        }
+    }
+    
+       
+
+
+
+    public function deleteStudent($dbo, $studentId) {
+        try {
+            // First, delete related records in intern_details
+            $c = "DELETE FROM intern_details WHERE INTERNS_ID = :studentId";
+            $s = $dbo->conn->prepare($c);
+            $s->execute([":studentId" => $studentId]);
+    
+            // Then, delete the student from interns_details
+            $c = "DELETE FROM interns_details WHERE INTERNS_ID = :studentId";
+            $s = $dbo->conn->prepare($c);
+            $s->execute([":studentId" => $studentId]);
+            
+            return ["success" => true, "message" => "Student deleted successfully."];
+        } catch (PDOException $e) {
+            return ["success" => false, "message" => "Error deleting student: " . $e->getMessage()];
+        }
+    }
+
+
+
    
     public function getAttendanceReport($dbo,$sessionid,$hteid,$coordinatorid,$ondate)
     {
@@ -111,41 +190,6 @@ class attendanceDetails
 
     }
 
-    // original
-    // public function saveAttendance($dbo,$sessionid,$hteid,$coordinatorid,$studentid,$ondate,$status)
-    // {
-    //     $rv=[-1];
-    //     $c="insert into interns_attendance 
-    //     (COORDINATOR_ID,HTE_ID,ID,INTERNS_ID,ON_DATE,STATUS)
-    //     VALUES (:COORDINATOR_ID,:HTE_ID,:ID,:INTERNS_ID,:ON_DATE,:STATUS)";
-    //     $s=$dbo->conn->prepare($c);
-    //     try{
-    //         $s->execute([":COORDINATOR_ID"=>$coordinatorid,":HTE_ID"=>$hteid,":ID"=>$sessionid,":INTERNS_ID"=>$studentid,":ON_DATE"=>$ondate,":STATUS"=>$status]);
-    //         $rv=[1];
-    //     }
-    //     catch(Exception $e)
-    //     {
-    //         // $rv=[$e->getMessage()];
-    //         // kung date kay nag exist na mag update na
-    //         $rv=[-1];
-    //         $c="UPDATE interns_attendance
-    //         SET STATUS = :STATUS
-    //         WHERE COORDINATOR_ID = :COORDINATOR_ID AND HTE_ID = :HTE_ID AND ID = :ID
-    //         AND INTERNS_ID = :INTERNS_ID AND ON_DATE = :ON_DATE";
-    //         $s=$dbo->conn->prepare($c);
-    //         try
-    //         {
-    //             $s->execute([":COORDINATOR_ID"=>$coordinatorid,":HTE_ID"=>$hteid,":ID"=>$sessionid,":INTERNS_ID"=>$studentid,":ON_DATE"=>$ondate,":STATUS"=>$status]);
-    //             $rv=[1];
-    //         }
-    //         catch(Exception $ee)
-    //         {
-    //             $rv=[$e->getMessage()];
-    //         }
-    //     }
-    //     return $rv;
-    // }
-
 
     public function saveAttendance($dbo, $sessionid, $hteid, $coordinatorid, $studentid, $ondate, $timein, $timeout)
     {
@@ -212,25 +256,7 @@ class attendanceDetails
         return $rv;
     }
 
-    // public function getPresentListOfAClassByACDROnDate($dbo,$sessionid,$hteid,$coordinatorid,$ondate)
-    // {
-    //     $rv = [];
-    //     $c="select INTERNS_ID from interns_attendance
-    //     WHERE COORDINATOR_ID = :COORDINATOR_ID AND HTE_ID = :HTE_ID AND ID = :ID
-    //         AND ON_DATE = :ON_DATE
-    //         AND  STATUS='YES'";
-    //     $s=$dbo->conn->prepare($c);
-    //     try{
-    //         $s->execute([":COORDINATOR_ID"=>$coordinatorid,":HTE_ID"=>$hteid,":ID"=>$sessionid,":ON_DATE"=>$ondate]);
-    //         $rv=$s->fetchAll(PDO::FETCH_ASSOC);
-    //     }
-    //     catch(Exception $e)
-    //     {
 
-    //     }
-    //     return $rv;
-
-    // }
 
     public function getPresentListOfAClassByACDROnDate($dbo,$sessionid,$classid,$coordinatorid,$ondate)
     {
@@ -251,115 +277,122 @@ class attendanceDetails
         return $rv;
     }
 
-    
-
-    // public function addStudent($dbo, $student_id, $name, $age, $gender, $email, $contact_number, $coordinator_id, $hte_id, $session_id) {
-    //     try {
-    //         $dbo->conn->beginTransaction();
-            
-    //         // Check if the HTE exists
-    //         $stmt = $dbo->conn->prepare("SELECT COUNT(*) FROM host_training_establishment WHERE HTE_ID = ?");
-    //         $stmt->execute([$hte_id]);
-    //         if ($stmt->fetchColumn() == 0) {
-    //             throw new Exception("HTE_ID $hte_id does not exist.");
-    //         }
-    
-    //         // Check if the student already exists
-    //         $stmt = $dbo->conn->prepare("SELECT INTERNS_ID FROM interns_details WHERE STUDENT_ID = ?");
-    //         $stmt->execute([$student_id]);
-            
-    //         if ($stmt->rowCount() > 0) {
-    //             // Student already exists, get the existing INTERNS_ID
-    //             $intern_id = $stmt->fetchColumn();
-                
-    //             // Check if this student is already assigned to the HTE and SESSION
-    //             $stmt = $dbo->conn->prepare("SELECT COUNT(*) FROM intern_details WHERE INTERNS_ID = ? AND SESSION_ID = ? AND HTE_ID = ?");
-    //             $stmt->execute([$intern_id, $session_id, $hte_id]);
-    //             if ($stmt->fetchColumn() > 0) {
-    //                 throw new Exception("This student is already assigned to this HTE and SESSION.");
-    //             }
-                
-    //             // Update intern_details for the existing student
-    //             $stmt = $dbo->conn->prepare("UPDATE intern_details SET SESSION_ID = ?, HTE_ID = ? WHERE INTERNS_ID = ?");
-    //             $stmt->execute([$session_id, $hte_id, $intern_id]);
-    //         } else {
-    //             // Insert into interns_details (new student)
-    //             $stmt = $dbo->conn->prepare("INSERT INTO interns_details (STUDENT_ID, NAME, AGE, GENDER, EMAIL, CONTACT_NUMBER) VALUES (?, ?, ?, ?, ?, ?)");
-    //             $stmt->execute([$student_id, $name, $age, $gender, $email, $contact_number]);
-    //             $intern_id = $dbo->conn->lastInsertId();
-    
-    //             // Insert new record in intern_details
-    //             $stmt = $dbo->conn->prepare("INSERT INTO intern_details (INTERNS_ID, SESSION_ID, HTE_ID) VALUES (?, ?, ?)");
-    //             $stmt->execute([$intern_id, $session_id, $hte_id]);
-    //         }
-    
-    //         $dbo->conn->commit();
-    //         return $intern_id;
-    //     } catch (Exception $e) {
-    //         $dbo->conn->rollBack();
-    //         throw $e;
-    //     }
-    // }
     public function addStudent($dbo, $student_id, $name, $age, $gender, $email, $contact_number, $coordinator_id, $hte_id, $session_id) {
         try {
-            // Ensure HTE_ID is not null or empty
+            // Check if HTE_ID is provided
             if (empty($hte_id)) {
                 throw new Exception("HTE must be selected.");
             }
     
+            // Start transaction
             $dbo->conn->beginTransaction();
-            
-            // Check if the HTE exists
-            $stmt = $dbo->conn->prepare("SELECT COUNT(*) FROM host_training_establishment WHERE HTE_ID = ?");
-            $stmt->execute([$hte_id]);
+    
+            // Validate if HTE exists
+            $stmt = $dbo->conn->prepare("SELECT COUNT(*) FROM host_training_establishment WHERE HTE_ID = :hte_id");
+            $stmt->bindParam(':hte_id', $hte_id, PDO::PARAM_INT);  // Binding the parameter
+            $stmt->execute();
             if ($stmt->fetchColumn() == 0) {
                 throw new Exception("HTE_ID $hte_id does not exist.");
             }
     
-            // Check if the student already exists
-            $stmt = $dbo->conn->prepare("SELECT INTERNS_ID FROM interns_details WHERE STUDENT_ID = ?");
-            $stmt->execute([$student_id]);
-            
+            // Check if the student is already assigned to any HTE in any session
+            $stmt = $dbo->conn->prepare("SELECT COUNT(*) 
+                                         FROM intern_details 
+                                         INNER JOIN interns_details ON intern_details.INTERNS_ID = interns_details.INTERNS_ID
+                                         WHERE interns_details.STUDENT_ID = :student_id");
+            $stmt->bindParam(':student_id', $student_id, PDO::PARAM_INT);  // Binding the parameter
+            $stmt->execute();
+    
+            // If the student already has an assignment, throw an exception
+            if ($stmt->fetchColumn() > 0) {
+                throw new Exception("This student is already assigned to an HTE in another session.");
+            }
+    
+            // Check if the student is already assigned to the same HTE in the selected session
+            $stmt = $dbo->conn->prepare("SELECT COUNT(*) 
+                                         FROM intern_details 
+                                         WHERE INTERNS_ID IN (SELECT INTERNS_ID FROM interns_details WHERE STUDENT_ID = :student_id) 
+                                         AND SESSION_ID = :session_id 
+                                         AND HTE_ID = :hte_id");
+            $stmt->bindParam(':student_id', $student_id, PDO::PARAM_INT);  // Binding the parameter
+            $stmt->bindParam(':session_id', $session_id, PDO::PARAM_INT);  // Binding the parameter
+            $stmt->bindParam(':hte_id', $hte_id, PDO::PARAM_INT);  // Binding the parameter
+            $stmt->execute();
+    
+            if ($stmt->fetchColumn() > 0) {
+                throw new Exception("This student is already assigned to the same session and HTE.");
+            }
+    
+            // Check if student already exists in the interns_details table
+            $stmt = $dbo->conn->prepare("SELECT INTERNS_ID FROM interns_details WHERE STUDENT_ID = :student_id");
+            $stmt->bindParam(':student_id', $student_id, PDO::PARAM_INT);  // Binding the parameter
+            $stmt->execute();
+    
             if ($stmt->rowCount() > 0) {
                 // Student already exists, get the existing INTERNS_ID
                 $intern_id = $stmt->fetchColumn();
-                
-                // Check if this student is already assigned to the same HTE and SESSION
-                $stmt = $dbo->conn->prepare("
-                    SELECT COUNT(*) 
-                    FROM intern_details 
-                    WHERE INTERNS_ID = ? AND SESSION_ID = ? AND HTE_ID = ?
-                ");
-                $stmt->execute([$intern_id, $session_id, $hte_id]);
-                
+    
+                // Check if the student is already assigned to the same session and HTE
+                $stmt = $dbo->conn->prepare("SELECT COUNT(*) FROM intern_details WHERE INTERNS_ID = :intern_id AND SESSION_ID = :session_id AND HTE_ID = :hte_id");
+                $stmt->bindParam(':intern_id', $intern_id, PDO::PARAM_INT);  // Binding the parameter
+                $stmt->bindParam(':session_id', $session_id, PDO::PARAM_INT);  // Binding the parameter
+                $stmt->bindParam(':hte_id', $hte_id, PDO::PARAM_INT);  // Binding the parameter
+                $stmt->execute();
+    
                 if ($stmt->fetchColumn() > 0) {
-                    // Student is already assigned to the same session and HTE, return early
+                    // Student already assigned to the same session and HTE
                     throw new Exception("This student ID is already assigned to the same session and HTE.");
                 }
     
-                // Insert new assignment if the student is not in the same HTE and SESSION
-                $stmt = $dbo->conn->prepare("INSERT INTO intern_details (INTERNS_ID, SESSION_ID, HTE_ID) VALUES (?, ?, ?)");
-                $stmt->execute([$intern_id, $session_id, $hte_id]);
+                // Insert into intern_details if student is not already assigned
+                $stmt = $dbo->conn->prepare("INSERT INTO intern_details (INTERNS_ID, SESSION_ID, HTE_ID) VALUES (:intern_id, :session_id, :hte_id)");
+                $stmt->bindParam(':intern_id', $intern_id, PDO::PARAM_INT);  // Binding the parameter
+                $stmt->bindParam(':session_id', $session_id, PDO::PARAM_INT);  // Binding the parameter
+                $stmt->bindParam(':hte_id', $hte_id, PDO::PARAM_INT);  // Binding the parameter
+                if (!$stmt->execute()) {
+                    throw new Exception("Failed to assign student to HTE and session.");
+                }
             } else {
-                // Insert into interns_details (new student)
-                $stmt = $dbo->conn->prepare("INSERT INTO interns_details (STUDENT_ID, NAME, AGE, GENDER, EMAIL, CONTACT_NUMBER) VALUES (?, ?, ?, ?, ?, ?)");
-                $stmt->execute([$student_id, $name, $age, $gender, $email, $contact_number]);
+                // Insert new student into interns_details
+                $stmt = $dbo->conn->prepare("INSERT INTO interns_details (STUDENT_ID, NAME, AGE, GENDER, EMAIL, CONTACT_NUMBER) VALUES (:student_id, :name, :age, :gender, :email, :contact_number)");
+                $stmt->bindParam(':student_id', $student_id, PDO::PARAM_INT);  // Binding the parameter
+                $stmt->bindParam(':name', $name, PDO::PARAM_STR);  // Binding the parameter
+                $stmt->bindParam(':age', $age, PDO::PARAM_INT);  // Binding the parameter
+                $stmt->bindParam(':gender', $gender, PDO::PARAM_STR);  // Binding the parameter
+                $stmt->bindParam(':email', $email, PDO::PARAM_STR);  // Binding the parameter
+                $stmt->bindParam(':contact_number', $contact_number, PDO::PARAM_STR);  // Binding the parameter
+                if (!$stmt->execute()) {
+                    throw new Exception("Failed to add new student.");
+                }
+                // Get the newly inserted INTERN_ID
                 $intern_id = $dbo->conn->lastInsertId();
     
-                // Insert new record in intern_details
-                $stmt = $dbo->conn->prepare("INSERT INTO intern_details (INTERNS_ID, SESSION_ID, HTE_ID) VALUES (?, ?, ?)");
-                $stmt->execute([$intern_id, $session_id, $hte_id]);
+                // Insert into intern_details for new student
+                $stmt = $dbo->conn->prepare("INSERT INTO intern_details (INTERNS_ID, SESSION_ID, HTE_ID) VALUES (:intern_id, :session_id, :hte_id)");
+                $stmt->bindParam(':intern_id', $intern_id, PDO::PARAM_INT);  // Binding the parameter
+                $stmt->bindParam(':session_id', $session_id, PDO::PARAM_INT);  // Binding the parameter
+                $stmt->bindParam(':hte_id', $hte_id, PDO::PARAM_INT);  // Binding the parameter
+                if (!$stmt->execute()) {
+                    throw new Exception("Failed to assign new student to HTE and session.");
+                }
             }
     
+            // Commit transaction if all operations succeed
             $dbo->conn->commit();
+    
+            // Return the intern_id of the assigned student
             return $intern_id;
+    
         } catch (Exception $e) {
+            // Rollback the transaction on any exception
             $dbo->conn->rollBack();
-            throw $e;
+    
+            // Return a JSON response with the error message
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            exit;
         }
     }
     
-
 
     public function addHTE($dbo, $name, $industry, $address, $contact_email, $contact_person, $contact_number, $coordinator_id, $session_id) {
         try {
@@ -402,9 +435,6 @@ class attendanceDetails
         }
     }
 
-
-    /////////////////////////////////////////////////////////////////////
-
     public function getCoordinatorDetails($dbo, $coordinator_id) {
         try {
             $stmt = $dbo->conn->prepare("SELECT COORDINATOR_ID, NAME, EMAIL, CONTACT_NUMBER, DEPARTMENT 
@@ -424,10 +454,6 @@ class attendanceDetails
             throw $e;
         }
     }
-
-
-
-
 
     public function isStudentAlreadyAssigned($dbo, $student_id, $session_id, $coordinator_id, $hte_id) {
         $query = "SELECT * FROM interns 
