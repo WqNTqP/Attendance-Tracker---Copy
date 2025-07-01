@@ -29,9 +29,11 @@ session_start();
     <div class="page">
     <div class="top-header">
         <button id="sidebarToggle" class="sidebar-toggle" aria-label="Toggle Sidebar">&#9776;</button>
+        <div class="sidebar-logo" style="margin-left: 1rem; cursor: pointer;" onclick="window.location.href='attendance.php';">
+            <h2 class="logo" style="cursor: pointer;">ATTENDANCE TRACKER</h2>
+        </div>
         <div class="user-profile" id="userProfile">
             <span id="userName">KIM CHARLES &#x25BC;</span>
-            <img src="icon/nobglogo.ico" alt="User Icon" class="user-icon" />
             <div class="user-dropdown" id="userDropdown" style="display:none;">
                 <button id="logoutBtn">Logout</button>
             </div>
@@ -39,21 +41,12 @@ session_start();
     </div>
 
     <div class="sidebar">
-        <div class="sidebar-logo">
-            <h2 class="logo">ATTENDANCE TRACKER</h2>
-        </div>
         <ul class="sidebar-menu">
             <li class="sidebar-item active" id="attendanceTab">Attendance</li>
             <li class="sidebar-item" id="evaluationTab">Evaluation</li>
+            <li class="sidebar-item" id="btnShowCoordinator">Coordinator Details</li>
         </ul>
-        <div class="sidebar-bottom-buttons">
-            <div class="coordinator-button-area">
-                <button class="btnShowCoordinator" id="btnShowCoordinator">Show Coordinator Details</button>
-            </div>
-            <div class="logout-area">
-                <button class="btnlogout" id="btnLogout"><span>LOGOUT</span></button>
-            </div>
-        </div>
+        <!-- Removed logout button here as per user request -->
     </div>
 
     <div class="content-area">

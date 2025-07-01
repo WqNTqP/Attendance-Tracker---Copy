@@ -2,6 +2,41 @@
 let currentHteId;
 let currentSessionId;
 
+$(document).ready(function() {
+    // Toggle user dropdown
+    $('#userProfile').on('click', function() {
+        $('#userDropdown').toggle();
+    });
+
+    // Hide dropdown when clicking outside
+    $(document).on('click', function(event) {
+        if (!$(event.target).closest('#userProfile').length) {
+            $('#userDropdown').hide();
+        }
+    });
+
+    // Logout button click handler moved to dropdown logout button
+    $(document).on('click', '#logoutBtn', function() {
+        $.ajax({
+            url: "ajaxhandler/logoutAjax.php",
+            type: "POST",
+            dataType: "json",
+            data: {id:1},
+            success: function(rv) {
+                document.location.replace("index.php");
+            },
+            error: function(xhr, status, error) {
+                alert("Logout failed! Please try again.");
+            }
+        });
+    });
+
+    // Sidebar toggle button click handler
+    $('#sidebarToggle').on('click', function() {
+        $('.sidebar').toggleClass('sidebar-open');
+    });
+});
+
 
 
 function getSessionHTML(rv)
@@ -827,11 +862,13 @@ $(function(e)
             });
         });
     
-        function displayCoordinatorDetails(coordinatorData) {
+function displayCoordinatorDetails(coordinatorData) {
             console.log("Displaying coordinator details:", coordinatorData);
             
-          
-            $('body').append(generateCoordinatorDetailsHTML(coordinatorData));
+            let html = generateCoordinatorDetailsHTML(coordinatorData);
+            // Remove the Add New Coordinator/Admin button from the HTML before appending
+            html = html.replace(/<button[^>]*id="btnAddCoordinator"[^>]*>.*?<\/button>/, '');
+            $('body').append(html);
             
         
             $("#coordinatorDetailsModal").css("display", "flex").hide().fadeIn();
