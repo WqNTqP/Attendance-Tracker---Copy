@@ -27,19 +27,36 @@ session_start();
 
 
     <div class="page">
-    <div class="header-area">
-            <div class="logo-area">
-                <h2 class="logo">ATTENDANCE TRACKER</h2>
+    <div class="top-header">
+        <button id="sidebarToggle" class="sidebar-toggle" aria-label="Toggle Sidebar">&#9776;</button>
+        <div class="user-profile" id="userProfile">
+            <span id="userName">KIM CHARLES &#x25BC;</span>
+            <img src="icon/nobglogo.ico" alt="User Icon" class="user-icon" />
+            <div class="user-dropdown" id="userDropdown" style="display:none;">
+                <button id="logoutBtn">Logout</button>
             </div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <h2 class="logo">ATTENDANCE TRACKER</h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-item active" id="attendanceTab">Attendance</li>
+            <li class="sidebar-item" id="evaluationTab">Evaluation</li>
+        </ul>
+        <div class="sidebar-bottom-buttons">
             <div class="coordinator-button-area">
                 <button class="btnShowCoordinator" id="btnShowCoordinator">Show Coordinator Details</button>
             </div>
             <div class="logout-area">
                 <button class="btnlogout" id="btnLogout"><span>LOGOUT</span></button>
             </div>
+        </div>
     </div>
 
-
+    <div class="content-area">
         <div class="session-area">
             <div class="label-area"><label>SESSION</label></div>
             <div class="dropdown-area">
@@ -60,6 +77,7 @@ session_start();
         <div class="studentlist-area" id="studentlistarea">
 
         </div>
+    </div>
  
     </div>
     <input type="hidden" id="hiddencdrid" value="<?php echo($cdrid)?>">

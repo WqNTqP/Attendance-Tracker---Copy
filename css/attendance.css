@@ -1,981 +1,545 @@
- *{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    --fontsize:.8rem;
-    --gap:.3rem;
-    --padding:.4rem;
-    transition: all 600ms;
- }
-
-
- body{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
- }
-
- .page
- {
-    width: min(1200px,95%);
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-areas: 
-    "header-area"
-    "session-area"
-    "classlist-area"
-    "classdetails-area"
-    "studentlist-area"
-    ;
-    padding-top: calc(var(--padding)*8);
-    padding-bottom: calc(var(--padding)*8);
-    border-bottom: solid black 2px;   
-    animation:fadein 700ms linear;
+/* Reset and base styles */
+:root {
+    --fontsize: 1rem;
+    --gap: 1rem;
+    --padding: 1rem;
+    --color-primary: #4a90e2;
+    --color-primary-dark: #357ABD;
+    --color-secondary: #50e3c2;
+    --color-accent: #f5a623;
+    --color-background: #f9fafb;
+    --color-surface: #ffffff;
+    --color-text-primary: #333333;
+    --color-text-secondary: #666666;
+    --color-border: #e0e0e0;
+    --border-radius: 8px;
+    --transition-speed: 0.3s;
+    font-family: 'Inter', sans-serif;
 }
+
 @keyframes fadein {
-    0%{opacity: 0;}
-    100%{opacity: 1;}
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .header-area {
     grid-area: header-area;
-    display: grid;
-    grid-template-columns: 1fr auto auto; /* Space for logo, coordinator button, and logout */
-    grid-template-areas: "logo-area coordinator-button-area logout-area"; /* Define areas */
-    gap: var(--gap);
-    padding: var(--padding);
-    border-bottom: solid 1px pink;
-    align-items: center; /* Center items vertically */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--gap);
+    border-bottom: 1px solid var(--color-border);
 }
 
+.logo-area {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    letter-spacing: 2px;
+    user-select: none;
+    margin-left: 200px; /* added to move header right to avoid sidebar overlap */
+}
 
-.coordinator-button-area {
-    display: flex; /* Allows for better alignment */
-    justify-content: flex-start; /* Align the button to the left */
+.coordinator-button-area, .logout-area {
+    display: flex;
+    align-items: center;
+}
+
+button {
+    font-size: 1rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--border-radius);
+    border: none;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    background-color: var(--color-primary);
+    color: white;
+    user-select: none;
+}
+
+button:hover, button:focus {
+    background-color: var(--color-primary-dark);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    outline: none;
 }
 
 .btnShowCoordinator {
-    padding: 10px 15px; /* Add some padding */
-    background-color: #4CAF50; /* Green background */
-    color: white; /* White text */
-    border: none; /* Remove border */
-    border-radius: 5px; /* Rounded corners */
-    cursor: pointer; /* Pointer cursor on hover */
-    margin-right: 20px; /* Add some space between the button and logout */
+    margin-right: 1rem;
 }
 
-.btnShowCoordinator:hover {
-    background-color: #45a049; /* Darker green on hover */
-}
-
-.logo-area
-{
-    grid-area: logo-area;
-    display: flex;
-    justify-content: start;
-    align-items: center;
-}
-.logout-area
-{
-    grid-area: logout-area;
-    display: flex;
-    justify-content: end;
-    align-items: center;
-}
-
- .session-area
- {
+.session-area {
     grid-area: session-area;
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: .5fr 1fr;
-    grid-template-areas: "label-area"
-    "dropdown-area";
-    gap:var(--gap);
-    padding: var(--padding);
-    border-bottom: solid 1px pink;
-
- }
-.label-area
-{
-    grid-area: label-area;
-    font-size: calc(var(--fontsize)*.8);
-    padding-left: calc(var(--padding)*.6);
-}
-.dropdown-area
-{
-    grid-area: dropdown-area;
-    font-size: calc(var(--fontsize)*1);
-    padding-top: calc(var(--padding));
-    padding-bottom: calc(var(--padding));
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-bottom: var(--gap);
+    border-bottom: 1px solid var(--color-border);
 }
 
+.label-area label {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    user-select: none;
+}
 
+.dropdown-area select {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+    transition: border-color var(--transition-speed);
+}
 
- .classlist-area
- {
+.dropdown-area select:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 6px var(--color-primary);
+}
+
+.classlist-area {
     grid-area: classlist-area;
     display: flex;
     flex-wrap: wrap;
     gap: var(--gap);
+    justify-content: center;
     padding: var(--padding);
+    background-color: var(--color-background);
+    border-radius: var(--border-radius);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.03);
+}
+
+.classcard {
+    font-size: 1rem;
+    width: 6rem;
+    height: 6rem;
+    border-radius: var(--border-radius);
+    background-color: var(--color-primary);
+    color: white;
+    display: flex;
     justify-content: center;
     align-items: center;
-    border-bottom: solid 1px pink;
- }
- .classdetails-area
- {
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: background-color var(--transition-speed), transform var(--transition-speed);
+}
+
+.classcard:hover, .classcard:focus {
+    background-color: var(--color-secondary);
+    transform: translateY(-4px);
+    outline: none;
+}
+
+.classdetails-area {
     grid-area: classdetails-area;
-    gap: var(--gap);
     padding: var(--padding);
-    border-bottom: solid 1px pink;
+    background-color: var(--color-surface);
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     text-transform: uppercase;
- }
- .studentlist-area
- {
+    font-weight: 600;
+    color: var(--color-primary-dark);
+}
+
+.classdetails {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: 1fr;
+    grid-template-areas: "code-area title-area ondate-area";
+    gap: var(--gap);
+    font-size: 1rem;
+    align-items: center;
+}
+
+.code-area, .title-area, .ondate-area {
+    padding: 0.5rem 1rem;
+}
+
+.ondate-area input[type="date"] {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    transition: border-color var(--transition-speed);
+}
+
+.ondate-area input[type="date"]:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 6px var(--color-primary);
+}
+
+.studentlist-area {
     grid-area: studentlist-area;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
     gap: var(--gap);
     padding: var(--padding);
-    border-bottom: solid 1px pink;
- }
-
- .btnlogout
- {
-    font-size: var(--fontsize);
-    width: 5em;
-    padding: var(--padding);
-    background-color: rgb(65, 69, 211);
-    color: white;
-    border: solid 1px  rgb(65, 69, 211);
-    border-radius:.1em;
- }
-
- .logo
- {
-    font-size: calc(var(--fontsize)*1.6);
- }
-
- .ddlclass
- {
-    width: 100%;
-    outline: none;
-    border: none;
-    background-color: transparent;
-    border-bottom: solid 1px blue;
- }
-
-.classcard
-{
-    font-size: calc(var(--fontsize)*1);
-    width: 4.5em;
-    height: 4.5em;
-    border-radius: .2em;
-    background-color: rgb(0, 145, 255);
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.classcard:hover{
-    background-color: rgb(226, 43, 174);
-    color:white;
-    animation:tilt 500ms linear;
-}
-@keyframes tilt {
-    0%{transform: rotate(0deg);}
-    15%{transform: rotate(-30deg);}
-    30%{transform: rotate(0deg);}
-    45%{transform: rotate(25deg);}
-    60%{transform: rotate(0deg);}
-    70%{transform: rotate(-20deg);}
-    80%{transform: rotate(0deg);}
-    90%{transform: rotate(10deg);}
-   100%{transform: rotate(0deg);}
+    background-color: var(--color-background);
+    border-radius: var(--border-radius);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.03);
 }
 
-.classdetails
-{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 2fr 1fr;
-    grid-template-areas: 
-    "title-area title-area"
-    "code-area ondate-area";
-    gap: var(--gap);
-    font-size: var(--fontsize);
-}
-
-.title-area
-{
-    grid-area: title-area;
-
-    display: flex;
-    justify-content: start;
-    align-items: center;
-}
-.code-area
-{
-    grid-area: code-area;
-
-    display: flex;
-    justify-content: start;
-    align-items: center;
-}
-.ondate-area
-{
-    grid-area: ondate-area;
-
-    display: flex;
-    justify-content: end;
-    align-items: center;
-}
-.ondate-area >input
-{
-    font-size: var(--fontsize);
-    background-color: transparent;
-    border: none;
-    border-bottom: solid 1px blue;
-    outline: none;
-}
-
-    .studentlist
-    {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-    }
-
-.studentlist >label
-{
-    font-size: calc(var(--fontsize)*.8);
-}
-
-.studentdetails
-{
-    display: grid;
-    grid-template-columns: .25fr 1.5fr .4fr;
-    grid-template-rows: 1fr 1fr;
-    grid-template-areas: 
-    "slno-area rollno-area checkbox-area"
-    "name-area name-area checkbox-area"
-    ;
-    gap: var(--gap);
-    width: 100%;
-    font-size: var(--fontsize);
-    padding-top: calc(var(--padding)*1.5);
-    padding-bottom: calc(var(--padding)*1.5);
-    border-bottom: solid 1px pink;
-    transition: all 300ms;
-    text-transform: uppercase;
-}
-
-.studentdetails:hover
-{
-    background-color: rgb(0, 106, 255);
-    color: white;
-}
-
-.btnReport
-{
-    width: 6rem;
-    padding:var(--padding);
-    background-color: pink;
-    border: solid 1px rgb(218, 11, 45);
-    border-radius: .2rem;
-}
-
-.checkbox-area
-{
-    display: flex;
-    justify-content: end;
-    align-items: center;
-}
-
-.checkbox-area > input
-{
-    font-size: var(--fontsize);
-    width: 1.5em;
-    height: 1.5em;
-}
-
-
-.slno-area
-{
-    grid-area: slno-area;
-
-}
-.rollno-area
-{
-    grid-area: rollno-area;
-
-}
-.name-area
-{
-    grid-area: name-area;
-
-}
-.checkbox-area
-{
-    grid-area: checkbox-area;
-
-}
-
-@media only screen and (min-width:600px) {
-    *{
-        /*Para ni sa screen size ubos 767 ug taas 600*/
-        --fontsize:.9rem;
-     } 
-}
-
-@media only screen and (min-width:600px) {
-    *{
-        /*Para ni sa screen size nga > 767*/
-        --fontsize:1rem;
-     } 
-    .session-area
-    {
-       grid-template-columns: .5fr .5fr 1fr .5fr;
-       grid-template-rows: 1fr;
-       grid-template-areas: "... label-area dropdown-area ...";
-    }
-    .label-area
-    {
-        display: flex;
-        justify-content: end;
-        align-items: center;
-        padding-left: calc(var(--padding)*1);
-    }
-    .classdetails
-    {
-        grid-template-columns: 1fr 3fr 1fr;
-        grid-template-rows: 1fr;
-        grid-template-areas: 
-        "code-area title-area ondate-area";
-        padding-top: calc(var(--padding)*1);
-        padding-bottom: calc(var(--padding)*1);
-    }
-    .studentdetails
-    {
-        display: grid;
-        grid-template-columns: 1fr 2fr 3fr 2fr;
-        grid-template-rows: 1fr;
-        grid-template-areas: 
-        "slno-area rollno-area name-area timein-area timeout-area";
-    }
-    .studentdetails>*
-    {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-}
-
-.btnlogout {
-    position: relative; /* Add this */
-}
-
-.btnlogout {
-    padding: 0.5em 1em;
-    border: none;
+.studentlist {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
     user-select: none;
+}
+
+.studentdetails {
+    display: grid;
+    grid-template-columns: 0.5fr 1fr 3fr 1.5fr 1.5fr;
+    grid-template-rows: 1fr;
+    grid-template-areas: "slno-area rollno-area name-area timein-area timeout-area";
+    gap: var(--gap);
+    padding: 0.75rem 1rem;
+    background-color: var(--color-surface);
+    border-radius: var(--border-radius);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    align-items: center;
+    transition: background-color var(--transition-speed);
+    text-transform: none;
+    color: var(--color-text-primary);
+}
+
+.studentdetails:hover, .studentdetails:focus-within {
+    background-color: var(--color-primary);
+    color: white;
     cursor: pointer;
-    font-size: 20px;
-    text-transform: uppercase;
-    transition: all 0.5s linear;
-    color: #fff;
-    position: relative;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    background-image: url('../icon/logout.ico');
-    background-size: 20px 20px;
-    background-position: 10px 50%;
-    background-repeat: no-repeat;
-    padding-left: 40px;
-  }
+}
 
-  .btnlogout span {
-    font-size: 14px;
-  }
+.studentdetails > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-.btnlogout:hover::after, .btnlogout:hover::before {
-    content: '';
-    background: linear-gradient(90deg, #FC466B 0%, #3F5EFB 100%);
+.studentdetails .name-area {
+    justify-content: flex-start;
+    gap: 0.5rem;
+}
+
+.studentdetails .name-area button {
+    background-color: var(--color-accent);
+    border-radius: var(--border-radius);
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+    opacity: 0;
+    pointer-events: none;
+}
+.studentdetails:hover .name-area button.btnDelete {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.studentdetails .name-area button:hover, .studentdetails .name-area button:focus {
+    background-color: #d48806;
+    outline: none;
+}
+
+.timein-area, .timeout-area {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.btnReport, .btnAdd, .btnAddHTE, .btnDeleteHTE {
+    width: auto;
+    padding: 0.6rem 1.2rem;
+    background-color: var(--color-accent);
+    border: none;
+    border-radius: var(--border-radius);
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: background-color var(--transition-speed);
+    margin: 0.25rem 0;
+}
+
+.btnReport:hover, .btnAdd:hover, .btnAddHTE:hover, .btnDeleteHTE:hover,
+.btnReport:focus, .btnAdd:focus, .btnAddHTE:focus, .btnDeleteHTE:focus {
+    background-color: #d48806;
+    outline: none;
+}
+
+input[type="text"], input[type="number"], input[type="email"], select {
     width: 100%;
-    height: 100%;
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-
-    animation: move-right-side 1s ease infinite;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    transition: border-color var(--transition-speed);
 }
 
-.btnlogout:hover::before {
-    background: linear-gradient(90deg, #00C9FF 0%, #92FE9D 100%);
-    inset: 0;
-    animation: move-left-side 1s ease infinite;
-    z-index: -2;
+input[type="text"]:focus, input[type="number"]:focus, input[type="email"]:focus, select:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 6px var(--color-primary);
 }
 
-.btnlogout:hover {
-    background-color: #fff;
-    color: #00C9FF;
-}
-
-@keyframes move-right-side {
-    0% {
-        inset: 0.3em 0 0 0.3em; /*top | left */
-    }
-
-    33% {
-        inset: 0 0.3em 0.3em 0; /*right| bottom*/
-    }
-        
-    66% {
-        /* top | right | bottom | left */
-        inset: 1em 0 0 0.5em; /*top | right */
-    }
-
-    100% {
-        inset:0  1em 0.5em 0;
-    }
-}
-
-@keyframes move-left-side {
-    0% {
-        right: -1em;
-        top: -0.5em;
-    }
-
-    33% {
-        bottom: -1em;
-        left: -0.5em;
-    }
-
-    66% {
-        top: 0;
-        right:-0.7;
-    }
-
-    100% {
-        right: -1em;
-        top: -0.5em;
-    }
-}
-
-
-
-/* Styles for the report section */
-.reportsection {
-    display: flex; 
-    justify-content: space-between; /* Push buttons to opposite sides */ 
-    align-items: center; 
-    padding: 10px 0; 
-}
-
-
-
-
-/* Modal Background */
 .modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000; /* Ensures modal is on top */
-}
-
-/* Form Container */
-#addStudentForm {
-    background-color: white; /* White background for form */
-    border-radius: 8px; /* Rounded corners */
-    padding: var(--padding); /* Consistent padding */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow */
-    width: 90%; /* Responsive width */
-    max-width: 500px; /* Max width for larger screens */
-    animation: fadein 300ms ease-in-out; /* Fade in effect */
-}
-
-/* Form Header */
-#addStudentForm h2 {
-    font-size: calc(var(--fontsize) * 1.2);
-    margin-bottom: var(--gap);
-}
-
-/* Input Fields */
-#addStudentForm label {
-    font-size: calc(var(--fontsize));
-    margin-bottom: 0.5rem; /* Spacing between label and input */
-    display: block; /* Ensure label is on its own line */
-}
-
-#addStudentForm input,
-#addStudentForm select {
-    width: 100%; /* Full width */
-    padding: var(--padding); /* Consistent padding */
-    border: solid 1px #ccc; /* Light gray border */
-    border-radius: 4px; /* Rounded corners */
-    margin-bottom: var(--gap); /* Spacing between inputs */
-    font-size: var(--fontsize); /* Consistent font size */
-}
-
-/* Button Styles */
-#addStudentForm button[type="submit"],
-#addStudentForm button[type="button"] {
-    background-color: rgb(65, 69, 211); /* Primary button color */
-    color: white; /* Text color */
-    padding: var(--padding); /* Consistent padding */
-    border: none; /* Remove border */
-    border-radius: 4px; /* Rounded corners */
-    cursor: pointer; /* Pointer cursor */
-    transition: background-color 300ms; /* Smooth transition for hover effect */
-    width: 48%; /* Adjust button width */
-}
-
-#addStudentForm button[type="submit"]:hover,
-#addStudentForm button[type="button"]:hover {
-    background-color: rgb(50, 55, 180); /* Darker shade on hover */
-}
-
-/* Close Button */
-#closeForm {
-    background-color: rgb(218, 11, 45); /* Red for close button */
-}
-
-#closeForm:hover {
-    background-color: rgb(180, 9, 30); /* Darker red on hover */
-}
-
-/* Fade-in Keyframe */
-@keyframes fadein {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-}
-
-/* Form Container */
-#addStudentForm, #addHTEForm {
-    background-color: white;
-    border-radius: 8px;
-    padding: var(--padding);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--color-surface);
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    padding: 2rem;
     width: 90%;
-    max-width: 500px;
-    animation: fadein 300ms ease-in-out;
+    max-width: 480px;
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+    gap: 1rem;
 }
 
-/* Form Header */
-#addStudentForm h2, #addHTEForm h2 {
-    font-size: calc(var(--fontsize) * 1.2);
-    margin-bottom: var(--gap);
+.modal h2 {
+    margin-bottom: 1rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    user-select: none;
 }
 
-/* Input Fields */
-#addStudentForm label, #addHTEForm label {
-    font-size: calc(var(--fontsize));
-    margin-bottom: 0.5rem;
-    display: block;
+.modal .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
-#addStudentForm input,
-#addStudentForm select,
-#addHTEForm input,
-#addHTEForm select {
+.modal label {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    user-select: none;
+}
+
+.modal input, .modal select {
+    font-size: 1rem;
+}
+
+.modal button {
     width: 100%;
-    padding: var(--padding);
-    border: solid 1px #ccc;
-    border-radius: 4px;
-    margin-bottom: var(--gap);
-    font-size: var(--fontsize);
-}
-
-/* Button Styles */
-#addStudentForm button[type="submit"],
-#addStudentForm button[type="button"],
-#addHTEForm button[type="submit"],
-#addHTEForm button[type="button"] {
-    background-color: rgb(65, 69, 211);
-    color: white;
-    padding: var(--padding);
+    padding: 0.75rem;
+    font-weight: 700;
+    border-radius: var(--border-radius);
     border: none;
-    border-radius: 4px;
+    background-color: var(--color-primary);
+    color: white;
     cursor: pointer;
-    transition: background-color 300ms;
-    width: 48%;
+    transition: background-color var(--transition-speed);
 }
 
-#addStudentForm button[type="submit"]:hover,
-#addStudentForm button[type="button"]:hover,
-#addHTEForm button[type="submit"]:hover,
-#addHTEForm button[type="button"]:hover {
-    background-color: rgb(50, 55, 180);
+.modal button:hover, .modal button:focus {
+    background-color: var(--color-primary-dark);
+    outline: none;
 }
 
-/* Close Button */
-#closeForm, #closeHTEForm {
-    background-color: rgb(218, 11, 45);
+.reportsection {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 2rem;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 1rem;
 }
 
-#closeForm:hover, #closeHTEForm:hover {
-    background-color: rgb(180, 9, 30);
+@media (min-width: 600px) {
+    .page {
+        padding: calc(var(--padding) * 3);
+    }
+    .studentdetails {
+        grid-template-columns: 0.5fr 1fr 4fr 1.5fr 1.5fr;
+    }
 }
 
-/* Fade-in Keyframe */
-@keyframes fadein {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-}
-
-
-
-/* If you want to align it to the right side */
-.reportsection:last-child {
-    justify-content: flex-end;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    font-weight: bold;
-    display: inline-block;
-    width: 150px;
-}
-
-/* Coordinator Details Modal Styles */
-#coordinatorDetailsModal {
+/* Sidebar styles */
+.sidebar {
+    width: 100%;
+    background-color: var(--color-primary);
+    color: white;
+    height: 80px;
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    padding: 0 1rem;
     display: flex;
-    justify-content: center;
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     z-index: 1000;
+    overflow-y: visible;
 }
 
-#coordinatorDetailsModal .modal-content {
-    background-color: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    width: 90%;
-    max-width: 500px;
-    animation: fadein 300ms ease-in-out;
+.sidebar-menu {
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 1rem;
 }
 
-#coordinatorDetailsModal h2 {
-    font-size: 1.2em;
-    margin-bottom: 15px;
-}
-
-#coordinatorDetailsModal .form-group {
-    margin-bottom: 15px;
-}
-
-#coordinatorDetailsModal .form-group label {
-    font-weight: bold;
-    display: inline-block;
-    width: 150px;
-    margin-right: 10px;
-}
-
-#coordinatorDetailsModal .form-group span {
-    display: inline-block;
-}
-
-#coordinatorDetailsModal button {
-    background-color: rgb(65, 69, 211);
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
+.sidebar-item {
+    padding: 1rem 1.5rem;
     cursor: pointer;
-    transition: background-color 300ms;
-    width: 100%;
-    margin-top: 15px;
+    font-weight: 600;
+    user-select: none;
+    transition: background-color var(--transition-speed);
+    white-space: nowrap;
 }
 
-#coordinatorDetailsModal button:hover {
-    background-color: rgb(50, 55, 180);
+.sidebar-item:hover,
+.sidebar-item.active {
+    background-color: var(--color-primary-dark);
 }
 
-@keyframes fadein {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+.sidebar-bottom-buttons {
+    display: flex;
+    gap: 1rem;
+    padding: 0;
+    border-top: none;
 }
 
-
-/* Style for the delete button */
-.btnDelete {
-    display: none; /* Initially hide the button */
-    margin-left: 10px; /* Space between name and delete button */
-    padding: 6px 12px; /* Button padding */
-    background-color: rgb(190, 22, 22); /* Bright red background color */
-    color: white; /* White text color */
-    border: none; /* Remove border */
-    border-radius: 25px; /* Rounded corners for pill shape */
-    font-size: calc(var(--fontsize) * 0.9); /* Responsive font size */
-    cursor: pointer; /* Pointer cursor for UX */
-    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s; /* Smooth transition */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-    position: relative; /* Allow positioning relative to name area */
-    z-index: 1; /* Appear above other elements */
-    width: 80px; /* Fixed width to reserve space */
-    text-align: center; /* Center text within button */
+.page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-/* Hover effect for the delete button */
-.btnDelete:hover {
-    background-color: rgb(190, 22, 22); /* Hover color */
-    transform: translateY(-2px); /* Lift effect on hover */
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+.content-area {
+    margin-left: 0;
+    margin-top: 80px; /* space for fixed top sidebar */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Show the delete button on student details row hover */
-.studentdetails:hover .btnDelete {
-    display: inline-block; /* Show button on row hover */
+.sidebar-bottom-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem 2rem 1.5rem; /* increased bottom padding */
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Name area styling */
-.name-area {
-    display: flex; /* Flex layout */
-    align-items: center; /* Center items vertically */
-    justify-content: space-between; /* Distribute space evenly */
-    width: 100%; /* Full width */
-    padding-right: 80px; /* Match delete button width to reserve space */
+.sidebar-bottom-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-
-/* Styles for the Edit button */
-.btnEdit {
-    padding: 10px 20px; /* Add some padding */
-    background-color: #007BFF; /* Blue background */
-    color: white; /* White text */
-    border: none; /* Remove border */
-    border-radius: 4px; /* Rounded corners */
-    cursor: pointer; /* Pointer cursor on hover */
-    font-size: 14px; /* Font size */
-    transition: background-color 0.3s; /* Smooth transition */
-    margin-left: 10px; /* Space between name and edit button */
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-/* Hover effect for the Edit button */
-.btnEdit:hover {
-    background-color: #0056b3; /* Darker blue on hover */
+.sidebar-item {
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    user-select: none;
+    transition: background-color var(--transition-speed);
 }
 
-/* If you want the edit button to be hidden initially */
-.btnEdit {
-    display: none; /* Initially hide the button */
+.sidebar-item:hover,
+.sidebar-item.active {
+    background-color: var(--color-primary-dark);
 }
 
-/* Show the Edit button on student details row hover */
-.studentdetails:hover .btnEdit {
-    display: inline-block; /* Show button on row hover */
+.page {
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
 }
 
-
-
-/* Form Container */
-#editStudentForm {
-    background-color: white; /* White background for form */
-    border-radius: 8px; /* Rounded corners */
-    padding: var(--padding); /* Consistent padding */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow */
-    width: 90%; /* Responsive width */
-    max-width: 500px; /* Max width for larger screens */
-    animation: fadein 300ms ease-in-out; /* Fade in effect */
+.content-area {
+    margin-left: 200px; /* space for fixed sidebar */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Form Header */
-#editStudentForm h2 {
-    font-size: calc(var(--fontsize) * 1.2);
-    margin-bottom: var(--gap);
+.top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+    height: 60px;
+    background-color: var(--color-primary);
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1200;
 }
 
-/* Input Fields */
-#editStudentForm label {
-    font-size: calc(var(--fontsize));
-    margin-bottom: 0.5rem; /* Spacing between label and input */
-    display: block; /* Ensure label is on its own line */
+.header-area {
+    display: none; /* hide old header area */
 }
 
-#editStudentForm input,
-#editStudentForm select {
-    width: 100%; /* Full width */
-    padding: var(--padding); /* Consistent padding */
-    border: solid 1px #ccc; /* Light gray border */
-    border-radius: 4px; /* Rounded corners */
-    margin-bottom: var(--gap); /* Spacing between inputs */
-    font-size: var(--fontsize); /* Consistent font size */
+.session-area {
+    margin-top: 80px; /* space for fixed header */
+    grid-area: session-area;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-bottom: var(--gap);
+    border-bottom: 1px solid var(--color-border);
 }
 
-/* Button Styles */
-#editStudentForm button[type="submit"],
-#editStudentForm button[type="button"] {
-    background-color: rgb(65, 69, 211); /* Primary button color */
-    color: white; /* Text color */
-    padding: var(--padding); /* Consistent padding */
-    border: none; /* Remove border */
-    border-radius: 4px; /* Rounded corners */
-    cursor: pointer; /* Pointer cursor */
-    transition: background-color 300ms; /* Smooth transition for hover effect */
-    width: 48%; /* Adjust button width */
-}
-
-#editStudentForm button[type="submit"]:hover,
-#editStudentForm button[type="button"]:hover {
-    background-color: rgb(50, 55, 180); /* Darker shade on hover */
-}
-
-/* Close Button */
-#closeEditForm {
-    background-color: rgb(218, 11, 45); /* Red for close button */
-}
-
-#closeEditForm:hover {
-    background-color: rgb(180, 9, 30); /* Darker red on hover */
-}
-
-/* Fade-in Keyframe */
-@keyframes fadein {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-}
-
-/* Common button styles */
-.common-button {
-    padding: 10px; /* Consistent padding */
-    color: white; /* Text color */
-    border: none; /* Remove border */
-    cursor: pointer; /* Pointer cursor */
-    font-size: 14px; /* Font size */
-    transition: background-color 0.3s, transform 0.2s; /* Smooth transition on hover and transform */
-    border-radius: 4px; /* Rounded corners for consistency */
-    position: relative; /* Ensure positioning for pseudo-elements */
-    width: 100px; /* Fixed width for all buttons */
-    height: 30px; /* Fixed height for all buttons */
-    text-align: center; /* Center text within the button */
-}
-
-/* Specific button styles */
-.btnReport {
-    background-color: #4CAF50; /* Green background for REPORT button */
-}
-
-.btnAdd {
-    background-color: #007BFF; /* Blue background for ADD button */
-}
-
-.btnAddHTE {
-    background-color: #28A745; /* Different shade of green for ADD HTE button */
-}
-
-.btnDeleteHTE {
-    background-color: #FF4D4D; /* Red background for DELETE button */
-}
-
-/* Hover effects for all buttons */
-.common-button:hover {
-    opacity: 0.9; /* Slightly darken all buttons on hover */
-    transform: translateY(-2px); /* Lift effect on hover */
-}
-
-/* Specific hover effects */
-.btnReport:hover {
-    background-color: #45a049; /* Darker green for REPORT button on hover */
-}
-
-.btnAdd:hover {
-    background-color: #0056b3; /* Darker blue for ADD button on hover */
-}
-
-.btnAddHTE:hover {
-    background-color: #218838; /* Darker green for ADD HTE button on hover */
-}
-
-.btnDeleteHTE:hover {
-    background-color: #FF7A7A; /* Lighter red for DELETE button on hover */
-}
-
-/* Form Container */
-#addCoordinatorForm {
-    background-color: white; /* White background for form */
-    border-radius: 8px; /* Rounded corners */
-    padding: var(--padding); /* Consistent padding */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow */
-    width: 90%; /* Responsive width */
-    max-width: 500px; /* Max width for larger screens */
-    animation: fadein 300ms ease-in-out; /* Fade in effect */
-}
-
-/* Form Header */
-#addCoordinatorForm h2 {
-    font-size: calc(var(--fontsize) * 1.2); /* Font size based on your variable */
-    margin-bottom: 20px; /* Space below the heading */
-    text-align: center; /* Center the header text */
-    color: #333; /* Dark color for visibility */
-    font-weight: bold; /* Make the header bold */
-}
-
-/* Input Fields */
-#addCoordinatorForm label {
-    font-size: calc(var(--fontsize)); /* Font size based on your variable */
-    margin-bottom: 0.5rem; /* Spacing between label and input */
-    display: block; /* Ensure label is on its own line */
-}
-
-#addCoordinatorForm input,
-#addCoordinatorForm select {
-    width: 100%; /* Full width */
-    padding: var(--padding); /* Consistent padding */
-    border: solid 1px #ccc; /* Light gray border */
-    border-radius: 4px; /* Rounded corners */
-    margin-bottom: var(--gap); /* Spacing between inputs */
-    font-size: var(--fontsize); /* Consistent font size */
-}
-
-/* Button Styles */
-#addCoordinatorForm button[type="submit"],
-#addCoordinatorForm button[type="button"] {
-    background-color: rgb(65, 69, 211); /* Primary button color */
-    color: white; /* Text color */
-    padding: var(--padding); /* Consistent padding */
-    border: none; /* Remove border */
-    border-radius: 4px; /* Rounded corners */
-    cursor: pointer; /* Pointer cursor */
-    transition: background-color 300ms; /* Smooth transition for hover effect */
-    width: 48%; /* Adjust button width */
-}
-
-#addCoordinatorForm button[type="button"] {
-    background-color: rgb(218, 11, 45); /* Red for close button */
-}
-
-#addCoordinatorForm button[type="submit"]:hover,
-#addCoordinatorForm button[type="button"]:hover {
-    background-color: rgb(50, 55, 180); /* Darker shade on hover */
-}
-
-/* Close Button */
-#closeCoordinatorForm:hover {
-    background-color: rgb(180, 9, 30); /* Darker red on hover */
-}
-
-/* Fade-in Keyframe */
-@keyframes fadein {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+@media (min-width: 768px) {
+    .session-area {
+        flex-direction: row;
+        align-items: center;
+        gap: 1rem;
+    }
+    .label-area {
+        flex: 0 0 auto;
+        font-size: 1rem;
+        color: var(--color-text-secondary);
+    }
+    .dropdown-area {
+        flex: 1 1 auto;
+    }
+    .classdetails {
+        grid-template-columns: 1fr 3fr 1fr;
+        grid-template-rows: 1fr;
+        grid-template-areas: "code-area title-area ondate-area";
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+    .studentdetails {
+        grid-template-columns: 0.5fr 1fr 4fr 1.5fr 1.5fr;
+        grid-template-rows: 1fr;
+        grid-template-areas: "slno-area rollno-area name-area timein-area timeout-area";
+    }
 }

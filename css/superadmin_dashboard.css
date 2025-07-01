@@ -203,3 +203,30 @@ table td button:hover {
         padding: 8px 16px;
     }
 }
+
+
+.logout-area {
+    text-align: center; /* Align the logout button to the right */
+    margin: 20px 0; /* Add some margin for spacing */
+}
+
+.btnlogout {
+    background-color: #3498db; /* Blue background */
+    color: white; /* White text */
+    border: none; /* No border */
+    border-radius: 5px; /* Rounded corners */
+    padding: 10px 20px; /* Padding for size */
+    font-size: 16px; /* Font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transition for hover effects */
+}
+
+.btnlogout:hover {
+    background-color: #2980b9; /* Darker blue on hover */
+    transform: translateY(-2px); /* Lift effect on hover */
+}
+
+.btnlogout:focus {
+    outline: none; /* Remove outline on focus */
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5); /* Optional: Add a shadow on focus */
+}

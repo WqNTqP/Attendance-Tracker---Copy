@@ -77,15 +77,20 @@ function approveAttendance($id) {
         }
 
         try {
-            // Insert into interns_attendance
-            $stmt = $dbo->conn->prepare("INSERT INTO interns_attendance (COORDINATOR_ID, HTE_ID, ID, INTERNS_ID, ON_DATE, TIMEIN, TIMEOUT) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$coordinatorId, $hteId, $sessionId, $internId, $onDate, $timeIn, $timeOut]);
+            if (!empty($timeIn) && !empty($timeOut)) {
+                // Insert into interns_attendance only if both timein and timeout are present
+                $stmt = $dbo->conn->prepare("INSERT INTO interns_attendance (COORDINATOR_ID, HTE_ID, ID, INTERNS_ID, ON_DATE, TIMEIN, TIMEOUT) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$coordinatorId, $hteId, $sessionId, $internId, $onDate, $timeIn, $timeOut]);
 
-            // Update status in pending_attendance
-            $stmt = $dbo->conn->prepare("UPDATE pending_attendance SET STATUS = 'approved' WHERE ID = ?");
-            $stmt->execute([$id]);
+                // Update status in pending_attendance to approved
+                $stmt = $dbo->conn->prepare("UPDATE pending_attendance SET STATUS = 'approved' WHERE ID = ?");
+                $stmt->execute([$id]);
 
-            echo json_encode(['status' => 'success', 'message' => 'Attendance approved successfully']);
+                echo json_encode(['status' => 'success', 'message' => 'Attendance approved successfully']);
+            } else {
+                // Keep status as pending if timeout is missing
+                echo json_encode(['status' => 'pending', 'message' => 'Attendance pending: timeout missing']);
+            }
         } catch (PDOException $e) {
             error_log("Database error: " . $e->getMessage());
             echo json_encode(['status' => 'error', 'message' => 'Database error occurred: ' . $e->getMessage()]);

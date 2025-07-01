@@ -95,4 +95,27 @@ $(document).ready(function() {
             }
         });
     }
+
+    $(document).on("click","#btnLogout",function(ee)
+    {
+            $.ajax(
+            {
+                // para mo connect ni siya sa logoutAjac.php
+                url: "ajaxhandler/logoutAjax.php",
+                type: "POST",
+                dataType: "json",
+                data: {id:1 },
+                beforeSend: function(e) {
+                    
+                },
+                success: function(rv) {
+                    document.location.replace("index.php");
+                },
+                error: function(xhr, status, error) {
+                    alert("Something went wrong!")
+                }
+            }
+        );
+
+    });
 });

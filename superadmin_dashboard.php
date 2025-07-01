@@ -27,6 +27,10 @@ $coordinators = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <h1>Super Admin Dashboard</h1>
 
+    <div class="logout-area">
+        <button class="btnlogout" id="btnLogout"><span>LOGOUT</span></button>
+    </div>
+
     <button id="btnAddCoordinator">Add New Coordinator/Admin</button>
 
     <h2>Existing Coordinators/Admins</h2>

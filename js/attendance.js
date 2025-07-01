@@ -170,19 +170,8 @@ function getStudentListHTML(studentList) {
     // Create the report and add buttons
     x += `<div class="reportsection">`;
     x += `<button id="btnReport" class="common-button btnReport">REPORT</button>`;
-    x += `</div>`; // close report-buttons div
-    x += `</div>`; // close reportsection div
-
-    x += `<div class="reportsection">`;
     x += `<button id="btnAdd" class="common-button btnAdd">STUDENT</button>`; // ADD button
-    x += `</div>`; // close reportsection div
-
-    // Add HTE button
-    x += `<div class="reportsection">`;
     x += `<button id="btnAddHTE" class="common-button btnAddHTE">ADD HTE</button>`; // ADD HTE button
-    x += `</div>`; // close reportsection div
-
-    x += `<div class="reportsection">`;
     x += `<button id="btnDeleteHTE" class="common-button btnDeleteHTE" data-hteid="${currentHteId}" data-sessionid="${currentSessionId}">DELETE</button>`; // DELETE HTE button
     x += `</div>`; // close reportsection div
 
@@ -741,9 +730,10 @@ $(function(e)
 
         $(document).on("click", "#closeForm", function() {
             if ($("#addStudentForm").is(":visible")) {
-                $("#addStudentForm").hide();
-                $("#studentForm")[0].reset();
-                $("#studentForm input, #studentForm select").prop("disabled", false);
+                $("#addStudentForm").fadeOut(function() {
+                    $("#studentForm")[0].reset();
+                    $("#studentForm input, #studentForm select").prop("disabled", false);
+                });
             }
         });
     
@@ -760,7 +750,7 @@ $(function(e)
 
         $(document).on("click", ".btnAddHTE", function(e) {
             e.preventDefault();
-            $("#addHTEForm").show();
+            $("#addHTEForm").css("display", "flex").hide().fadeIn();
         });
     
 
@@ -795,7 +785,7 @@ $(function(e)
     
     
         $(document).on("click", "#closeHTEForm", function(e) {
-            $("#addHTEForm").hide();
+            $("#addHTEForm").fadeOut();
         });
     });
     
@@ -844,12 +834,14 @@ $(function(e)
             $('body').append(generateCoordinatorDetailsHTML(coordinatorData));
             
         
-            $("#coordinatorDetailsModal").show();
+            $("#coordinatorDetailsModal").css("display", "flex").hide().fadeIn();
         }
     
     
         $(document).on("click", "#closeCoordinatorDetails", function() {
-            $("#coordinatorDetailsModal").remove();
+            $("#coordinatorDetailsModal").fadeOut(function() {
+                $(this).remove();
+            });
         });
     });
 
@@ -983,17 +975,18 @@ $(document).ready(function() {
     $('body').append(generateAddCoordinatorForm());
 
     // Show the form when the button is clicked
-    $(document).on("click", "#btnAddCoordinator", function() {
-        $("#addCoordinatorForm").show();
-        $("#coordinatorDetailsModal").hide(); // Hide the modal
-        $("#coordinatorForm")[0].reset(); // Use native DOM reset method on the form
-    });
+        $(document).on("click", "#btnAddCoordinator", function() {
+            $("#addCoordinatorForm").css("display", "flex").hide().fadeIn();
+            $("#coordinatorDetailsModal").fadeOut();
+            $("#coordinatorForm")[0].reset(); // Use native DOM reset method on the form
+        });
 
     // Close the modal when the close button is clicked
-    $(document).on("click", "#closeCoordinatorForm", function() {
-        $("#addCoordinatorForm").hide(); // Hide the form
-        $("#coordinatorForm")[0].reset(); // Reset the form using native DOM reset
-    });
+        $(document).on("click", "#closeCoordinatorForm", function() {
+            $("#addCoordinatorForm").fadeOut(function() {
+                $("#coordinatorForm")[0].reset();
+            });
+        });
 });
 
 
