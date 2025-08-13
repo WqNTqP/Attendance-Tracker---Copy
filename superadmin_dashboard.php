@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['current_user_role']) || $_SESSION['current_user_role'] !== 'SUPERADMIN') {
-    header("Location: index.php"); // Redirect to admin page if not authorized
+    header("Location: index.php");
     exit();
 }
 
@@ -13,6 +13,9 @@ $dbo = new Database();
 $stmt = $dbo->conn->prepare("SELECT * FROM coordinator");
 $stmt->execute();
 $coordinators = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Get superadmin details
+$superadminName = $_SESSION['current_user_name'] ?? 'Super Admin';
 ?>
 
 <!DOCTYPE html>
@@ -20,94 +23,147 @@ $coordinators = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/superadmin_dashboard.css"> <!-- Add your CSS file -->
+    <link rel="stylesheet" href="css/attendance.css">
     <link rel="icon" type="image/x-icon" href="icon/favicon.ico">
     <title>Super Admin Dashboard</title>
 </head>
 <body>
-    <h1>Super Admin Dashboard</h1>
-
-    <div class="logout-area">
-        <button class="btnlogout" id="btnLogout"><span>LOGOUT</span></button>
-    </div>
-
-    <button id="btnAddCoordinator">Add New Coordinator/Admin</button>
-
-    <h2>Existing Coordinators/Admins</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Coordinator ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Contact Number</th>
-                <th>Department</th>
-                <th>Role</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($coordinators as $coordinator): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($coordinator['COORDINATOR_ID']); ?></td>
-                    <td><?php echo htmlspecialchars($coordinator['NAME']); ?></td>
-                    <td><?php echo htmlspecialchars($coordinator['EMAIL']); ?></td>
-                    <td><?php echo htmlspecialchars($coordinator['CONTACT_NUMBER']); ?></td>
-                    <td><?php echo htmlspecialchars($coordinator['DEPARTMENT']); ?></td>
-                    <td><?php echo htmlspecialchars($coordinator['ROLE']); ?></td>
-                    <td>
-                        <button onclick="deleteCoordinator('<?php echo $coordinator['COORDINATOR_ID']; ?>')">Delete</button>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-
-    <!-- Modal for Adding Coordinator -->
-    <div id="addCoordinatorModal" style="display:none;">
-        <form id="addCoordinatorForm">
-            <h2>Add New Coordinator/Admin</h2>
-            <label for="coordinatorId">Coordinator ID:</label>
-            <input type="text" id="coordinatorId" name="coordinatorId" required>
-
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
-
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-
-            <label for="contactNumber">Contact Number:</label>
-            <input type="text" id="contactNumber" name="contactNumber" required>
-
-            <label for="department">Department:</label>
-            <input type="text" id="department" name="department" required>
-
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
-
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-
-            <label for="role">Role:</label>
-            <select id="role" name="role" required>
-                <option value="COORDINATOR">Coordinator</option>
-                <option value="ADMIN">Admin</option>
-            </select>
-
-            <!-- HTE Dropdown Container -->
-            <div id="hteDropdownContainer" style="display:none;">
-                <label for="hteSelect">Select HTE:</label>
-                <select id="hteSelect" name="hteId">
-                    <!-- HTE options will be populated here -->
-                </select>
+    <div class="page">
+        <div class="top-header">
+            <button id="sidebarToggle" class="sidebar-toggle" aria-label="Toggle Sidebar">&#9776;</button>
+            <div class="sidebar-logo" style="margin-left: 1rem; cursor: pointer;" onclick="window.location.href='superadmin_dashboard.php';">
+                <h2 class="logo" style="cursor: pointer;">ATTENDANCE TRACKER</h2>
             </div>
+            <div class="user-profile" id="userProfile">
+                <span id="userName"><?php echo htmlspecialchars($superadminName); ?> &#x25BC;</span>
+                <div class="user-dropdown" id="userDropdown" style="display:none;">
+                    <button id="btnProfile">Profile</button>
+                    <button id="logoutBtn">Logout</button>
+                </div>
+            </div>
+        </div>
 
-            <button type="submit">Add</button>
-            <button type="button" id="closeModal">Close</button>
-        </form>
+        <div class="sidebar">
+            <ul class="sidebar-menu">
+                <li class="sidebar-item active" id="dashboardTab">Dashboard</li>
+                <li class="sidebar-item" id="coordinatorsTab">Coordinators</li>
+                <li class="sidebar-item" id="reportsTab">Reports</li>
+            </ul>
+        </div>
+
+        <div class="content-area">
+            <h1>Super Admin Dashboard</h1>
+
+            <button id="btnAddCoordinator" class="btn" style="margin-bottom: 20px;">Add New Coordinator/Admin</button>
+
+            <h2>Existing Coordinators/Admins</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Coordinator ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Contact Number</th>
+                        <th>Department</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($coordinators as $coordinator): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($coordinator['COORDINATOR_ID']); ?></td>
+                            <td><?php echo htmlspecialchars($coordinator['NAME']); ?></td>
+                            <td><?php echo htmlspecialchars($coordinator['EMAIL']); ?></td>
+                            <td><?php echo htmlspecialchars($coordinator['CONTACT_NUMBER']); ?></td>
+                            <td><?php echo htmlspecialchars($coordinator['DEPARTMENT']); ?></td>
+                            <td><?php echo htmlspecialchars($coordinator['ROLE']); ?></td>
+                            <td>
+                                <button onclick="deleteCoordinator('<?php echo $coordinator['COORDINATOR_ID']; ?>')" class="btn-decline">Delete</button>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+
+            <!-- Modal for Adding Coordinator -->
+            <div id="addCoordinatorModal" style="display:none;">
+                <form id="addCoordinatorForm">
+                    <h2>Add New Coordinator/Admin</h2>
+                    <label for="coordinatorId">Coordinator ID:</label>
+                    <input type="text" id="coordinatorId" name="coordinatorId" required>
+
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" required>
+
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+
+                    <label for="contactNumber">Contact Number:</label>
+                    <input type="text" id="contactNumber" name="contactNumber" required>
+
+                    <label for="department">Department:</label>
+                    <input type="text" id="department" name="department" required>
+
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+
+                    <label for="role">Role:</label>
+                    <select id="role" name="role" required>
+                        <option value="COORDINATOR">Coordinator</option>
+                        <option value="ADMIN">Admin</option>
+                    </select>
+
+                    <!-- HTE Dropdown Container -->
+                    <div id="hteDropdownContainer" style="display:none;">
+                        <label for="hteSelect">Select HTE:</label>
+                        <select id="hteSelect" name="hteId">
+                            <!-- HTE options will be populated here -->
+                        </select>
+                    </div>
+
+                    <button type="submit">Add</button>
+                    <button type="button" id="closeModal">Close</button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script src="js/jquery.js"></script>
     <script src="js/superadmin_dashboard.js"></script>
+    <script>
+        // Add sidebar toggle functionality
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('sidebar-open');
+        });
+
+        // User profile dropdown
+        document.getElementById('userProfile').addEventListener('click', function() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'flex' : 'none';
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userProfile = document.getElementById('userProfile');
+            const userDropdown = document.getElementById('userDropdown');
+            if (!userProfile.contains(event.target)) {
+                userDropdown.style.display = 'none';
+            }
+        });
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            window.location.href = 'ajaxhandler/adminLogout.php';
+        });
+
+        // Profile button
+        document.getElementById('btnProfile').addEventListener('click', function() {
+            alert('Profile functionality to be implemented');
+        });
+    </script>
 </body>
 </html>
