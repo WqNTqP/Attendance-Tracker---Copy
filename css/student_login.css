@@ -23,14 +23,15 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: white;
     border-radius: 10px;
     transition: all 1s;
 }
 
-.loginform:hover {
+/* Removed hover effect on loginform */
+/* .loginform:hover {
     background-color: rgba(255, 255, 255, 0.2);
-}
+} */
 
 .inputgroup {
     position: relative;

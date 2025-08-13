@@ -829,7 +829,8 @@ $(function(e)
 
 
     $(document).ready(function() {
-        $(document).on("click", "#btnShowCoordinator", function() {
+
+        $(document).on("click", "#btnProfile", function() {
             console.log("Button clicked");
             let cdrid = $("#hiddencdrid").val();
             console.log("CDRID:", cdrid);

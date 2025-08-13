@@ -1,24 +1,21 @@
-*
-{
+* {
     margin:0 ;
     padding: 0;
     box-sizing: border-box;
 }
 
-body
-{
- height: 100vh;
- background-color: rgb(16, 17, 17);
- display: flex;
- justify-content: center;
- align-items: center;
- background-image: url('../icon/hcdcwebbg.png');
- background-size: cover;
- background-position: center;
+body {
+    height: 100vh;
+    background-color: rgb(16, 17, 17);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url('../icon/hcdcwebbg.png');
+    background-size: cover;
+    background-position: center;
 }
 
-.loginform
-{
+.loginform {
     width: min(400px,95%);
     height: 550px;
     border: solid 1px blue;
@@ -27,28 +24,24 @@ body
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: transparent;
+    background-color: white;
     border-radius: 10px;
     transition: all 1s;
 
 }
 
-.loginform:hover
-{
+/* Removed hover effect on loginform */
+/* .loginform:hover {
     background-color: white;
-}
+} */
 
-
-
-.inputgroup
-{
+.inputgroup {
     position: relative;
     height: 50px;
     width: 85%;
 }
 
-.inputgroup input
-{
+.inputgroup input {
     position: absolute;
     width: 100%;
     height: 45px;
@@ -63,8 +56,7 @@ body
     transition: all 200ms;
 }
 
-.inputgroup label
-{
+.inputgroup label {
     position: absolute;
     transition: all 200ms;
     color: black;
@@ -73,32 +65,27 @@ body
 
 .inputgroup input:hover +label,
 .inputgroup input:focus +label,
-.inputgroup input:valid +label
-{
+.inputgroup input:valid +label {
     transform: translateY(-20px);
     color: rgb(0, 85, 255);
 }
 
 .inputgroup input:hover ,
 .inputgroup input:focus ,
-.inputgroup input:valid
-{
+.inputgroup input:valid {
     border-bottom: solid 1px rgb(0, 85, 255);
 }
 
 
-.topmargin
-{
+.topmargin {
     margin-top: 50px;
 }
 
-.topmarginlarge
-{
+.topmarginlarge {
     margin-top: 80px;
 }
 
-.divcallfroaction
-{
+.divcallfroaction {
     width: 85%;
     height: 45px;
     display: flex;
@@ -106,8 +93,7 @@ body
     align-items: center;
 }
 
-.btnlogin
-{
+.btnlogin {
     border:solid 1px blue;
     width: 150px;
     height: 45px;
@@ -116,24 +102,19 @@ body
     color: white;
 }
 
-.btnlogin:hover
-{
-
+.btnlogin:hover {
     transform: translateY(-5px);
     transition: 200ms;
 }
 
-.inactivecolor
-{
+.inactivecolor {
     background-color: rgb(190, 22, 22);
 }
-.activecolor
-{
+.activecolor {
     background-color: rgb(50, 168, 247);
 }
 
-.diverror
-{
+.diverror {
     background-color: transparent;
     color: black;
     height: 45px;
@@ -147,8 +128,7 @@ body
     transition: all 1s;
 }
 
-.applyerrordiv
-{
+.applyerrordiv {
     visibility: visible;
     opacity: 1;
     animation: falldown 2s linear;

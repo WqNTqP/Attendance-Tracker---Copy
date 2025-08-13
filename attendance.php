@@ -35,19 +35,19 @@ session_start();
         <div class="user-profile" id="userProfile">
             <span id="userName">KIM CHARLES &#x25BC;</span>
             <div class="user-dropdown" id="userDropdown" style="display:none;">
+                <button id="btnProfile">Profile</button>
                 <button id="logoutBtn">Logout</button>
             </div>
         </div>
     </div>
 
-    <div class="sidebar">
-        <ul class="sidebar-menu">
-            <li class="sidebar-item active" id="attendanceTab">Attendance</li>
-            <li class="sidebar-item" id="evaluationTab">Evaluation</li>
-            <li class="sidebar-item" id="btnShowCoordinator">Coordinator Details</li>
-        </ul>
-        <!-- Removed logout button here as per user request -->
-    </div>
+        <div class="sidebar">
+            <ul class="sidebar-menu">
+                <li class="sidebar-item active" id="attendanceTab">Attendance</li>
+                <li class="sidebar-item" id="evaluationTab">Evaluation</li>
+            </ul>
+            <!-- Removed logout button here as per user request -->
+        </div>
 
     <div class="content-area">
         <div class="session-area">
