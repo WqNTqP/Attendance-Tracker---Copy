@@ -1,14 +1,14 @@
 function tryStudentLogin()
 {
     let email = $("#txtEmail").val();
-    let studentId = $("#txtStudentID").val();
-    if(email.trim() !== "" && studentId.trim() !== "")
+    let password = $("#txtStudentID").val();
+    if(email.trim() !== "" && password.trim() !== "")
     {
         $.ajax({
             url: "ajaxhandler/studentLoginAjax.php",
             type: "POST",
             dataType: "json",
-            data: { email: email, student_id: studentId, action: "verifyStudent" },
+            data: { email: email, password: password, action: "verifyStudent" },
             beforeSend: function() {
                 $("#diverror").removeClass("applyerrordiv");
                 $("#lockscreen").addClass("applylockscreen");
@@ -35,7 +35,7 @@ function tryStudentLogin()
     else
     {
         $("#diverror").addClass("applyerrordiv");
-        $("#diverror").text("Please enter both email and student ID.");
+        $("#diverror").text("Please enter both email and password.");
     }
 }
 
@@ -52,4 +52,6 @@ $(document).ready(function() {
             tryStudentLogin();
         }
     });
+
+    // Password visibility toggle removed
 });

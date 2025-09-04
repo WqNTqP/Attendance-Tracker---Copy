@@ -1,2 +1,19 @@
 [2024-10-22 05:07:26] ERROR: Error recording attendance: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
 [2024-10-22 05:07:33] ERROR: Error recording attendance: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[极速赛车开奖号码查询官网2025-08-27 11:27] ERROR: Error retrieving dashboard stats: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.interns极速赛车开奖号码查询官网_attendance' doesn't exist
+[极速赛车开奖号码查询官网2025-08-27 11:27] ERROR: Error retrieving dashboard stats: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.interns极速赛车开奖号码查询官网_attendance' doesn't exist
+[2025-08-28 13:51] ERROR: Error retrieving student details: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'id.HTE_ID' in 'on clause'
+[2025-08-28 13:51] ERROR: Error retrieving student details: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'id.HTE_ID' in 'on clause'
+[2025-08-28 13:52] ERROR: Error retrieving student details: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'id.HTE_ID' in 'on clause'
+[2025-08-28 13:52] ERROR: Error retrieving student details: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'id.HTE_ID' in 'on clause'
+[2025-08-28 13:52] ERROR: Error retrieving student details: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'id.HTE_ID' in 'on clause'
+[2025-09-02 18:19] ERROR: Error retrieving latest report week: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'submitted_at' in 'order clause'
+[2025-09-02 18:19] ERROR: Error retrieving latest report week: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'submitted_at' in 'order clause'
+[2025-09-02 18:19] ERROR: Error retrieving latest report week: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'submitted_at' in 'order clause'
+[2025-09-02 18:19] ERROR: Error retrieving latest report week: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'submitted_at' in 'order clause'
+[2025-09-02 18:19] ERROR: Error retrieving latest report week: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'submitted_at' in 'order clause'
+[2025-09-02 18:19] ERROR: Error retrieving latest report week: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'submitted_at' in 'order clause'
+[2025-09-02 18:19] ERROR: Error retrieving latest report week: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'submitted_at' in 'order clause'
+[2025-09-02 18:19] ERROR: Error retrieving latest report week: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'submitted_at' in 'order clause'
+[2025-09-02 18:20] ERROR: Error retrieving latest report week: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'submitted_at' in 'order clause'
+[2025-09-02 18:20] ERROR: Error retrieving latest report week: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'submitted_at' in 'order clause'

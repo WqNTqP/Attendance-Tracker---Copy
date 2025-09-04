@@ -1,0 +1,200 @@
+<?php
+date_default_timezone_set('Asia/Manila');
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+header('Content-Type: application/json');
+
+$path = dirname(__FILE__) . '/../';
+require_once $path . "database/database.php";
+
+function sendResponse($status, $data, $message = '') {
+    echo json_encode(array("status" => $status, "data" => $data, "message" => $message));
+    exit;
+}
+
+function logError($message) {
+    error_log(date('[Y-m-d H:i] ') . "ERROR: " . $message . "\n", 3, 'error.log');
+}
+
+try {
+    $dbo = new Database();
+} catch (Exception $e) {
+    logError("Database connection failed: " . $e->getMessage());
+    sendResponse('error', null, 'Database connection failed');
+}
+
+$action = isset($_POST['action']) ? $_POST['action'] : '';
+
+if (empty($action)) {
+    sendResponse('error', null, 'No action specified');
+}
+
+switch ($action) {
+    case "getAdminDetails":
+        $adminId = $_POST['adminId'] ?? null;
+        if (!$adminId) {
+            sendResponse('error', null, 'Admin ID is required');
+        }
+        try {
+            $stmt = $dbo->conn->prepare("
+                SELECT c.*, h.NAME as HTE_NAME 
+                FROM coordinator c 
+                LEFT JOIN host_training_establishment h ON c.HTE_ID = h.HTE_ID 
+                WHERE c.COORDINATOR_ID = ?
+            ");
+            $stmt->execute([$adminId]);
+            $adminDetails = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($adminDetails) {
+                sendResponse('success', $adminDetails, 'Admin details retrieved successfully');
+            } else {
+                sendResponse('error', null, 'Admin not found');
+            }
+        } catch (Exception $e) {
+            logError("Error retrieving admin details: " . $e->getMessage());
+            sendResponse('error', null, 'Error retrieving admin details');
+        }
+        break;
+
+    case "updateAdminProfileDetails":
+        $adminId = $_POST['adminId'] ?? null;
+        $name = $_POST['name'] ?? null;
+        $email = $_POST['email'] ?? null;
+        $contactNumber = $_POST['contactNumber'] ?? null;
+        $department = $_POST['department'] ?? null;
+        
+        if (!$adminId || !$name || !$email || !$contactNumber || !$department) {
+            sendResponse('error', null, 'All fields are required');
+        }
+        
+        $profilePicturePath = null;
+        if (isset($_FILES['profilePicture']) && $_FILES['profilePicture']['error'] == UPLOAD_ERR_OK) {
+            $fileTmpPath = $_FILES['profilePicture']['tmp_name'];
+            $fileName = $_FILES['profilePicture']['name'];
+            $fileSize = $_FILES['profilePicture']['size'];
+            $fileType = $_FILES['profilePicture']['type'];
+            $allowedFileTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
+            if (in_array($fileType, $allowedFileTypes)) {
+                $uploadFileDir = '../uploads/';
+                if (!file_exists($uploadFileDir)) {
+                    mkdir($uploadFileDir, 0777, true);
+                }
+                $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
+                $uniqueFileName = uniqid() . '_' . $adminId . '.' . $fileExtension;
+                $dest_path = $uploadFileDir . $uniqueFileName;
+
+                if (move_uploaded_file($fileTmpPath, $dest_path)) {
+                    $profilePicturePath = $uniqueFileName;
+                } else {
+                    sendResponse('error', null, 'Error moving the uploaded file');
+                }
+            } else {
+                sendResponse('error', null, 'Invalid file type. Only JPEG, PNG, and GIF files are allowed.');
+            }
+        }
+
+        try {
+            if ($profilePicturePath) {
+                // Update with profile picture
+                $stmt = $dbo->conn->prepare("UPDATE coordinator SET NAME = ?, EMAIL = ?, CONTACT_NUMBER = ?, DEPARTMENT = ?, PROFILE = ? WHERE COORDINATOR_ID = ?");
+                $stmt->execute([$name, $email, $contactNumber, $department, $profilePicturePath, $adminId]);
+            } else {
+                // Update without profile picture
+                $stmt = $dbo->conn->prepare("UPDATE coordinator SET NAME = ?, EMAIL = ?, CONTACT_NUMBER = ?, DEPARTMENT = ? WHERE COORDINATOR_ID = ?");
+                $stmt->execute([$name, $email, $contactNumber, $department, $adminId]);
+            }
+            sendResponse('success', null, 'Profile updated successfully');
+        } catch (Exception $e) {
+            logError("Error updating admin profile: " . $e->getMessage());
+            sendResponse('error', null, 'Error updating profile');
+        }
+        break;
+
+    case "updateAdminProfilePicture":
+        $adminId = $_POST['adminId'] ?? null;
+        
+        if (!$adminId) {
+            sendResponse('error', null, 'Admin ID is required');
+        }
+        
+        if (!isset($_FILES['profilePicture']) || $_FILES['profilePicture']['error'] != UPLOAD_ERR_OK) {
+            sendResponse('error', null, 'Please select a valid profile picture to upload');
+        }
+
+        $fileTmpPath = $_FILES['profilePicture']['tmp_name'];
+        $fileName = $_FILES['profilePicture']['name'];
+        $fileSize = $_FILES['profilePicture']['size'];
+        $fileType = $_FILES['profilePicture']['type'];
+        $allowedFileTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
+        if (!in_array($fileType, $allowedFileTypes)) {
+            sendResponse('error', null, 'Invalid file type. Only JPEG, PNG, and GIF files are allowed.');
+        }
+
+        $uploadFileDir = '../uploads/';
+        if (!file_exists($uploadFileDir)) {
+            mkdir($uploadFileDir, 0777, true);
+        }
+        $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
+        $uniqueFileName = uniqid() . '_' . $adminId . '.' . $fileExtension;
+        $dest_path = $uploadFileDir . $uniqueFileName;
+
+        if (move_uploaded_file($fileTmpPath, $dest_path)) {
+            try {
+                // Update only the profile picture with filename only (no path)
+                $stmt = $dbo->conn->prepare("UPDATE coordinator SET PROFILE = ? WHERE COORDINATOR_ID = ?");
+                $stmt->execute([$uniqueFileName, $adminId]);
+                sendResponse('success', null, 'Profile picture updated successfully');
+            } catch (Exception $e) {
+                logError("Error updating profile picture: " . $e->getMessage());
+                sendResponse('error', null, 'Error updating profile picture');
+            }
+        } else {
+            sendResponse('error', null, 'Error moving the uploaded file');
+        }
+        break;
+
+    case "updatePassword":
+        $adminId = $_POST['adminId'] ?? null;
+        $currentPassword = $_POST['currentPassword'] ?? null;
+        $newPassword = $_POST['newPassword'] ?? null;
+        $confirmPassword = $_POST['confirmPassword'] ?? null;
+
+        if (!$adminId || !$currentPassword || !$newPassword || !$confirmPassword) {
+            sendResponse('error', null, 'All password fields are required');
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            sendResponse('error', null, 'New password and confirmation do not match');
+        }
+
+        try {
+            // Fetch current password
+            $stmt = $dbo->conn->prepare("SELECT PASSWORD FROM coordinator WHERE COORDINATOR_ID = ?");
+            $stmt->execute([$adminId]);
+            $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$admin) {
+                sendResponse('error', null, 'Admin not found');
+            }
+
+            if ($admin['PASSWORD'] !== $currentPassword) {
+                sendResponse('error', null, 'Current password is incorrect');
+            }
+
+            // Update password
+            $stmt = $dbo->conn->prepare("UPDATE coordinator SET PASSWORD = ? WHERE COORDINATOR_ID = ?");
+            $stmt->execute([$newPassword, $adminId]);
+
+            sendResponse('success', null, 'Password updated successfully');
+        } catch (Exception $e) {
+            logError("Error updating password: " . $e->getMessage());
+            sendResponse('error', null, 'Error updating password');
+        }
+        break;
+
+    default:
+        sendResponse('error', null, 'Invalid action');
+}
+?>

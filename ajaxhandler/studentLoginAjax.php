@@ -6,12 +6,18 @@ require_once $path."/Attendance Tracker - Copy - NP/database/student.php";
 if(isset($_POST["action"]) && $_POST["action"] == "verifyStudent")
 {
     $email = $_POST["email"];
-    $studentId = $_POST["student_id"];
+    $password = $_POST["password"];
+
+    // Debug logging
+    error_log("Login attempt - Email: $email, Password: $password");
 
     $dbo = new Database();
     $sdo = new Student();
 
-    $rv = $sdo->verifyStudent($dbo, $email, $studentId);
+    $rv = $sdo->verifyStudent($dbo, $email, $password);
+    
+    // Debug logging
+    error_log("Login result: " . json_encode($rv));
     
     if($rv['status'] == "ALL OK")
     {

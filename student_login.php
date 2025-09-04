@@ -17,7 +17,7 @@
 
         <div class="inputgroup topmarginlarge">
             <input type="password" id="txtStudentID" required>
-            <label for="txtStudentID" id="lblStudentID">STUDENT ID</label>
+            <label for="txtStudentID" id="lblStudentID">PASSWORD (Use Student ID initially)</label>
         </div>
 
         <div class="divcallfroaction topmarginlarge">

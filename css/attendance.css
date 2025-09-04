@@ -37,14 +37,14 @@
     border-bottom: 1px solid var(--color-border);
 }
 
-.logo-area {
+  .logo-area {
     font-size: 1.8rem;
     font-weight: 700;
     color: var(--color-primary);
     letter-spacing: 2px;
     user-select: none;
-    margin-left: 200px; /* added to move header right to avoid sidebar overlap */
-}
+    margin-left: 50px; /* adjusted to accommodate moved hamburger menu */
+  }
 
 .coordinator-button-area, .logout-area {
     display: flex;
@@ -205,9 +205,9 @@ button:hover, button:focus {
 
 .studentdetails {
     display: grid;
-    grid-template-columns: 0.5fr 1fr 3fr 1.5fr 1.5fr;
+    grid-template-columns: 0.8fr 2.5fr 0.6fr 1fr 1fr;
     grid-template-rows: 1fr;
-    grid-template-areas: "slno-area rollno-area name-area timein-area timeout-area";
+    grid-template-areas: "rollno-area name-area delete-area timein-area timeout-area";
     gap: var(--gap);
     padding: 0.75rem 1rem;
     background-color: var(--color-surface);
@@ -256,6 +256,39 @@ button:hover, button:focus {
 
 .studentdetails .name-area button:hover, .studentdetails .name-area button:focus {
     background-color: #d48806;
+    outline: none;
+}
+
+/* Delete area styles */
+.studentdetails .delete-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.studentdetails .delete-area button.btnDelete {
+    background-color: #dc3545;
+    border-radius: var(--border-radius);
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), opacity var(--transition-speed);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.studentdetails:hover .delete-area button.btnDelete {
+    opacity: 0.7;
+    pointer-events: auto;
+}
+
+.studentdetails .delete-area button.btnDelete:hover,
+.studentdetails .delete-area button.btnDelete:focus {
+    background-color: #c82333;
+    opacity: 1;
     outline: none;
 }
 
@@ -309,9 +342,9 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="email"]:focus,
     background-color: var(--color-surface);
     border-radius: var(--border-radius);
     box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-    padding: 2rem;
-    width: 90%;
-    max-width: 480px;
+    padding: 1.5rem; /* Reduced padding */
+    width: 80%; /* Reduced width */
+    max-width: 400px; /* Adjusted max-width */
     z-index: 1000;
     display: none;
     flex-direction: column;
@@ -372,7 +405,17 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="email"]:focus,
         padding: calc(var(--padding) * 3);
     }
     .studentdetails {
-        grid-template-columns: 0.5fr 1fr 4fr 1.5fr 1.5fr;
+        grid-template-columns: 0.8fr 3fr 0.6fr 1fr 1fr;
+        grid-template-areas: "rollno-area name-area delete-area timein-area timeout-area";
+    }
+    
+    .studentdetails .timein-area,
+    .studentdetails .timeout-area {
+        justify-self: end;
+    }
+    
+    .studentdetails .delete-area {
+        justify-self: center;
     }
 }
 
@@ -704,8 +747,421 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="email"]:focus,
         padding-bottom: 0;
     }
     .studentdetails {
-        grid-template-columns: 0.5fr 1fr 4fr 1.5fr 1.5fr;
+        grid-template-columns: 0.8fr 3fr 0.6fr 1fr 1fr;
         grid-template-rows: 1fr;
-        grid-template-areas: "slno-area rollno-area name-area timein-area timeout-area";
+        grid-template-areas: "rollno-area name-area delete-area timein-area timeout-area";
     }
+    
+    .studentdetails .timein-area,
+    .studentdetails .timeout-area {
+        justify-self: end;
+    }
+    
+    .studentdetails .delete-area {
+        justify-self: center;
+    }
+}
+
+/* Enhanced Mobile UI - User Friendly */
+@media (max-width: 600px) {
+  /* Reset mobile styles for better UX */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Date display fix for mobile - full width responsive */
+  .date-display {
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+    min-width: 100%;
+    max-width: 100%;
+    display: inline-block;
+    text-align: center;
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  .ondate-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    position: relative;
+  }
+
+  .ondate-area input[type="date"] {
+    font-size: 0.85rem;
+    padding: 0.5rem;
+    min-width: 100%;
+    max-width: 100%;
+    text-align: center;
+    cursor: pointer;
+    z-index: 10;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background-color: var(--color-surface);
+    box-sizing: border-box;
+  }
+
+  /* Remove custom date format restrictions for full functionality */
+  .ondate-area input[type="date"]::-webkit-calendar-picker-indicator {
+    display: block;
+  }
+
+  .ondate-area input[type="date"]::-webkit-datetime-edit-month-field,
+  .ondate-area input[type="date"]::-webkit-datetime-edit-day-field,
+  .ondate-area input[type="date"]::-webkit-datetime-edit-year-field {
+    font-size: 0.85rem;
+  }
+
+  /* Sidebar - Completely hidden on mobile */
+  .sidebar {
+    width: 280px;
+    left: -280px;
+    font-size: 1rem;
+    padding: 1rem;
+    background-color: #b71c1c;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+    visibility: hidden;
+    opacity: 0;
+    transition: left 0.3s ease, visibility 0.3s ease, opacity 0.3s ease;
+  }
+  .sidebar.sidebar-open {
+    left: 0;
+    visibility: visible;
+    opacity: 1;
+  }
+
+  /* Content area - Optimized for mobile */
+  .content-area {
+    margin-left: 0;
+    margin-top: 70px;
+    padding: 1rem;
+    min-height: calc(100vh - 70px);
+  }
+
+  /* Top header - Mobile optimized */
+  .top-header {
+    height: 56px;
+    padding: 0 1rem;
+    font-size: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Date display adjustment */
+  .date-display {
+    font-size: 1rem; /* Ensure it's readable on mobile */
+    white-space: nowrap; /* Prevent wrapping */
+    overflow: hidden; /* Hide overflow */
+    text-overflow: ellipsis; /* Add ellipsis if text is too long */
+  }
+  #sidebarToggle {
+    font-size: 1rem;
+    padding: 0.25rem 0.5rem;
+    background: none;
+    border: none;
+    color: white;
+    position: static;
+    order: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    line-height: 1;
+    min-width: auto;
+    width: auto;
+  }
+
+  /* Logo - Mobile friendly and smaller */
+  .sidebar-logo {
+    order: 2;
+    flex: 1;
+    text-align: center;
+  }
+  
+  .sidebar-logo .logo {
+    font-size: 1rem;
+    white-space: nowrap;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1;
+  }
+
+  .user-profile {
+    order: 3;
+    font-size: 0.9rem;
+  }
+  
+  #userName {
+    font-size: 0.9rem;
+  }
+
+  /* Session area - Mobile first design */
+  .session-area {
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 70px;
+    padding: 1rem;
+    background-color: var(--color-surface);
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .label-area {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .dropdown-area {
+    margin-bottom: 0.5rem;
+  }
+
+  .dropdown-area select {
+    font-size: 1rem;
+    padding: 0.75rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+    width: 100%;
+  }
+
+  /* Class cards - Touch friendly and compact */
+  .classlist-area {
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .classcard {
+    width: 100%;
+    max-width: 90px;
+    height: 60px;
+    font-size: 0.8rem;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+  }
+
+  .classcard:active {
+    transform: scale(0.95);
+  }
+
+  /* Class details - Responsive mobile layout */
+  .classdetails {
+    display: grid;
+    grid-template-columns: 0.8fr 1.8fr 1fr;
+    grid-template-areas: "code-area title-area ondate-area";
+    gap: 0.25rem;
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    align-items: center;
+    background-color: var(--color-surface);
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+
+  .classdetails > div {
+    padding: 0.125rem;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    text-align: center;
+  }
+
+  .classdetails .code-area {
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  .classdetails .title-area {
+    font-size: 0.75rem;
+    text-align: left;
+  }
+
+  .classdetails .ondate-area {
+    font-size: 0.75rem;
+    text-align: center;
+  }
+
+/* Student list - Horizontal mobile layout */
+.studentdetails {
+    display: grid;
+grid-template-columns: 1fr 3fr 0.6fr 0.8fr 0.8fr; /* Increased width for rollno-area */
+    grid-template-areas: "rollno-area name-area delete-area timein-area timeout-area";
+    gap: 0.5rem;
+    padding: 0.75rem;
+    font-size: 0.8rem;
+    align-items: center;
+    background-color: var(--color-surface);
+    border-radius: var(--border-radius);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 600px) {
+    .studentdetails .rollno-area {
+        font-size: 0.7rem; /* Reduced font size for mobile */
+    }
+}
+
+  .studentdetails > div {
+    padding: 0.25rem;
+    min-width: 0;
+    overflow-wrap: break-word;
+    border-bottom: none;
+  }
+
+  .studentdetails .rollno-area {
+    font-weight: 600;
+    padding-right: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .studentdetails .timein-area,
+  .studentdetails .timeout-area {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-align: center;
+    justify-self: end;
+  }
+
+  .studentdetails .name-area {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .studentdetails .name-area button.btnDelete {
+    margin-top: 0;
+    padding: 0.1rem 0.2rem;
+    font-size: 0.55rem;
+    flex-shrink: 0;
+    min-height: auto;
+    line-height: 1;
+  }
+
+  .studentdetails .delete-area {
+    justify-self: center;
+  }
+
+  .studentdetails .delete-area button.btnDelete {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+    min-height: auto;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .studentdetails:hover .delete-area button.btnDelete {
+    opacity: 0.7;
+    pointer-events: auto;
+  }
+
+  .studentdetails .delete-area button.btnDelete:hover,
+  .studentdetails .delete-area button.btnDelete:focus {
+    opacity: 1;
+  }
+
+  /* Buttons - Touch friendly */
+  button,
+  .btnReport, .btnAdd, .btnAddHTE, .btnDeleteHTE,
+  .btnShowCoordinator, .sidebar-item {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: var(--border-radius);
+    min-height: 44px; /* Touch target size */
+  }
+
+  /* Modal - Mobile optimized */
+  .modal {
+    width: 95%;
+    max-width: 320px;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .modal h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+
+  #coordinatorDetailsModal {
+    width: 95%;
+    max-width: 320px;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+  }
+
+  #coordinatorDetailsModal h2 {
+    font-size: 1.3rem;
+  }
+
+  /* Touch improvements */
+  .classcard,
+  button,
+  .sidebar-item {
+    cursor: pointer;
+    transition: transform 0.1s ease;
+  }
+
+  .classcard:active,
+  button:active,
+  .sidebar-item:active {
+    transform: scale(0.98);
+  }
+
+  /* Scroll improvements */
+  .content-area {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Form improvements */
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  select {
+    font-size: 16px; /* Prevents zoom on iOS */
+    min-height: 44px;
+    padding: 0.75rem;
+  }
+
+  /* Better spacing */
+  .session-area,
+  .classlist-area,
+  .studentlist-area {
+    margin-bottom: 1rem;
+  }
+
+  /* Improved shadows for depth */
+  .classcard,
+  .studentdetails,
+  .modal {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  /* Better focus states */
+  button:focus,
+  .classcard:focus,
+  select:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
 }

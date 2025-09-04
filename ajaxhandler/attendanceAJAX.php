@@ -62,7 +62,7 @@ function createPDFReport($list, $filename) {
             $line = $list[$i];
             $pdf->Cell($widths[0], 10, $line['INTERNS_ID'], 1, 0, 'C');
             $pdf->Cell($widths[1], 10, $line['STUDENT_ID'], 1, 0, 'C');
-            $pdf->Cell($widths[2], 10, $line['NAME'], 1, 0, 'L');
+            $pdf->Cell($widths[2], 10, $line['SURNAME'], 1, 0, 'L');
             $pdf->Cell($widths[4], 10, $line['TIMEIN'], 1, 0, 'C');
             $pdf->Cell($widths[5], 10, $line['TIMEOUT'], 1, 0, 'C');
             $pdf->Ln();
@@ -255,7 +255,7 @@ function createPDFReport($list, $filename) {
 
     if (isset($_POST['action'])) {
         $action = $_POST['action'];
-    
+
         if ($action == "addHTE") {
             // Collect all necessary data from POST
             $name = $_POST['NAME'] ?? null;
@@ -266,24 +266,24 @@ function createPDFReport($list, $filename) {
             $contact_number = $_POST['CONTACT_NUMBER'] ?? null;
             $coordinator_id = $_SESSION['current_user'] ?? null;
             $session_id = $_POST['sessionId'] ?? null;
-    
+
             // Add these lines for debugging
             error_log("Received POST data: " . print_r($_POST, true));
             error_log("Coordinator ID: " . $coordinator_id);
             error_log("Session ID: " . $session_id);
-    
+
             // Check for required fields
             if (!$name || !$industry || !$address || !$contact_email || !$contact_person || !$contact_number || !$coordinator_id || !$session_id) {
                 echo json_encode(['success' => false, 'message' => 'Error: All fields are required.']);
                 return; // Stop execution if validation fails
             }
-    
+
             // Debugging: Log all parameters to check their values
             error_log("Adding HTE with: name=$name, industry=$industry, address=$address, contact_email=$contact_email, contact_person=$contact_person, contact_number=$contact_number, coordinator_id=$coordinator_id, session_id=$session_id");
-    
+
             $dbo = new Database(); // Create a Database instance
             $hdo = new attendanceDetails(); // Create an instance of hteDetails
-    
+
             // Add this new logging block right before calling addHTE
             error_log("About to call addHTE with the following parameters:");
             error_log("name: " . $name);
@@ -294,13 +294,62 @@ function createPDFReport($list, $filename) {
             error_log("contact_number: " . $contact_number);
             error_log("coordinator_id: " . $coordinator_id);
             error_log("session_id: " . $session_id);
-    
+
             try {
                 // Call addHTE with the database instance
                 $new_hte_id = $hdo->addHTE($dbo, $name, $industry, $address, $contact_email, $contact_person, $contact_number, $coordinator_id, $session_id);
                 echo json_encode(['success' => true, 'message' => 'HTE added successfully', 'new_hte_id' => $new_hte_id]);
             } catch (Exception $e) {
                 error_log("Exception caught: " . $e->getMessage());
+                echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+            }
+        }
+
+        if ($action == "addHTEControl") {
+            // Collect all necessary data from POST
+            $name = $_POST['NAME'] ?? null;
+            $industry = $_POST['INDUSTRY'] ?? null;
+            $address = $_POST['ADDRESS'] ?? null;
+            $contact_email = $_POST['CONTACT_EMAIL'] ?? null;
+            $contact_person = $_POST['CONTACT_PERSON'] ?? null;
+            $contact_number = $_POST['CONTACT_NUMBER'] ?? null;
+            $coordinator_id = $_SESSION['current_user'] ?? null;
+            $session_id = $_POST['sessionId'] ?? null;
+
+            // Add these lines for debugging
+            error_log("Received POST data for addHTEControl: " . print_r($_POST, true));
+            error_log("Coordinator ID: " . $coordinator_id);
+            error_log("Session ID: " . $session_id);
+
+            // Check for required fields
+            if (!$name || !$industry || !$address || !$contact_email || !$contact_person || !$contact_number || !$coordinator_id || !$session_id) {
+                echo json_encode(['success' => false, 'message' => 'Error: All fields are required.']);
+                return; // Stop execution if validation fails
+            }
+
+            // Debugging: Log all parameters to check their values
+            error_log("Adding HTE via Control with: name=$name, industry=$industry, address=$address, contact_email=$contact_email, contact_person=$contact_person, contact_number=$contact_number, coordinator_id=$coordinator_id, session_id=$session_id");
+
+            $dbo = new Database(); // Create a Database instance
+            $hdo = new attendanceDetails(); // Create an instance of hteDetails
+
+            // Add this new logging block right before calling addHTE
+            error_log("About to call addHTE for Control with the following parameters:");
+            error_log("name: " . $name);
+            error_log("industry: " . $industry);
+            error_log("address: " . $address);
+            error_log("contact_email: " . $contact_email);
+            error_log("contact_person: " . $contact_person);
+            error_log("contact_number: " . $contact_number);
+            error_log("coordinator_id: " . $coordinator_id);
+            error_log("session_id: " . $session_id);
+
+            try {
+                // Call addHTE with the database instance
+                $new_hte_id = $hdo->addHTE($dbo, $name, $industry, $address, $contact_email, $contact_person, $contact_number, $coordinator_id, $session_id);
+                echo json_encode(['success' => true, 'message' => 'HTE added successfully via Control', 'new_hte_id' => $new_hte_id]);
+            } catch (Exception $e) {
+                error_log("Exception caught in addHTEControl: " . $e->getMessage());
                 echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
             }
         }
@@ -355,24 +404,94 @@ function createPDFReport($list, $filename) {
     echo json_encode($response);
 }
 
+    if ($action == "getHTEList") {
+        $dbo = new Database();
+        $ado = new attendanceDetails();
+        
+        try {
+            // Get all HTEs for the dropdown
+            $c = "SELECT hte.HTE_ID, hte.NAME, hte.INDUSTRY 
+                  FROM host_training_establishment hte 
+                  ORDER BY hte.NAME";
+            $s = $dbo->conn->prepare($c);
+            $s->execute();
+            $htes = $s->fetchAll(PDO::FETCH_ASSOC);
+            
+            echo json_encode(['success' => true, 'htes' => $htes]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Error loading HTEs: ' . $e->getMessage()]);
+        }
+    }
 
 
 
-// Assuming you're handling the deleteHTE action in PHP
+
+// Handle deleteHTE action with permission check
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'deleteHTE') {
     $hteId = $_POST['hteId'];
+    $currentUserId = $_SESSION['current_user'] ?? null;
 
     // Database connection
-    $dbo = new Database(); // Assuming you have a Database class to handle connections
+    $dbo = new Database();
     $response = [];
 
+    if (!$currentUserId) {
+        $response['success'] = false;
+        $response['message'] = 'User not logged in.';
+        echo json_encode($response);
+        exit;
+    }
+
     try {
+        // Check if the current user is assigned to this HTE
+        $stmt = $dbo->conn->prepare("
+            SELECT COUNT(*) as count 
+            FROM internship_needs 
+            WHERE HTE_ID = :hteId AND COORDINATOR_ID = :coordinatorId
+        ");
+        $stmt->execute([
+            ':hteId' => $hteId,
+            ':coordinatorId' => $currentUserId
+        ]);
+        
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($result['count'] == 0) {
+            $response['success'] = false;
+            $response['message'] = 'You do not have permission to delete this HTE. It is not assigned to you.';
+            echo json_encode($response);
+            exit;
+        }
+
+        // Check if there are any students assigned to this HTE
+        $stmt = $dbo->conn->prepare("
+            SELECT COUNT(*) as count 
+            FROM intern_details 
+            WHERE HTE_ID = :hteId
+        ");
+        $stmt->execute([':hteId' => $hteId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($result['count'] > 0) {
+            $response['success'] = false;
+            $response['message'] = 'Cannot delete HTE. There are students assigned to it.';
+            echo json_encode($response);
+            exit;
+        }
+
         // Prepare the SQL statement to delete from host_training_establishment
         $stmt = $dbo->conn->prepare("DELETE FROM host_training_establishment WHERE HTE_ID = :hteId");
         $stmt->bindParam(':hteId', $hteId, PDO::PARAM_INT);
         
         // Execute the deletion
         if ($stmt->execute()) {
+            // Also delete from internship_needs
+            $stmt = $dbo->conn->prepare("DELETE FROM internship_needs WHERE HTE_ID = :hteId AND COORDINATOR_ID = :coordinatorId");
+            $stmt->execute([
+                ':hteId' => $hteId,
+                ':coordinatorId' => $currentUserId
+            ]);
+            
             $response['success'] = true;
             $response['message'] = 'HTE deleted successfully.';
         } else {

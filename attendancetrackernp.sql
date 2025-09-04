@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 13, 2025 at 06:03 AM
+-- Generation Time: Sep 03, 2025 at 05:48 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -36,6 +36,7 @@ CREATE TABLE `coordinator` (
   `USERNAME` varchar(255) DEFAULT NULL,
   `PASSWORD` varchar(255) DEFAULT NULL,
   `ROLE` enum('COORDINATOR','ADMIN','SUPERADMIN') NOT NULL DEFAULT 'COORDINATOR',
+  `PROFILE` varchar(255) DEFAULT NULL,
   `HTE_ID` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -43,10 +44,11 @@ CREATE TABLE `coordinator` (
 -- Dumping data for table `coordinator`
 --
 
-INSERT INTO `coordinator` (`COORDINATOR_ID`, `NAME`, `EMAIL`, `CONTACT_NUMBER`, `DEPARTMENT`, `USERNAME`, `PASSWORD`, `ROLE`, `HTE_ID`) VALUES
-(59828994, 'Kim Charles', 'shadowd6163@gmail.com', '09513762404', 'IT', 'shadow', 'test', 'ADMIN', 1),
-(59828996, 'KIM CHARLES', 'kimcharles.emping@hcdc.edu.ph', '09513762404', 'IT_DEPARTMENT', 'kimcharles', 'test1', 'COORDINATOR', NULL),
-(59828999, 'superadmin', 'superadmin@gmail.com', '09513762404', 'IT', 'super', 'admin', 'SUPERADMIN', NULL);
+INSERT INTO `coordinator` (`COORDINATOR_ID`, `NAME`, `EMAIL`, `CONTACT_NUMBER`, `DEPARTMENT`, `USERNAME`, `PASSWORD`, `ROLE`, `PROFILE`, `HTE_ID`) VALUES
+(123, 'ch', 'kim69@gmail.com', '09513762404', 'it', 'test', 'test', 'COORDINATOR', NULL, NULL),
+(59828994, 'Kim Charles', 'shadowd6163@gmail.com', '09513762404', 'IT', 'shadow', '123456', 'ADMIN', '68b1991cc6ef8_59828994.jpg', 1),
+(59828996, 'KIM CHARLES', 'kimcharles.emping@hcdc.edu.ph', '09513762404', 'IT_DEPARTMENT', 'kimcharles', 'test1', 'COORDINATOR', NULL, NULL),
+(59828999, 'superadmin', 'superadmin@gmail.com', '09513762404', 'IT', 'super', 'admin', 'SUPERADMIN', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -126,7 +128,12 @@ INSERT INTO `interns_attendance` (`COORDINATOR_ID`, `HTE_ID`, `ID`, `INTERNS_ID`
 (59828996, 1, 1, 190, '2024-12-04', '17:27:00', '17:27:00'),
 (59828996, 1, 1, 190, '2025-07-01', '23:43:00', '23:43:00'),
 (59828996, 1, 1, 190, '2025-07-02', '10:09:00', '10:09:00'),
-(59828996, 1, 1, 190, '2025-08-13', '12:01:00', '12:01:00');
+(59828996, 1, 1, 190, '2025-08-13', '12:04:00', '12:04:00'),
+(59828996, 1, 1, 190, '2025-08-24', '17:51:00', '17:51:00'),
+(59828996, 1, 1, 190, '2025-08-26', '10:52:00', '20:52:00'),
+(59828996, 1, 1, 190, '2025-08-27', '11:02:00', '12:02:00'),
+(59828996, 1, 1, 190, '2025-08-28', '08:00:00', '14:09:00'),
+(59828996, 1, 1, 190, '2025-08-29', '11:25:00', '11:25:00');
 
 -- --------------------------------------------------------
 
@@ -138,67 +145,65 @@ CREATE TABLE `interns_details` (
   `INTERNS_ID` int(11) NOT NULL,
   `STUDENT_ID` int(11) NOT NULL,
   `NAME` varchar(30) NOT NULL,
+  `SURNAME` varchar(100) DEFAULT NULL,
   `AGE` int(11) NOT NULL,
   `GENDER` varchar(10) NOT NULL,
   `EMAIL` varchar(30) NOT NULL,
+  `PASSWORD` varchar(255) DEFAULT NULL,
   `CONTACT_NUMBER` varchar(15) NOT NULL,
-  `GPA` float DEFAULT NULL,
-  `performance_score` float DEFAULT NULL
+  `profile_picture` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `interns_details`
 --
 
-INSERT INTO `interns_details` (`INTERNS_ID`, `STUDENT_ID`, `NAME`, `AGE`, `GENDER`, `EMAIL`, `CONTACT_NUMBER`, `GPA`, `performance_score`) VALUES
-(190, 59828881, 'Kim Charles', 23, 'Male', 'shadowd6163@gmail.com', '09513762404', 1.1, 5),
-(206, 59829532, 'JAMES', 21, 'MALE', 'james@hcdc.edu.ph', '\'09876523322\'', 1.2, 4),
-(207, 59832315, 'Harold', 22, 'MALE', 'Harold@hcdc.edu.ph', '\'09812654321\'', 1.3, 3),
-(208, 59823526, 'Adriane', 23, 'MALE', 'Adriane@hcdc.edu.ph', '\'09526543212\'', 1.4, 2),
-(209, 59829332, 'Urie', 21, 'FEMALE', 'Urie@hcdc.edu,ph', '\'09476543212\'', 1.5, 1),
-(210, 59832925, 'Joy', 22, 'FEMALE', 'Joy@hcdc.edu.ph', '\'09813252615\'', 1.6, 5),
-(211, 59823962, 'Emman', 22, 'MALE', 'Emman@hcdc.edu.ph', '\'09235157692\'', 1.7, 4),
-(212, 59832356, 'Bob', 22, 'MALE', 'Bob@hcdc.edu.ph', '\'09273679179\'', 1.8, 3),
-(213, 59852427, 'Charles', 23, 'MALE', 'Charles@hcdc.edu.ph', '\'09283782367\'', 1.9, 2),
-(214, 59834987, 'Kristine', 22, 'FEMALE', 'Kristine@hcdc.edu.ph', '\'09382658121\'', 2, 1),
-(215, 59829572, 'Robin', 21, 'FEMALE', 'Robin@hcdc.edu.ph', '\'09237834612\'', 2.1, 5),
-(216, 59823572, 'Kanye', 23, 'MALE', 'Kanye@hcdc.edu.ph', '\'09823261716\'', 2.2, 4),
-(217, 59823573, 'Sara', 24, 'FEMALE', 'Sara@hcdc.edu.ph', '\'09823261717\'', 2.3, 3),
-(218, 59823574, 'Ernest', 23, 'MALE', 'Ernest@hcdc.edu.ph', '\'09823261718\'', 2.4, 2),
-(219, 59823575, 'Sophia', 21, 'FEMALE', 'Sophia@hdcc.edu.ph', '\'09823261719\'', 2.5, 1),
-(220, 59823576, 'Mary', 22, 'FEMALE', 'mary@hcdc.edu.ph', '\'09823261720\'', 2.6, 5),
-(221, 59823577, 'Lynn', 23, 'FEMALE', 'Lynn@hcdc.edu.ph', '\'09823261721\'', 2.7, 4),
-(222, 59823578, 'Christian', 22, 'MALE', 'christian@hcdc.edu.ph', '\'09823261722\'', 2.8, 3),
-(223, 59823579, 'John', 23, 'MALE', 'John@hcdc.edu.ph', '\'09823261723\'', 2.9, 2),
-(224, 59823580, 'Steve', 22, 'MALE', 'steve@hcdc.edu.ph', '\'09823261724\'', 3, 1),
-(225, 59823581, 'Anita', 21, 'FEMALE', 'anita@hcdc.edu.ph', '\'09823261725\'', 3.1, 5),
-(226, 59823582, 'Jake', 23, 'MALE', 'Jake@hcdc.edu.ph', '\'09823261726\'', 3.2, 4),
-(227, 59823583, 'Joel', 23, 'MALE', 'Joel@hcdc.edu.ph', '\'09823261727\'', 3.3, 3),
-(228, 59823584, 'Jane', 22, 'FEMALE', 'jane@hcdc.edu.ph', '\'09823261728\'', 3.4, 2),
-(231, 59823587, 'Karl', 23, 'MALE', 'karl@hcdc.edu.ph', '\'09823261731\'', NULL, NULL),
-(232, 59823588, 'Nicole', 22, 'FEMALE', 'nicole@hcdc.edu.ph', '\'09823261732\'', NULL, NULL),
-(233, 59823589, 'Amy', 21, 'FEMALE', 'Amy@hcdc.edu.ph', '\'09823261733\'', NULL, NULL),
-(234, 59823590, 'Justin', 24, 'MALE', 'Justin@hcdc.edu.ph', '\'09823261734\'', NULL, NULL),
-(235, 59823591, 'Stefan', 23, 'MALE', 'Stefan@hcdc.edu.ph', '\'09823261735\'', NULL, NULL),
-(236, 59823592, 'Paul', 25, 'MALE', 'Paul@hcdc.edu.ph', '\'09823261736\'', NULL, NULL),
-(237, 59823593, 'Hannah', 23, 'FEMALE', 'Hannah@hcdc.edu.ph', '\'09823261737\'', NULL, NULL),
-(238, 59823594, 'Joyce', 21, 'FEMALE', 'joyce@hcdc.edu.ph', '\'09823261738\'', NULL, NULL),
-(239, 59823595, 'Mark', 22, 'MALE', 'mark@hdc.edu.ph', '\'09823261739\'', NULL, NULL),
-(240, 59823596, 'Kate', 23, 'FEMALE', 'kate@hcdc.edu.ph', '\'09823261740\'', NULL, NULL),
-(241, 59823597, 'Jessica', 21, 'FEMALE', 'jessica@hcdc.edu.ph', '\'09823261741\'', NULL, NULL),
-(242, 59823598, 'Tristan', 22, 'MALE', 'tristan@hcdc.edu.ph', '\'09823261742\'', NULL, NULL),
-(243, 59823599, 'Emilie', 21, 'FEMALE', 'emilie@hcdc.edu.ph', '\'09823261743\'', NULL, NULL),
-(244, 59823600, 'Nate', 23, 'MALE', 'nate@hcdc.edu.ph', '\'09823261744\'', NULL, NULL),
-(245, 59823601, 'Kimberly', 22, 'FEMALE', 'kimberly@hcdc.edu.ph', '\'09823261745\'', NULL, NULL),
-(246, 59823602, 'Austin', 22, 'MALE', 'Austin@hcdc.edu.ph', '\'09823261746\'', NULL, NULL),
-(247, 59823603, 'Prince', 21, 'MALE', 'prince@hcdc.edu.ph', '\'09823261747\'', NULL, NULL),
-(248, 59823604, 'Jin', 22, 'MALE', 'Jin@hcdc.edu.ph', '\'09823261748\'', NULL, NULL),
-(249, 59823605, 'Carlo', 23, 'MALE', 'Carlo@hcdc.edu.ph', '\'09823261749\'', NULL, NULL),
-(252, 59823608, 'Kylie', 24, 'FEMALE', 'Kylie@hcdc.edu.ph', '\'09823261752\'', NULL, NULL),
-(253, 59823609, 'Ken', 22, 'MALE', 'Ken@hcdc.edu.ph', '\'09823261753\'', NULL, NULL),
-(254, 59823610, 'Maya', 23, 'FEMALE', 'Maya@hcdc.edu.ph', '\'09823261754\'', NULL, NULL),
-(255, 59828996, 'Kim', 69, 'Male', 'kim69@gmail.com', '09513762404', NULL, NULL),
-(258, 59828110, 'Kim', 51, 'Male', 'kim69@gmail.com', '09513762404', NULL, NULL);
+INSERT INTO `interns_details` (`INTERNS_ID`, `STUDENT_ID`, `NAME`, `SURNAME`, `AGE`, `GENDER`, `EMAIL`, `PASSWORD`, `CONTACT_NUMBER`, `profile_picture`) VALUES
+(190, 59828881, 'Kim Charles', 'Emping', 23, 'Male', 'shadowd6163@gmail.com', '123456', '09513762404', '68b5486432a3f_190.jpg'),
+(206, 59829532, 'JAMES', 'Smith', 21, 'MALE', 'james@hcdc.edu.ph', NULL, '\'09876523322\'', NULL),
+(207, 59832315, 'Harold', 'Johnson', 22, 'MALE', 'Harold@hcdc.edu.ph', NULL, '\'09812654321\'', NULL),
+(208, 59823526, 'Adriane', 'Brown', 23, 'MALE', 'Adriane@hcdc.edu.ph', NULL, '\'09526543212\'', NULL),
+(209, 59829332, 'Urie', 'Garcia', 21, 'FEMALE', 'Urie@hcdc.edu,ph', NULL, '\'09476543212\'', NULL),
+(210, 59832925, 'Joy', 'Lopez', 22, 'FEMALE', 'Joy@hcdc.edu.ph', NULL, '\'09813252615\'', NULL),
+(211, 59823962, 'Emman', 'Miller', 22, 'MALE', 'Emman@hcdc.edu.ph', NULL, '\'09235157692\'', NULL),
+(212, 59832356, 'Bob', 'Wilson', 22, 'MALE', 'Bob@hcdc.edu.ph', NULL, '\'09273679179\'', NULL),
+(213, 59852427, 'Charles', 'Moore', 23, 'MALE', 'Charles@hcdc.edu.ph', NULL, '\'09283782367\'', NULL),
+(214, 59834987, 'Kristine', 'Taylor', 22, 'FEMALE', 'Kristine@hcdc.edu.ph', NULL, '\'09382658121\'', NULL),
+(215, 59829572, 'Robin', 'Anderson', 21, 'FEMALE', 'Robin@hcdc.edu.ph', NULL, '\'09237834612\'', NULL),
+(216, 59823572, 'Kanye', 'Thomas', 23, 'MALE', 'Kanye@hcdc.edu.ph', NULL, '\'09823261716\'', NULL),
+(217, 59823573, 'Sara', 'Jackson', 24, 'FEMALE', 'Sara@hcdc.edu.ph', NULL, '\'09823261717\'', NULL),
+(218, 59823574, 'Ernest', 'White', 23, 'MALE', 'Ernest@hcdc.edu.ph', NULL, '\'09823261718\'', NULL),
+(219, 59823575, 'Sophia', 'Harris', 21, 'FEMALE', 'Sophia@hdcc.edu.ph', NULL, '\'09823261719\'', NULL),
+(220, 59823576, 'Mary', 'Martin', 22, 'FEMALE', 'mary@hcdc.edu.ph', NULL, '\'09823261720\'', NULL),
+(221, 59823577, 'Lynn', 'Thompson', 23, 'FEMALE', 'Lynn@hcdc.edu.ph', NULL, '\'09823261721\'', NULL),
+(222, 59823578, 'Christian', 'Martinez', 22, 'MALE', 'christian@hcdc.edu.ph', NULL, '\'09823261722\'', NULL),
+(223, 59823579, 'John', 'Robinson', 23, 'MALE', 'John@hcdc.edu.ph', NULL, '\'09823261723\'', NULL),
+(224, 59823580, 'Steve', 'Emping', 22, 'MALE', 'steve@hcdc.edu.ph', NULL, '\'09823261724\'', NULL),
+(225, 59823581, 'Anita', 'Rodriguez', 21, 'FEMALE', 'anita@hcdc.edu.ph', NULL, '\'09823261725\'', NULL),
+(226, 59823582, 'Jake', 'Lewis', 23, 'MALE', 'Jake@hcdc.edu.ph', NULL, '\'09823261726\'', NULL),
+(227, 59823583, 'Joel', 'Lee', 23, 'MALE', 'Joel@hcdc.edu.ph', NULL, '\'09823261727\'', NULL),
+(228, 59823584, 'Jane', 'Walker', 22, 'FEMALE', 'jane@hcdc.edu.ph', NULL, '\'09823261728\'', NULL),
+(231, 59823587, 'Karl', 'Hall', 23, 'MALE', 'karl@hcdc.edu.ph', NULL, '\'09823261731\'', NULL),
+(232, 59823588, 'Nicole', 'Allen', 22, 'FEMALE', 'nicole@hcdc.edu.ph', NULL, '\'09823261732\'', NULL),
+(233, 59823589, 'Amy', 'Young', 21, 'FEMALE', 'Amy@hcdc.edu.ph', NULL, '\'09823261733\'', NULL),
+(234, 59823590, 'Justin', 'Hernandez', 24, 'MALE', 'Justin@hcdc.edu.ph', NULL, '\'09823261734\'', NULL),
+(235, 59823591, 'Stefan', 'King', 23, 'MALE', 'Stefan@hcdc.edu.ph', NULL, '\'09823261735\'', NULL),
+(236, 59823592, 'Paul', 'Wright', 25, 'MALE', 'Paul@hcdc.edu.ph', NULL, '\'09823261736\'', NULL),
+(237, 59823593, 'Hannah', 'Lopez', 23, 'FEMALE', 'Hannah@hcdc.edu.ph', NULL, '\'09823261737\'', NULL),
+(238, 59823594, 'Joyce', 'Hill', 21, 'FEMALE', 'joyce@hcdc.edu.ph', NULL, '\'09823261738\'', NULL),
+(239, 59823595, 'Mark', 'Scott', 22, 'MALE', 'mark@hdc.edu.ph', NULL, '\'09823261739\'', NULL),
+(240, 59823596, 'Kate', 'Green', 23, 'FEMALE', 'kate@hcdc.edu.ph', NULL, '\'09823261740\'', NULL),
+(241, 59823597, 'Jessica', 'Adams', 21, 'FEMALE', 'jessica@hcdc.edu.ph', NULL, '\'09823261741\'', NULL),
+(242, 59823598, 'Tristan', 'Baker', 22, 'MALE', 'tristan@hcdc.edu.ph', NULL, '\'09823261742\'', NULL),
+(243, 59823599, 'Emilie', 'Nelson', 21, 'FEMALE', 'emilie@hcdc.edu.ph', NULL, '\'09823261743\'', NULL),
+(244, 59823600, 'Nate', 'Carter', 23, 'MALE', 'nate@hcdc.edu.ph', NULL, '\'09823261744\'', NULL),
+(245, 59823601, 'Kimberly', 'Mitchell', 22, 'FEMALE', 'kimberly@hcdc.edu.ph', NULL, '\'09823261745\'', NULL),
+(246, 59823602, 'Austin', 'Perez', 22, 'MALE', 'Austin@hcdc.edu.ph', NULL, '\'09823261746\'', NULL),
+(247, 59823603, 'Prince', 'Roberts', 21, 'MALE', 'prince@hcdc.edu.ph', NULL, '\'09823261747\'', NULL),
+(252, 59823608, 'Kylie', 'Campbell', 24, 'FEMALE', 'Kylie@hcdc.edu.ph', NULL, '\'09823261752\'', NULL),
+(253, 59823609, 'Ken', 'Parker', 22, 'MALE', 'Ken@hcdc.edu.ph', NULL, '\'09823261753\'', NULL),
+(254, 59823610, 'Maya', 'Evans', 23, 'FEMALE', 'Maya@hcdc.edu.ph', NULL, '\'09823261754\'', NULL),
+(259, 598289964, 'Ako', 'Emping', 61, 'Male', 'kim69@gmail.com', NULL, '09513762404', NULL);
 
 --
 -- Triggers `interns_details`
@@ -268,10 +273,7 @@ INSERT INTO `intern_details` (`INTERNS_ID`, `SESSION_ID`, `HTE_ID`) VALUES
 (245, 1, 1),
 (246, 1, 1),
 (247, 1, 1),
-(248, 1, 1),
-(249, 1, 1),
-(255, 1, 1),
-(258, 1, 1);
+(259, 2, 3);
 
 -- --------------------------------------------------------
 
@@ -299,7 +301,37 @@ INSERT INTO `pending_attendance` (`ID`, `INTERNS_ID`, `HTE_ID`, `ON_DATE`, `TIME
 (28, 190, 1, '2025-06-30', '23:43:00', '23:48:00', 'approved'),
 (36, 190, 1, '2025-07-01', '23:43:00', '23:43:00', 'approved'),
 (38, 190, 1, '2025-07-02', '10:09:00', '10:09:00', 'approved'),
-(39, 190, 1, '2025-08-13', '12:01:00', '12:01:00', 'approved');
+(40, 190, 1, '2025-08-13', '12:04:00', '12:04:00', 'approved'),
+(44, 190, 1, '2025-08-24', '17:51:00', '17:51:00', 'approved'),
+(45, 190, 1, '2025-08-26', '10:52:00', '10:52:00', 'approved'),
+(46, 190, 1, '2025-08-27', '11:02:00', '11:02:00', 'approved'),
+(50, 190, 1, '2025-08-28', '14:09:00', '14:09:00', 'approved'),
+(51, 190, 1, '2025-08-29', '11:25:00', '11:25:00', 'approved');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `report_images`
+--
+
+CREATE TABLE `report_images` (
+  `image_id` int(11) NOT NULL,
+  `report_id` int(11) NOT NULL,
+  `image_filename` varchar(255) NOT NULL,
+  `day_of_week` enum('monday','tuesday','wednesday','thursday','friday') DEFAULT NULL,
+  `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `report_images`
+--
+
+INSERT INTO `report_images` (`image_id`, `report_id`, `image_filename`, `day_of_week`, `uploaded_at`) VALUES
+(81, 4, '68b6cecc4edae_1756810956_monday.jpg', 'monday', '2025-09-03 03:27:19'),
+(82, 4, '68b67ef92f8ee_1756790521_tuesday.jpg', 'tuesday', '2025-09-03 03:27:19'),
+(83, 4, '68b6cfd63a7ea_1756811222_wednesday.jpg', 'wednesday', '2025-09-03 03:27:19'),
+(84, 4, '68b67ef9302e7_1756790521_thursday.jpg', 'thursday', '2025-09-03 03:27:19'),
+(85, 4, '68b6c59bbd60a_1756808603_friday.jpg', 'friday', '2025-09-03 03:27:19');
 
 -- --------------------------------------------------------
 
@@ -353,7 +385,35 @@ INSERT INTO `student_deletion_log` (`log_id`, `intern_id`, `student_id`, `name`,
 (10, 230, '59823586', 'Eugene', '2025-07-01 14:27:33', NULL),
 (11, 250, '59823606', 'Karen', '2025-07-01 14:28:20', NULL),
 (12, 257, '59828110', 'ch', '2025-07-01 23:19:43', NULL),
-(13, 256, '598289111', 'Kim', '2025-07-02 00:26:39', NULL);
+(13, 256, '598289111', 'Kim', '2025-07-02 00:26:39', NULL),
+(14, 258, '59828110', 'Kim', '2025-08-22 18:42:30', NULL),
+(15, 255, '59828996', 'Kim', '2025-08-22 18:55:44', NULL),
+(16, 249, '59823605', 'Carlo', '2025-08-24 14:06:16', NULL),
+(17, 248, '59823604', 'Jin', '2025-08-24 14:06:53', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `weekly_reports`
+--
+
+CREATE TABLE `weekly_reports` (
+  `report_id` int(11) NOT NULL,
+  `interns_id` int(11) NOT NULL,
+  `week_start` date NOT NULL,
+  `week_end` date NOT NULL,
+  `report_content` text DEFAULT NULL,
+  `status` enum('draft','submitted') DEFAULT 'draft',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `weekly_reports`
+--
+
+INSERT INTO `weekly_reports` (`report_id`, `interns_id`, `week_start`, `week_end`, `report_content`, `status`, `created_at`, `updated_at`) VALUES
+(4, 190, '2025-09-01', '2025-09-07', '{\"monday\":\"Monday\",\"tuesday\":\"Tuesday\",\"wednesday\":\"Wednesday\",\"thursday\":\"Thursday\",\"friday\":\"Friday\"}', 'submitted', '2025-09-01 06:56:44', '2025-09-03 03:27:19');
 
 --
 -- Indexes for dumped tables
@@ -413,6 +473,13 @@ ALTER TABLE `pending_attendance`
   ADD KEY `hte_id` (`HTE_ID`);
 
 --
+-- Indexes for table `report_images`
+--
+ALTER TABLE `report_images`
+  ADD PRIMARY KEY (`image_id`),
+  ADD KEY `report_id` (`report_id`);
+
+--
 -- Indexes for table `session_details`
 --
 ALTER TABLE `session_details`
@@ -424,6 +491,13 @@ ALTER TABLE `session_details`
 --
 ALTER TABLE `student_deletion_log`
   ADD PRIMARY KEY (`log_id`);
+
+--
+-- Indexes for table `weekly_reports`
+--
+ALTER TABLE `weekly_reports`
+  ADD PRIMARY KEY (`report_id`),
+  ADD KEY `interns_id` (`interns_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -439,31 +513,43 @@ ALTER TABLE `coordinator`
 -- AUTO_INCREMENT for table `host_training_establishment`
 --
 ALTER TABLE `host_training_establishment`
-  MODIFY `HTE_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `HTE_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `interns_details`
 --
 ALTER TABLE `interns_details`
-  MODIFY `INTERNS_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=259;
+  MODIFY `INTERNS_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=260;
 
 --
 -- AUTO_INCREMENT for table `pending_attendance`
 --
 ALTER TABLE `pending_attendance`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+
+--
+-- AUTO_INCREMENT for table `report_images`
+--
+ALTER TABLE `report_images`
+  MODIFY `image_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
 
 --
 -- AUTO_INCREMENT for table `session_details`
 --
 ALTER TABLE `session_details`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `student_deletion_log`
 --
 ALTER TABLE `student_deletion_log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
+-- AUTO_INCREMENT for table `weekly_reports`
+--
+ALTER TABLE `weekly_reports`
+  MODIFY `report_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Constraints for dumped tables
@@ -506,6 +592,18 @@ ALTER TABLE `intern_details`
 ALTER TABLE `pending_attendance`
   ADD CONSTRAINT `pending_attendance_ibfk_1` FOREIGN KEY (`INTERNS_ID`) REFERENCES `interns_details` (`INTERNS_ID`),
   ADD CONSTRAINT `pending_attendance_ibfk_2` FOREIGN KEY (`hte_id`) REFERENCES `host_training_establishment` (`HTE_ID`);
+
+--
+-- Constraints for table `report_images`
+--
+ALTER TABLE `report_images`
+  ADD CONSTRAINT `report_images_ibfk_1` FOREIGN KEY (`report_id`) REFERENCES `weekly_reports` (`report_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `weekly_reports`
+--
+ALTER TABLE `weekly_reports`
+  ADD CONSTRAINT `weekly_reports_ibfk_1` FOREIGN KEY (`interns_id`) REFERENCES `interns_details` (`INTERNS_ID`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

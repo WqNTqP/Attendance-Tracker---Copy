@@ -11,6 +11,48 @@ session_start();
         header("location:index.php");
         die();
     }
+    
+    // Get display name for user
+    $displayName = 'User';
+    if(isset($_SESSION["current_user_name"])) {
+        $displayName = $_SESSION["current_user_name"];
+    } elseif(isset($_SESSION["current_user"])) {
+        // For backwards compatibility, fetch name from database
+        $path=$_SERVER['DOCUMENT_ROOT'];
+        require_once $path."/Attendance Tracker - Copy - NP/database/database.php";
+        try {
+            $db = new Database();
+            $stmt = $db->conn->prepare("SELECT NAME FROM coordinator WHERE COORDINATOR_ID = ?");
+            $stmt->execute([$_SESSION["current_user"]]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($result) {
+                $displayName = $result['NAME'];
+                $_SESSION["current_user_name"] = $result['NAME']; // Cache for future use
+            } else {
+                $displayName = $_SESSION["current_user"];
+            }
+        } catch (Exception $e) {
+            $displayName = $_SESSION["current_user"];
+        }
+    } elseif(isset($_SESSION["student_user"])) {
+        // For student users, fetch name from database
+        $path=$_SERVER['DOCUMENT_ROOT'];
+        require_once $path."/Attendance Tracker - Copy - NP/database/database.php";
+        try {
+            $db = new Database();
+            $stmt = $db->conn->prepare("SELECT NAME FROM student WHERE STUDENT_ID = ?");
+            $stmt->execute([$_SESSION["student_user"]]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($result) {
+                $displayName = $result['NAME'];
+                $_SESSION["student_name"] = $result['NAME']; // Cache for future use
+            } else {
+                $displayName = $_SESSION["student_user"];
+            }
+        } catch (Exception $e) {
+            $displayName = $_SESSION["student_user"];
+        }
+    }
 ?>
 
 <!DOCTYPE html>
@@ -32,8 +74,10 @@ session_start();
         <div class="sidebar-logo" style="margin-left: 1rem; cursor: pointer;" onclick="window.location.href='attendance.php';">
             <h2 class="logo" style="cursor: pointer;">ATTENDANCE TRACKER</h2>
         </div>
-        <div class="user-profile" id="userProfile">
-            <span id="userName">KIM CHARLES &#x25BC;</span>
+    <div class="user-profile" id="userProfile">
+            <span id="userName">
+                <?php echo htmlspecialchars($displayName); ?> &#x25BC;
+            </span>
             <div class="user-dropdown" id="userDropdown" style="display:none;">
                 <button id="btnProfile">Profile</button>
                 <button id="logoutBtn">Logout</button>
@@ -43,10 +87,11 @@ session_start();
 
         <div class="sidebar">
             <ul class="sidebar-menu">
-                <li class="sidebar-item active" id="attendanceTab">Attendance</li>
-                <li class="sidebar-item" id="evaluationTab">Evaluation</li>
+                <li class="sidebar-item <?php echo basename($_SERVER['PHP_SELF']) == 'attendance.php' ? 'active' : ''; ?>" id="attendanceTab" onclick="window.location.href='attendance.php'">Attendance</li>
+                <li class="sidebar-item <?php echo basename($_SERVER['PHP_SELF']) == 'evaluation.php' ? 'active' : ''; ?>" id="evaluationTab" onclick="window.location.href='evaluation.php'">Evaluation</li>
+                <li class="sidebar-item <?php echo basename($_SERVER['PHP_SELF']) == 'contral.php' ? 'active' : ''; ?>" id="controlTab" onclick="window.location.href='contral.php'">Control</li>
             </ul>
-            <!-- Removed logout button here as per user request -->
+
         </div>
 
     <div class="content-area">

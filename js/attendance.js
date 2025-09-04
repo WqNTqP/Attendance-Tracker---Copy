@@ -153,22 +153,22 @@ function getStudentListHTML(studentList) {
     let x = `<div class="studentlist"><label>STUDENT LIST</label></div>`;
     if (studentList && studentList.length > 0) {
         x += `<div class="studentdetails header-row">`;
-        x += `<div class="slno-area">INT.NO.</div>`;
         x += `<div class="rollno-area">Student ID</div>`;
         x += `<div class="name-area">Name</div>`;
+        x += `<div class="delete-area"></div>`;
         x += `<div class="timein-area">Time In</div>`;
         x += `<div class="timeout-area">Time Out</div>`;
         x += `</div>`; // close header-row div
 
         studentList.forEach((cs, index) => {
             x += `<div class="studentdetails">`;
-            x += `<div class="slno-area">${index + 1}</div>`;
             x += `<div class="rollno-area">${cs['STUDENT_ID']}</div>`;
-            x += `<div class="name-area">`;
-            x += `${cs['NAME']} `;
-            // x += `<button class="btnEdit" data-studentid="${cs['INTERNS_ID']}">Edit</button>`;
+            x += `<div class="name-area">${cs['SURNAME']}</div>`;
+            
+            // Delete button in separate column
+            x += `<div class="delete-area">`;
             x += `<button class="btnDelete" data-studentid="${cs['INTERNS_ID']}">Delete</button>`;
-            x += `</div>`; // close name-area div
+            x += `</div>`;
             
             // Convert time to AM/PM format for timein and timeout, or display '--:-- --' if empty
             const formatTime = (time) => {
@@ -202,13 +202,10 @@ function getStudentListHTML(studentList) {
     } else {
         x += `<p>No students found.</p>`;
     }
-    // Create the report and add buttons
-    x += `<div class="reportsection">`;
-    x += `<button id="btnReport" class="common-button btnReport">REPORT</button>`;
-    x += `<button id="btnAdd" class="common-button btnAdd">STUDENT</button>`; // ADD button
-    x += `<button id="btnAddHTE" class="common-button btnAddHTE">ADD HTE</button>`; // ADD HTE button
-    x += `<button id="btnDeleteHTE" class="common-button btnDeleteHTE" data-hteid="${currentHteId}" data-sessionid="${currentSessionId}">DELETE</button>`; // DELETE HTE button
-    x += `</div>`; // close reportsection div
+        // Create the report button only (removed STUDENT, ADDHTE, DELETE buttons as they're in control panel)
+        x += `<div class="reportsection">`;
+        x += `<button id="btnReport" class="common-button btnReport">REPORT</button>`;
+        x += `</div>`; // close reportsection div
 
     // Add Student Form
     x += generateAddStudentForm();
