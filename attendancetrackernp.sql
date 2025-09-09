@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 05, 2025 at 10:25 AM
+-- Generation Time: Sep 09, 2025 at 09:50 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -135,7 +135,8 @@ INSERT INTO `interns_attendance` (`COORDINATOR_ID`, `HTE_ID`, `ID`, `INTERNS_ID`
 (59828996, 1, 1, 190, '2025-08-28', '08:00:00', '14:09:00'),
 (59828996, 1, 1, 190, '2025-08-29', '08:16:00', '11:25:00'),
 (59828996, 1, 1, 190, '2025-09-04', '12:52:00', '12:52:00'),
-(59828996, 3, 2, 259, '2025-09-04', '18:23:00', '18:24:00');
+(59828996, 3, 2, 259, '2025-09-04', '18:23:00', '18:24:00'),
+(59828996, 1, 1, 190, '2025-09-05', '16:29:00', '16:32:00');
 
 -- --------------------------------------------------------
 
@@ -205,7 +206,8 @@ INSERT INTO `interns_details` (`INTERNS_ID`, `STUDENT_ID`, `NAME`, `SURNAME`, `A
 (252, 59823608, 'Kylie', 'Campbell', 24, 'FEMALE', 'Kylie@hcdc.edu.ph', NULL, '\'09823261752\'', NULL),
 (253, 59823609, 'Ken', 'Parker', 22, 'MALE', 'Ken@hcdc.edu.ph', NULL, '\'09823261753\'', NULL),
 (254, 59823610, 'Maya', 'Evans', 23, 'FEMALE', 'Maya@hcdc.edu.ph', NULL, '\'09823261754\'', NULL),
-(259, 598289964, 'Ako', 'Emping', 61, 'Male', 'kim69@gmail.com', '123456', '09513762404', NULL);
+(259, 598289964, 'Ako', 'Emping', 61, 'Male', 'kim69@gmail.com', '123456', '09513762404', NULL),
+(260, 12345678, 'test', NULL, 53, 'Male', 'kim69@gmail.com', NULL, '09513762404', NULL);
 
 --
 -- Triggers `interns_details`
@@ -290,28 +292,30 @@ CREATE TABLE `pending_attendance` (
   `ON_DATE` date DEFAULT NULL,
   `TIMEIN` time DEFAULT NULL,
   `TIMEOUT` time DEFAULT NULL,
-  `STATUS` varchar(255) DEFAULT NULL
+  `STATUS` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `pending_attendance`
 --
 
-INSERT INTO `pending_attendance` (`ID`, `INTERNS_ID`, `HTE_ID`, `ON_DATE`, `TIMEIN`, `TIMEOUT`, `STATUS`) VALUES
-(17, 190, 1, '2024-11-26', '15:54:00', '15:54:00', 'approved'),
-(22, 190, 1, '2024-12-04', '17:27:00', '17:27:00', 'approved'),
-(28, 190, 1, '2025-06-30', '23:43:00', '23:48:00', 'approved'),
-(36, 190, 1, '2025-07-01', '23:43:00', '23:43:00', 'approved'),
-(38, 190, 1, '2025-07-02', '10:09:00', '10:09:00', 'approved'),
-(40, 190, 1, '2025-08-13', '12:04:00', '12:04:00', 'approved'),
-(44, 190, 1, '2025-08-24', '17:51:00', '17:51:00', 'approved'),
-(45, 190, 1, '2025-08-26', '10:52:00', '10:52:00', 'approved'),
-(46, 190, 1, '2025-08-27', '11:02:00', '11:02:00', 'approved'),
-(50, 190, 1, '2025-08-28', '14:09:00', '14:09:00', 'approved'),
-(51, 190, 1, '2025-08-29', '11:25:00', '11:25:00', 'approved'),
-(54, 190, 1, '2025-09-04', '12:52:00', '12:52:00', 'approved'),
-(55, 259, 3, '2025-09-04', '18:23:00', '18:24:00', 'approved'),
-(60, 190, 1, '2025-09-05', '16:22:00', NULL, 'pending');
+INSERT INTO `pending_attendance` (`ID`, `INTERNS_ID`, `HTE_ID`, `ON_DATE`, `TIMEIN`, `TIMEOUT`, `STATUS`, `created_at`, `updated_at`) VALUES
+(17, 190, 1, '2024-11-26', '15:54:00', '15:54:00', 'approved', '2025-09-05 08:28:03', '2025-09-05 08:28:03'),
+(22, 190, 1, '2024-12-04', '17:27:00', '17:27:00', 'approved', '2025-09-05 08:28:03', '2025-09-05 08:28:03'),
+(28, 190, 1, '2025-06-30', '23:43:00', '23:48:00', 'approved', '2025-09-05 08:28:03', '2025-09-05 08:28:03'),
+(36, 190, 1, '2025-07-01', '23:43:00', '23:43:00', 'approved', '2025-09-05 08:28:03', '2025-09-05 08:28:03'),
+(38, 190, 1, '2025-07-02', '10:09:00', '10:09:00', 'approved', '2025-09-05 08:28:03', '2025-09-05 08:28:03'),
+(40, 190, 1, '2025-08-13', '12:04:00', '12:04:00', 'approved', '2025-09-05 08:28:03', '2025-09-05 08:28:03'),
+(44, 190, 1, '2025-08-24', '17:51:00', '17:51:00', 'approved', '2025-09-05 08:28:03', '2025-09-05 08:28:03'),
+(45, 190, 1, '2025-08-26', '10:52:00', '10:52:00', 'approved', '2025-09-05 08:28:03', '2025-09-05 08:28:03'),
+(46, 190, 1, '2025-08-27', '11:02:00', '11:02:00', 'approved', '2025-09-05 08:28:03', '2025-09-05 08:28:03'),
+(50, 190, 1, '2025-08-28', '14:09:00', '14:09:00', 'approved', '2025-09-05 08:28:03', '2025-09-05 08:28:03'),
+(51, 190, 1, '2025-08-29', '11:25:00', '11:25:00', 'approved', '2025-09-05 08:28:03', '2025-09-05 08:28:03'),
+(54, 190, 1, '2025-09-04', '12:52:00', '12:52:00', 'approved', '2025-09-05 08:28:03', '2025-09-05 08:28:03'),
+(55, 259, 3, '2025-09-04', '18:23:00', '18:24:00', 'approved', '2025-09-05 08:28:03', '2025-09-05 08:28:03'),
+(61, 190, 1, '2025-09-05', '16:29:00', '16:32:00', 'approved', '2025-09-05 08:29:11', '2025-09-05 08:32:57');
 
 -- --------------------------------------------------------
 
@@ -527,13 +531,13 @@ ALTER TABLE `host_training_establishment`
 -- AUTO_INCREMENT for table `interns_details`
 --
 ALTER TABLE `interns_details`
-  MODIFY `INTERNS_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=260;
+  MODIFY `INTERNS_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=261;
 
 --
 -- AUTO_INCREMENT for table `pending_attendance`
 --
 ALTER TABLE `pending_attendance`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
 
 --
 -- AUTO_INCREMENT for table `report_images`
