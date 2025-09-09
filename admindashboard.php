@@ -109,15 +109,7 @@ $adminName = $name ?? 'Admin';
                     <span class="stat-number"><?php echo htmlspecialchars($attendanceStats['late'] ?? 0); ?></span>
                 </div>
             </div>
-            <div class="stat-card absent">
-                <div class="stat-icon">
-                    <i class="fas fa-times-circle"></i>
-                </div>
-                <div class="stat-content">
-                    <h4>Absent</h4>
-                    <span class="stat-number"><?php echo htmlspecialchars($attendanceStats['absent'] ?? 0); ?></span>
-                </div>
-            </div>
+
         </div>
     </div>
 
@@ -148,14 +140,7 @@ $adminName = $name ?? 'Admin';
                                 <?php endforeach; ?>
                             </ul>
                         </div>
-                        <div class="list absent-list">
-                            <h4>Absent</h4>
-                            <ul id="absentList">
-                                <?php foreach ($absentList as $student): ?>
-                                    <li><?php echo htmlspecialchars($student['SURNAME']); ?></li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
+
                     </div>
                 </div>
 
@@ -177,8 +162,8 @@ $adminName = $name ?? 'Admin';
                             <?php foreach ($pendingRecords as $record): ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($record['STUDENT_ID']); ?></td>
-                                <td><?php echo htmlspecialchars($record['TIMEIN'] ?? '--:--'); ?></td>
-                                <td><?php echo htmlspecialchars($record['TIMEOUT'] ?? '--:--'); ?></td>
+                                <td><?php echo htmlspecialchars($record['TIMEIN'] ? date('h:i A', strtotime($record['TIMEIN'])) : '--:--'); ?></td>
+                                <td><?php echo htmlspecialchars($record['TIMEOUT'] ? date('h:i A', strtotime($record['TIMEOUT'])) : '--:--'); ?></td>
                                 <td>
                                     <button onclick="approveAttendance(<?php echo $record['ID']; ?>)" class="btn-accept">Approve</button>
                                     <button onclick="deletePendingAttendance(<?php echo $record['ID']; ?>)" class="btn-decline">Decline</button>
@@ -276,15 +261,7 @@ $adminName = $name ?? 'Admin';
                                 <span id="historyLate" class="stat-number">0</span>
                             </div>
                         </div>
-                        <div class="stat-card absent">
-                            <div class="stat-icon">
-                                <i class="fas fa-times-circle"></i>
-                            </div>
-                            <div class="stat-content">
-                                <h4>Absent</h4>
-                                <span id="historyAbsent" class="stat-number">0</span>
-                            </div>
-                        </div>
+
                     </div>
                     <div class="attendance-lists">
                         <div id="historyTableContainer" style="display: block;">

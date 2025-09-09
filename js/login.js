@@ -22,7 +22,7 @@ function tryLogin() {
                     if (rv.data.role === 'SUPERADMIN') {
                         document.location.replace("superadmin_dashboard.php"); // For Coordinator
                     } else if (rv.data.role === 'COORDINATOR') {
-                        document.location.replace("attendance.php");
+                        document.location.replace("mainDashboard.php");
                     }
                 } else {
                     $("#diverror").addClass("applyerrordiv");

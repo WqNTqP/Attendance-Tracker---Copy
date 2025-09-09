@@ -2,6 +2,25 @@
 let currentHteId;
 let currentSessionId;
 
+// Tab switching functionality
+function switchTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+
+    // Remove active class from all sidebar items
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Show selected tab content
+    document.getElementById(tabName + 'Content').classList.add('active');
+
+    // Add active class to selected sidebar item
+    document.getElementById(tabName + 'Tab').classList.add('active');
+}
+
 $(document).ready(function() {
     // Toggle user dropdown
     $('#userProfile').on('click', function() {
@@ -31,9 +50,443 @@ $(document).ready(function() {
         });
     });
 
+    // Profile button click handler
+    $(document).on('click', '#btnProfile', function() {
+        let cdrid = $("#hiddencdrid").val();
+
+        if (!cdrid) {
+            alert("Coordinator ID not found.");
+            return;
+        }
+
+        $.ajax({
+            url: "ajaxhandler/attendanceAJAX.php",
+            type: "POST",
+            dataType: "json",
+            data: {cdrid: cdrid, action: "getCoordinatorDetails"},
+            success: function(response) {
+                if (response.success) {
+                    displayCoordinatorDetails(response.data);
+                } else {
+                    alert("Error: " + (response.message || "Unknown error occurred."));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX error:", status, error);
+                alert("Error fetching coordinator details. Please check the console for more information.");
+            }
+        });
+    });
+
+    // Function to display coordinator details modal with Edit Profile and Change Password buttons
+    function displayCoordinatorDetails(coordinatorData) {
+        let html = `
+            <div class="modal-overlay">
+                <div id="coordinatorDetailsModal" class="modal" style="display: flex;">
+                    <div class="modal-content" style="max-width: 600px;">
+                        <div class="modal-header">
+                            <h2>Coordinator Details</h2>
+                            <button class="modal-close" id="closeCoordinatorDetailsModal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>Coordinator ID:</label>
+                                <span>${coordinatorData.COORDINATOR_ID}</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Name:</label>
+                                <span>${coordinatorData.NAME}</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Email:</label>
+                                <span>${coordinatorData.EMAIL}</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Contact Number:</label>
+                                <span>${coordinatorData.CONTACT_NUMBER}</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Department:</label>
+                                <span>${coordinatorData.DEPARTMENT}</span>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" id="btnEditProfile" class="btn-submit">Edit Profile</button>
+                                <button type="button" id="btnChangePassword" class="btn-secondary">Change Password</button>
+                                <button type="button" id="btnCloseCoordinatorDetails" class="btn-cancel">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        $('body').append(html);
+        $("#coordinatorDetailsModal").hide().fadeIn();
+    }
+
+    // Close coordinator details modal
+    $(document).on('click', '#closeCoordinatorDetailsModal, #btnCloseCoordinatorDetails', function() {
+        $('#coordinatorDetailsModal').fadeOut(function() {
+            $(this).remove();
+        });
+    });
+
+    // Edit Profile button click handler inside coordinator details modal
+    $(document).on('click', '#btnEditProfile', function() {
+        $('#coordinatorDetailsModal').fadeOut(function() {
+            $(this).remove();
+        });
+        loadEditableProfile();
+    });
+
+    // Change Password button click handler inside coordinator details modal
+    $(document).on('click', '#btnChangePassword', function() {
+        $('#coordinatorDetailsModal').fadeOut(function() {
+            $(this).remove();
+        });
+        showChangePasswordModal();
+    });
+
+    // Function to load editable profile modal
+    function loadEditableProfile() {
+        let cdrid = $("#hiddencdrid").val();
+
+        if (!cdrid) {
+            alert("Coordinator ID not found.");
+            return;
+        }
+
+        $.ajax({
+            url: "ajaxhandler/attendanceAJAX.php",
+            type: "POST",
+            dataType: "json",
+            data: {cdrid: cdrid, action: "getCoordinatorDetails"},
+            success: function(response) {
+                if (response.success) {
+                    displayEditableProfileModal(response.data);
+                } else {
+                    alert("Error: " + (response.message || "Unknown error occurred."));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX error:", status, error);
+                alert("Error fetching coordinator details. Please check the console for more information.");
+            }
+        });
+    }
+
+    // Function to display editable profile modal
+    function displayEditableProfileModal(coordinatorData) {
+        let html = `
+            <div id="editableProfileModal" class="modal" style="display: flex;">
+                <div class="modal-content" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h2>Edit Profile</h2>
+                        <button class="modal-close" id="closeEditableProfileModal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editProfileForm">
+                            <div class="form-group">
+                                <label for="profileCoordinatorId">Coordinator ID:</label>
+                                <input type="text" id="profileCoordinatorId" value="${coordinatorData.COORDINATOR_ID}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="profileName">Name:</label>
+                                <input type="text" id="profileName" name="name" value="${coordinatorData.NAME || ''}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="profileEmail">Email:</label>
+                                <input type="email" id="profileEmail" name="email" value="${coordinatorData.EMAIL || ''}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="profileContact">Contact Number:</label>
+                                <input type="tel" id="profileContact" name="contact_number" value="${coordinatorData.CONTACT_NUMBER || ''}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="profileDepartment">Department:</label>
+                                <input type="text" id="profileDepartment" name="department" value="${coordinatorData.DEPARTMENT || ''}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="profilePicture">Profile Picture:</label>
+                                <input type="file" id="profilePicture" name="profile_picture" accept="image/*">
+                                <small style="color: #666;">Leave empty to keep current picture</small>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn-submit">Update Profile</button>
+                                <button type="button" id="changePasswordBtn" class="btn-secondary">Change Password</button>
+                                <button type="button" id="cancelProfileEdit" class="btn-cancel">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        $('body').append(html);
+        $("#editableProfileModal").hide().fadeIn();
+    }
+
+    // Close editable profile modal
+    $(document).on('click', '#closeEditableProfileModal, #cancelProfileEdit', function() {
+        $('#editableProfileModal').fadeOut(function() {
+            $(this).remove();
+        });
+    });
+
+    // Close modal when clicking outside
+    $(document).on('click', function(event) {
+        if ($(event.target).is('#editableProfileModal')) {
+            $('#editableProfileModal').fadeOut(function() {
+                $(this).remove();
+            });
+        }
+    });
+
+    // Handle profile form submission
+    $(document).on('submit', '#editProfileForm', function(e) {
+        e.preventDefault();
+
+        let formData = new FormData(this);
+        formData.append('action', 'updateCoordinatorDetails');
+        formData.append('coordinator_id', $('#profileCoordinatorId').val());
+
+        // Handle profile picture upload
+        let profilePicture = $('#profilePicture')[0].files[0];
+        if (profilePicture) {
+            formData.append('profile_picture', profilePicture);
+        }
+
+        $.ajax({
+            url: "ajaxhandler/attendanceAJAX.php",
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    alert("Profile updated successfully!");
+                    $('#editableProfileModal').fadeOut(function() {
+                        $(this).remove();
+                    });
+                } else {
+                    alert("Error updating profile: " + (response.message || "Unknown error"));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("Error updating profile:", error);
+                alert("Error updating profile. Please try again.");
+            }
+        });
+    });
+
+    // Change password button handler
+    $(document).on('click', '#changePasswordBtn', function() {
+        showChangePasswordModal();
+    });
+
+    // Function to show change password modal
+    function showChangePasswordModal() {
+        let html = `
+            <div id="changePasswordModal" class="modal" style="display: flex;">
+                <div class="modal-content" style="max-width: 400px;">
+                    <div class="modal-header">
+                        <h2>Change Password</h2>
+                        <button class="modal-close" id="closeChangePasswordModal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="changePasswordForm">
+                            <div class="form-group">
+                                <label for="currentPassword">Current Password:</label>
+                                <input type="password" id="currentPassword" name="current_password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword">New Password:</label>
+                                <input type="password" id="newPassword" name="new_password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirm New Password:</label>
+                                <input type="password" id="confirmPassword" name="confirm_password" required>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn-submit">Change Password</button>
+                                <button type="button" id="cancelPasswordChange" class="btn-cancel">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        $('body').append(html);
+        $("#changePasswordModal").hide().fadeIn();
+    }
+
+    // Close change password modal
+    $(document).on('click', '#closeChangePasswordModal, #cancelPasswordChange', function() {
+        $('#changePasswordModal').fadeOut(function() {
+            $(this).remove();
+        });
+    });
+
+    // Handle change password form submission
+    $(document).on('submit', '#changePasswordForm', function(e) {
+        e.preventDefault();
+
+        let currentPassword = $('#currentPassword').val();
+        let newPassword = $('#newPassword').val();
+        let confirmPassword = $('#confirmPassword').val();
+
+        if (newPassword !== confirmPassword) {
+            alert("New passwords do not match!");
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            alert("New password must be at least 6 characters long!");
+            return;
+        }
+
+        let coordinatorId = $('#hiddencdrid').val();
+
+        $.ajax({
+            url: "ajaxhandler/attendanceAJAX.php",
+            type: "POST",
+            dataType: "json",
+            data: {
+                action: 'verifyCoordinatorPassword',
+                coordinator_id: coordinatorId,
+                password: currentPassword
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Password verified, now update it
+                    $.ajax({
+                        url: "ajaxhandler/attendanceAJAX.php",
+                        type: "POST",
+                        dataType: "json",
+                        data: {
+                            action: 'updateCoordinatorPassword',
+                            coordinator_id: coordinatorId,
+                            new_password: newPassword
+                        },
+                        success: function(updateResponse) {
+                            if (updateResponse.success) {
+                                alert("Password changed successfully!");
+                                $('#changePasswordModal').fadeOut(function() {
+                                    $(this).remove();
+                                });
+                            } else {
+                                alert("Error changing password: " + (updateResponse.message || "Unknown error"));
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Error changing password:", error);
+                            alert("Error changing password. Please try again.");
+                        }
+                    });
+                } else {
+                    alert("Current password is incorrect!");
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("Error verifying password:", error);
+                alert("Error verifying current password. Please try again.");
+            }
+        });
+    });
+
     // Sidebar toggle button click handler
     $('#sidebarToggle').on('click', function() {
         $('.sidebar').toggleClass('sidebar-open');
+    });
+
+    // Click outside to close modals and sidebar
+    $(document).on('click', function(event) {
+        // Close coordinator details modal
+        if (!$(event.target).closest('#coordinatorDetailsModal .modal-content').length && !$(event.target).is('#btnProfile')) {
+            $('#coordinatorDetailsModal').fadeOut(function() {
+                $(this).remove();
+            });
+        }
+
+        // Close add student form
+        if (!$(event.target).closest('#addStudentForm').length && !$(event.target).is('.btnAdd')) {
+            $('#addStudentForm').fadeOut(function() {
+                $('#studentForm')[0].reset();
+                $('#studentForm input, #studentForm select').prop('disabled', false);
+            });
+        }
+
+        // Close add HTE form
+        if (!$(event.target).closest('#addHTEForm').length && !$(event.target).is('.btnAddHTE')) {
+            $('#addHTEForm').fadeOut();
+        }
+
+        // Close sidebar when clicking outside
+        if (!$(event.target).closest('.sidebar').length && !$(event.target).is('#sidebarToggle')) {
+            $('.sidebar').removeClass('sidebar-open');
+        }
+    });
+
+    // View All Students button click handler
+    $(document).on('click', '#btnViewAllStudents', function() {
+        let cdrid = $("#hiddencdrid").val();
+
+        if (!cdrid) {
+            alert("Coordinator ID not found.");
+            return;
+        }
+
+        $.ajax({
+            url: "ajaxhandler/attendanceAJAX.php",
+            type: "POST",
+            dataType: "json",
+            data: {cdrid: cdrid, action: "getAllStudentsUnderCoordinator"},
+            success: function(response) {
+                if (response.success) {
+                    displayAllStudents(response.data);
+                } else {
+                    alert("Error: " + (response.message || "Unknown error occurred."));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX error:", status, error);
+                alert("Error fetching students. Please check the console for more information.");
+            }
+        });
+    });
+
+    // Function to display all students under coordinator
+    function displayAllStudents(students) {
+        let tbodyHtml = '';
+
+        if (students && students.length > 0) {
+            students.forEach(student => {
+                tbodyHtml += `
+                    <tr>
+                        <td>${student.STUDENT_ID || ''}</td>
+                        <td>${student.NAME || ''}</td>
+                        <td>${student.AGE || ''}</td>
+                        <td>${student.GENDER || ''}</td>
+                        <td>${student.EMAIL || ''}</td>
+                        <td>${student.CONTACT_NUMBER || ''}</td>
+                        <td>${student.HTE_NAME || 'Not Assigned'}</td>
+                        <td>${student.SESSION_NAME || 'Not Assigned'}</td>
+                    </tr>
+                `;
+            });
+        } else {
+            tbodyHtml = `<tr><td colspan="8">No students found under this coordinator.</td></tr>`;
+        }
+
+        $('#allStudentsTableBody').html(tbodyHtml);
+        $('#allStudentsContainer').show();
+    }
+
+    // Close all students container
+    $(document).on('click', '#closeAllStudents', function() {
+        $('#allStudentsContainer').hide();
     });
 });
 
@@ -70,10 +523,17 @@ function loadSeassions()
                 let x=getSessionHTML(rv);
                 $("#ddlclass").html(x);
 
+                // Auto-select the first session if available
+                if (rv && rv.length > 0) {
+                    $("#ddlclass").val(rv[0].ID);
+                    // Trigger the change event to load HTEs for the selected session
+                    $("#ddlclass").trigger("change");
+                }
+
             }
         },
         error: function(xhr, status, error) {
-            
+
             alert("OOPS!");
         }
     });
@@ -149,10 +609,13 @@ function fetchTHE(cdrid,sessionid)
 }
 ///////
 
+
 function getStudentListHTML(studentList) {
     let x = `<div class="studentlist"><label>STUDENT LIST</label></div>`;
     if (studentList && studentList.length > 0) {
         x += `<div class="studentdetails header-row">`;
+        // Removed checkbox column header
+        // x += `<div class="select-area"><input type="checkbox" id="selectAll"></div>`;
         x += `<div class="rollno-area">Student ID</div>`;
         x += `<div class="name-area">Name</div>`;
         x += `<div class="delete-area"></div>`;
@@ -162,236 +625,66 @@ function getStudentListHTML(studentList) {
 
         studentList.forEach((cs, index) => {
             x += `<div class="studentdetails">`;
+            // Removed checkbox column for each student
+            // x += `<div class="select-area"><input type="checkbox" class="student-checkbox" data-studentid="${cs['INTERNS_ID']}"></div>`;
             x += `<div class="rollno-area">${cs['STUDENT_ID']}</div>`;
             x += `<div class="name-area">${cs['SURNAME']}</div>`;
-            
+
             // Delete button in separate column
             x += `<div class="delete-area">`;
             x += `<button class="btnDelete" data-studentid="${cs['INTERNS_ID']}">Delete</button>`;
             x += `</div>`;
-            
+
             // Convert time to AM/PM format for timein and timeout, or display '--:-- --' if empty
             const formatTime = (time) => {
                 if (!time) return '--:-- --'; // Return '--:-- --' if time is empty
-        
+
                 let [hours, minutes] = time.split(':');
                 let suffix = 'AM';
                 hours = parseInt(hours);
-        
+
                 if (hours >= 12) {
                     suffix = 'PM';
                     if (hours > 12) hours -= 12; // Convert to 12-hour format
                 } else if (hours === 0) {
                     hours = 12; // Midnight case
                 }
-        
+
                 return `${hours}:${minutes} ${suffix}`;
             };
-        
+
             x += `<div class="timein-area" data-studentid='${cs['INTERNS_ID']}'>`;
             x += `<span class="cbtimein">${formatTime(cs['timein'])}</span>`;
             x += `</div>`;
-            
+
             x += `<div class="timeout-area" data-studentid='${cs['INTERNS_ID']}'>`;
             x += `<span class="cbtimeout">${formatTime(cs['timeout'])}</span>`;
             x += `</div>`;
-            
+
             x += `</div>`; // close studentdetails div
         });
-        
+
     } else {
         x += `<p>No students found.</p>`;
     }
-        // Create the report button only (removed STUDENT, ADDHTE, DELETE buttons as they're in control panel)
+        // Create the report button only, removed assign button
         x += `<div class="reportsection">`;
-        x += `<button id="btnReport" class="common-button btnReport">REPORT</button>`;
+        // x += `<button id="btnAssign" class="common-button btnAssign">ASSIGN</button>`;
         x += `</div>`; // close reportsection div
-
-    // Add Student Form
-    x += generateAddStudentForm();
-
-    // Add HTE Form
-    x += generateAddHTEForm();
-
-    x += generateAddCoordinatorForm();
 
     return x;
 }
 
 
-function generateAddStudentForm() {
-    return `
-        <div id="addStudentForm" class="modal" style="display:none;">
-            <form id="studentForm" method="POST" enctype="multipart/form-data">
-                <h2>Add Student</h2>
-
-                <div class="form-group">
-                    <label for="studentId">Student ID:</label>
-                    <input type="text" id="studentId" name="studentId" required>
-                </div>
-                <div class="form-group">
-                    <label for="name">Name:</label>
-                    <input type="text" id="name" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label for="age">Age:</label>
-                    <input type="number" id="age" name="age" required>
-                </div>
-                <div class="form-group">
-                    <label for="gender">Gender:</label>
-                    <select id="gender" name="gender" required>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="contactNumber">Contact Number:</label>
-                    <input type="text" id="contactNumber" name="contactNumber" required>
-                </div>
-
-                <!-- New Section for CSV Upload -->
-                <div class="form-group">
-                    <label for="csvFile">Upload CSV File:</label>
-                    <input type="file" id="csvFile" name="csvFile" accept=".csv">
-                </div>
-
-                <button type="submit">Submit</button>
-                <button type="button" id="closeForm">Close</button>
-            </form>
-        </div>
-    `;
-}
 
 
-function generateAddHTEForm() {
-    return `
-        <div id="addHTEForm" class="modal" style="display:none;">
-            <form id="hteForm">
-                <h2>Add New HTE</h2>
-                <div class="form-group">
-                    <label for="hteName">Name:</label>
-                    <input type="text" id="hteName" name="NAME" required> <!-- Updated -->
-                </div>
-                <div class="form-group">
-                    <label for="hteIndustry">Industry:</label>
-                    <input type="text" id="hteIndustry" name="INDUSTRY" required> <!-- Updated -->
-                </div>
-                <div class="form-group">
-                    <label for="hteAddress">Address:</label>
-                    <input type="text" id="hteAddress" name="ADDRESS" required> <!-- Updated -->
-                </div>
-                <div class="form-group">
-                    <label for="hteEmail">Contact Email:</label>
-                    <input type="email" id="hteEmail" name="CONTACT_EMAIL" required> <!-- Updated -->
-                </div>
-                <div class="form-group">
-                    <label for="hteContactPerson">Contact Person:</label>
-                    <input type="text" id="hteContactPerson" name="CONTACT_PERSON" required> <!-- Updated -->
-                </div>
-                <div class="form-group">
-                    <label for="hteContactNumber">Contact Number:</label>
-                    <input type="text" id="hteContactNumber" name="CONTACT_NUMBER" required> <!-- Updated -->
-                </div>
-                <button type="submit">Submit</button>
-                <button type="button" id="closeHTEForm">Close</button>
-            </form>
-        </div>
-    `;
-}
-
-function generateCoordinatorDetailsHTML(data) {
-    return `
-        <div id="coordinatorDetailsModal" class="modal" style="display:block;">
-            <div class="modal-content">
-                <h2>Coordinator Details</h2>
-                <div class="form-group">
-                    <label>COORDINATOR ID:</label>
-                    <span>${data.COORDINATOR_ID}</span>
-                </div>
-                <div class="form-group">
-                    <label>Name:</label>
-                    <span>${data.NAME}</span>
-                </div>
-                <div class="form-group">
-                    <label>Email:</label>
-                    <span>${data.EMAIL}</span>
-                </div>
-                <div class="form-group">
-                    <label>Contact Number:</label>
-                    <span>${data.CONTACT_NUMBER}</span>
-                </div>
-                <div class="form-group">
-                    <label>Department:</label>
-                    <span>${data.DEPARTMENT}</span>
-                </div>
-                <button type="button" id="btnAddCoordinator" class="common-button">Add New Coordinator/Admin</button>
-                <button type="button" id="closeCoordinatorDetails">Close</button>
-            </div>
-        </div>
-    `;
-}
 
 
-function generateAddCoordinatorForm() {
-    return `
-        <div id="addCoordinatorForm" class="modal" style="display:none;">
-            <form id="coordinatorForm">
-                <h2>Add New Coordinator/Admin</h2>
-                <div class="form-group">
-                    <label for="coordinatorId">Coordinator ID:</label>
-                    <input type="text" id="coordinatorId" name="coordinatorId" placeholder="Enter Coordinator ID" required>
-                </div>
 
-                <div class="form-group">
-                    <label for="name">Name:</label>
-                    <input type="text" id="name1" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="email" id="email1" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="contactNumber">Contact Number:</label>
-                    <input type="text" id="contactNumber1" name="contactNumber" required>
-                </div>
-                <div class="form-group">
-                    <label for="department">Department:</label>
-                    <input type="text" id="department" name="department" required>
-                </div>
-                <div class="form-group">
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <div class="form-group">
-                    <label for="role">Role:</label>
-                    <select id="role" name="role" required>
-                        <option value="COORDINATOR">Coordinator</option>
-                        <option value="ADMIN">Admin</option>
-                    </select>
-                </div>
 
-                <!-- HTE Dropdown Container -->
-                <div id="hteDropdownContainer" style="display:none;">
-                    <label for="hteSelect">Select HTE:</label>
-                    <select id="hteSelect" name="hteId">
-                        <!-- HTE options will be populated here -->
-                    </select>
-                </div>
 
-                <button type="submit">ADD</button>
-                <button type="button" id="closeCoordinatorForm">Close</button>
-            </form>
-        </div>
-    `;
-}
+
+
 
 
 
@@ -819,66 +1112,6 @@ $(function(e)
         $(document).on("click", "#closeHTEForm", function(e) {
             $("#addHTEForm").fadeOut();
         });
-    });
-    
-    
-
-
-
-    $(document).ready(function() {
-
-        $(document).on("click", "#btnProfile", function() {
-            console.log("Button clicked");
-            let cdrid = $("#hiddencdrid").val();
-            console.log("CDRID:", cdrid);
-            
-            if (!cdrid) {
-                console.log("No CDRID found");
-                alert("Coordinator ID not found.");
-                return;
-            }
-    
-            $.ajax({
-                url: "ajaxhandler/attendanceAJAX.php",
-                type: "POST",
-                dataType: "json",
-                data: {cdrid: cdrid, action: "getCoordinatorDetails"},
-                success: function(response) {
-                    console.log("AJAX Success:", response);
-                    if (response.success) {
-                        displayCoordinatorDetails(response.data);
-                    } else {
-                        console.error("Error in response:", response.message);
-                        alert("Error: " + (response.message || "Unknown error occurred."));
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error("AJAX error:", status, error);
-                    console.log("Response Text:", xhr.responseText);
-                    alert("Error fetching coordinator details. Please check the console for more information.");
-                }
-            });
-        });
-    
-function displayCoordinatorDetails(coordinatorData) {
-            console.log("Displaying coordinator details:", coordinatorData);
-            
-            let html = generateCoordinatorDetailsHTML(coordinatorData);
-            // Remove the Add New Coordinator/Admin button from the HTML before appending
-            html = html.replace(/<button[^>]*id="btnAddCoordinator"[^>]*>.*?<\/button>/, '');
-            $('body').append(html);
-            
-        
-            $("#coordinatorDetailsModal").css("display", "flex").hide().fadeIn();
-        }
-    
-    
-        $(document).on("click", "#closeCoordinatorDetails", function() {
-            $("#coordinatorDetailsModal").fadeOut(function() {
-                $(this).remove();
-            });
-        });
-    });
 
 
     $(document).on("click", ".btnDelete", function() {
@@ -1005,25 +1238,6 @@ $(document).on("click", ".btnDeleteHTE", function () {
     }
 });
 
-$(document).ready(function() {
-    // Append the add coordinator form to the body
-    $('body').append(generateAddCoordinatorForm());
-
-    // Show the form when the button is clicked
-        $(document).on("click", "#btnAddCoordinator", function() {
-            $("#addCoordinatorForm").css("display", "flex").hide().fadeIn();
-            $("#coordinatorDetailsModal").fadeOut();
-            $("#coordinatorForm")[0].reset(); // Use native DOM reset method on the form
-        });
-
-    // Close the modal when the close button is clicked
-        $(document).on("click", "#closeCoordinatorForm", function() {
-            $("#addCoordinatorForm").fadeOut(function() {
-                $("#coordinatorForm")[0].reset();
-            });
-        });
-});
-
 
 
 
@@ -1092,5 +1306,183 @@ function fetchHTEOptions() {
         }
     });
 }
+
+// Select all checkboxes functionality
+$(document).on("change", "#selectAll", function() {
+    const isChecked = $(this).is(":checked");
+    $(".student-checkbox").prop("checked", isChecked);
+});
+
+// Assign button click handler
+$(document).on("click", "#btnAssign", function() {
+    const selectedStudents = [];
+    $(".student-checkbox:checked").each(function() {
+        selectedStudents.push($(this).data("studentid"));
+    });
+
+    if (selectedStudents.length === 0) {
+        alert("Please select at least one student to assign.");
+        return;
+    }
+
+    showAssignModal(selectedStudents);
+});
+
+// Function to show assign modal
+function showAssignModal(selectedStudents) {
+    const modalHTML = `
+        <div id="assignModal" class="modal" style="display:flex;">
+            <div class="modal-content">
+                <h3>Assign Students to Session and HTE</h3>
+                <form id="assignForm">
+                    <div class="form-group">
+                        <label for="assignSessionSelect">Select Session:</label>
+                        <select id="assignSessionSelect" name="sessionId" required>
+                            <option value="">Select Session</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignHTESelect">Select HTE:</label>
+                        <select id="assignHTESelect" name="hteId" required>
+                            <option value="">Select HTE</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-submit">Assign</button>
+                        <button type="button" id="closeAssignModal" class="btn-cancel">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+
+    $('body').append(modalHTML);
+    loadAssignSessionOptions();
+}
+
+// Load session options for assign modal
+function loadAssignSessionOptions() {
+    $.ajax({
+        url: "ajaxhandler/attendanceAJAX.php",
+        type: "POST",
+        dataType: "json",
+        data: {action: "getSession"},
+        success: function(response) {
+            if (response && response.length > 0) {
+                let options = '<option value="">Select Session</option>';
+                response.forEach(function(session) {
+                    const sessionId = session.ID;
+                    const sessionName = session.YEAR + " " + session.TERM;
+                    options += `<option value="${sessionId}">${sessionName}</option>`;
+                });
+                $('#assignSessionSelect').html(options);
+            } else {
+                alert("No sessions found. Please add a session first.");
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error loading sessions:", error);
+            alert("Error loading sessions. Please try again.");
+        }
+    });
+}
+
+// Load HTE options based on selected session for assign modal
+$(document).on("change", "#assignSessionSelect", function() {
+    const sessionId = $(this).val();
+    if (!sessionId) {
+        $('#assignHTESelect').html('<option value="">Select HTE</option>');
+        return;
+    }
+
+    const cdrid = $('#hiddencdrid').val();
+    $.ajax({
+        url: "ajaxhandler/attendanceAJAX.php",
+        type: "POST",
+        dataType: "json",
+        data: {cdrid: cdrid, sessionid: sessionId, action: "getHTE"},
+        success: function(response) {
+            if (response && response.length > 0) {
+                let options = '<option value="">Select HTE</option>';
+                response.forEach(function(hte) {
+                    options += `<option value="${hte.HTE_ID}">${hte.NAME} (${hte.INDUSTRY})</option>`;
+                });
+                $('#assignHTESelect').html(options);
+            } else {
+                $('#assignHTESelect').html('<option value="">No HTEs found for this session</option>');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error loading HTEs:", error);
+            alert("Error loading HTEs. Please try again.");
+        }
+    });
+});
+
+// Assign form submission
+$(document).on("submit", "#assignForm", function(e) {
+    e.preventDefault();
+
+    const sessionId = $('#assignSessionSelect').val();
+    const hteId = $('#assignHTESelect').val();
+    const selectedStudents = [];
+
+    $(".student-checkbox:checked").each(function() {
+        selectedStudents.push($(this).data("studentid"));
+    });
+
+    if (!sessionId || !hteId) {
+        alert("Please select both session and HTE.");
+        return;
+    }
+
+    if (selectedStudents.length === 0) {
+        alert("No students selected.");
+        return;
+    }
+
+    // Send assignment request
+    $.ajax({
+        url: "ajaxhandler/attendanceAJAX.php",
+        type: "POST",
+        dataType: "json",
+        data: {
+            action: "assignStudents",
+            studentIds: selectedStudents,
+            sessionId: sessionId,
+            hteId: hteId
+        },
+        success: function(response) {
+            if (response.success) {
+                alert("Students assigned successfully!");
+                $('#assignModal').remove();
+                // Refresh the student list
+                const cdrid = $('#hiddencdrid').val();
+                const ondate = $("#dtpondate").val();
+                fetchStudentList(currentSessionId, currentHteId, cdrid, ondate);
+            } else {
+                alert("Error assigning students: " + (response.message || "Unknown error"));
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error assigning students:", error);
+            alert("Error assigning students. Please try again.");
+        }
+    });
+});
+
+// Close assign modal
+$(document).on("click", "#closeAssignModal", function() {
+    $('#assignModal').remove();
+});
+
+// Close modal when clicking outside
+$(document).on("click", function(event) {
+    if ($(event.target).is('#assignModal')) {
+        $('#assignModal').remove();
+    }
+});
+
+});
 
 });

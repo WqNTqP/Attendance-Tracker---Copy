@@ -77,8 +77,150 @@ $(function(e) {
 
     // History filter
     $("#historyFilter").change(function() {
+        const selectedFilter = $(this).val();
+        loadAttendanceHistory();
+        if (selectedFilter === 'all') {
+            $("#yearFilter").show();
+            $("#monthFilter").show();
+            $("#clearFiltersBtn").show();
+            loadAvailableYears();
+            loadAvailableMonths();
+        } else {
+            $("#yearFilter").hide();
+            $("#monthFilter").hide();
+            $("#clearFiltersBtn").hide();
+        }
+    });
+
+    // Clear filters button
+    $("#clearFiltersBtn").click(function() {
+        // Clear only year and month filters, keep "all" filter active
+        $("#yearFilter").val('');
+        $("#monthFilter").val('');
+
+        // Clear current month to prevent auto-selection
+        window.currentMonth = null;
+
+        // Reload attendance history with cleared year/month but keep "all" filter
         loadAttendanceHistory();
     });
+
+    // Year filter
+    $("#yearFilter").change(function() {
+        const selectedYear = $(this).val();
+        loadAvailableMonths(selectedYear);
+        if (window.currentMonth) {
+            window.currentMonth.setFullYear(parseInt(selectedYear));
+        }
+        loadAttendanceHistory();
+    });
+
+    // Month filter
+    $("#monthFilter").change(function() {
+        const selectedMonth = $(this).val();
+        if (selectedMonth) {
+            // Month-only format: "MM" (1-12)
+            const month = parseInt(selectedMonth);
+            // Use the selected year from yearFilter, or current year if no year selected
+            const selectedYear = $("#yearFilter").val() || new Date().getFullYear();
+            window.currentMonth = new Date(parseInt(selectedYear), month - 1, 1);
+        } else {
+            // Clear label if no selection
+        }
+        loadAttendanceHistory();
+    });
+
+
+
+    // Update label on page load after months are loaded
+    function updateMonthNavigationDisplay() {
+        if (window.currentMonth === undefined) {
+            window.currentMonth = new Date();
+        }
+
+        if (window.currentMonth) {
+            const monthNames = [
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ];
+
+            const currentMonthName = monthNames[window.currentMonth.getMonth()];
+            const currentYear = window.currentMonth.getFullYear();
+
+            // Update the month display if there's an element for it
+            if ($("#currentMonthDisplay").length > 0) {
+                $("#currentMonthDisplay").text(`${currentMonthName} ${currentYear}`);
+            }
+
+            // Update the selected month label as well
+            updateSelectedMonthLabel(window.currentMonth);
+        }
+    }
+
+    // Function to update the selected month label in the dropdown
+    function updateSelectedMonthLabel(currentMonth) {
+        if (!currentMonth) {
+            console.log("No current month provided to updateSelectedMonthLabel");
+            return;
+        }
+
+        const monthFilter = $("#monthFilter");
+        if (monthFilter.length === 0) {
+            console.log("Month filter element not found");
+            return;
+        }
+
+        // Get the month value (1-based)
+        const monthValue = (currentMonth.getMonth() + 1).toString();
+
+        // Set the selected value in the month filter dropdown
+        monthFilter.val(monthValue);
+
+        console.log(`Updated month filter to show month: ${monthValue} (${currentMonth.toLocaleString('default', { month: 'long' })})`);
+    }
+
+    function loadAvailableMonths(year) {
+        console.log("loadAvailableMonths called with year:", year);
+        const monthFilter = $("#monthFilter");
+        console.log("Month filter element:", monthFilter);
+        monthFilter.empty(); // Clear existing options
+
+        // Add a default option
+        monthFilter.append('<option value="">Select Month</option>');
+
+        const currentYear = new Date().getFullYear();
+
+        // Always show all 12 months regardless of current date or database records
+        for (let month = 1; month <= 12; month++) {
+            let monthValue, monthName;
+            if (year) {
+                // If year is selected, include year in value
+                monthValue = `${year}-${month.toString().padStart(2, '0')}`;
+                monthName = new Date(year, month - 1, 1).toLocaleString('default', { month: 'long' });
+                monthFilter.append(`<option value="${monthValue}">${monthName} ${year}</option>`);
+            } else {
+                // If no year selected, use month-only value
+                monthValue = `${month.toString().padStart(2, '0')}`;
+                monthName = new Date(currentYear, month - 1, 1).toLocaleString('default', { month: 'long' });
+                monthFilter.append(`<option value="${monthValue}">${monthName}</option>`);
+            }
+        }
+
+        console.log("Month filter options after population:", monthFilter.html());
+        // Make sure the filter is visible
+        monthFilter.show();
+
+        // Set the current month as selected unconditionally to ensure dropdown shows current month
+        if (window.currentMonth) {
+            const year = window.currentMonth.getFullYear();
+            const month = window.currentMonth.getMonth() + 1; // 1-based
+            const monthValue = `${year}-${month.toString().padStart(2, '0')}`;
+            monthFilter.val(monthValue);
+            updateSelectedMonthLabel(window.currentMonth);
+        }
+    }
+
+
 
     // Update date every minute
     setInterval(updateCurrentDate, 60000);
@@ -127,6 +269,11 @@ $(function(e) {
 
     // Call updateUserNameDisplay on document ready
     updateUserNameDisplay();
+
+    // Initialize year filter on page load if history filter is 'all'
+    if ($("#historyFilter").val() === 'all') {
+        loadAvailableYears();
+    }
 });
 
 // Dashboard Statistics
@@ -302,22 +449,56 @@ function loadAttendanceStatus() {
 
 function updateAttendanceUI(data) {
     console.log("Updating UI with data:", data);
-    
+
     // Reset buttons
     $("#timeInButton").prop('disabled', false);
     $("#timeOutButton").prop('disabled', false);
     $("#todayStatusBadge").text("Not Checked In").removeClass("present checked-in").addClass("pending");
-    
+
     if (data.TIMEIN) {
-        $("#timeInDisplay").text(data.TIMEIN);
+        $("#timeInDisplay").text(convertTo12HourFormat(data.TIMEIN));
         $("#timeInButton").prop('disabled', true);
-        $("#todayStatusBadge").text("Checked In").removeClass("pending").addClass("checked-in");
+
+        // Determine if on time or late based on TIMEIN (On Time up to 08:00:59)
+        const timeInParts = data.TIMEIN.split(':');
+        const hours = parseInt(timeInParts[0]);
+        const minutes = parseInt(timeInParts[1]);
+        const isLate = hours > 8 || (hours === 8 && minutes > 0);
+
+        if (isLate) {
+            $("#todayStatusBadge").text("Late - Checked In").removeClass("pending").addClass("checked-in");
+        } else {
+            $("#todayStatusBadge").text("On Time - Checked In").removeClass("pending").addClass("checked-in");
+        }
     }
     if (data.TIMEOUT) {
-        $("#timeOutDisplay").text(data.TIMEOUT);
+        $("#timeOutDisplay").text(convertTo12HourFormat(data.TIMEOUT));
         $("#timeOutButton").prop('disabled', true);
-        $("#todayStatusBadge").text("Present").removeClass("checked-in").addClass("present");
+
+        // Determine if on time or late based on TIMEIN for Present status
+        const timeInParts = data.TIMEIN.split(':');
+        const hours = parseInt(timeInParts[0]);
+        const minutes = parseInt(timeInParts[1]);
+        const isLate = hours > 8 || (hours === 8 && minutes > 0);
+
+        if (isLate) {
+            $("#todayStatusBadge").text("Late - Present").removeClass("checked-in").addClass("present");
+        } else {
+            $("#todayStatusBadge").text("On Time - Present").removeClass("checked-in").addClass("present");
+        }
     }
+}
+
+// Helper function to convert 24-hour time string to 12-hour format with AM/PM
+function convertTo12HourFormat(timeString) {
+    if (!timeString || timeString === '--:--') return '--:--';
+
+    const [hours, minutes, seconds] = timeString.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12; // Convert 0 to 12 for midnight
+
+    return `${hour12}:${minutes} ${ampm}`;
 }
 
 function checkAndResetAttendance() {
@@ -402,21 +583,56 @@ function loadCurrentWeek() {
 function loadAttendanceHistory() {
     const studentId = $("#hiddenStudentId").val();
     const filter = $("#historyFilter").val();
+    const selectedMonth = $("#monthFilter").val();
     let startDate, endDate;
 
     const currentDate = new Date();
-    if (filter === 'week') {
+
+    if (filter === 'all' && window.currentMonth) {
+        // Use window.currentMonth for date range when navigating months
+        startDate = new Date(window.currentMonth.getFullYear(), window.currentMonth.getMonth(), 1);
+        endDate = new Date(window.currentMonth.getFullYear(), window.currentMonth.getMonth() + 1, 0);
+    } else if (filter === 'week') {
         startDate = new Date(currentDate);
-        startDate.setDate(currentDate.getDate() - currentDate.getDay());
+        startDate.setDate(currentDate.getDate() - currentDate.getDay() + 1);
         endDate = new Date(startDate);
         endDate.setDate(startDate.getDate() + 6);
+    } else if (filter === 'lastweek') {
+        startDate = new Date(currentDate);
+        startDate.setDate(currentDate.getDate() - currentDate.getDay() - 6);
+        endDate = new Date(currentDate);
+        endDate.setDate(currentDate.getDate() - currentDate.getDay());
     } else if (filter === 'month') {
         startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
         endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    } else if (filter === 'lastmonth') {
+        startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+        endDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
+    } else if (filter === 'all' && selectedMonth) {
+        // Month is now always in format "MM" (1-12), combine with selected year
+        const month = parseInt(selectedMonth);
+        const selectedYear = $("#yearFilter").val() || new Date().getFullYear();
+        startDate = new Date(parseInt(selectedYear), month - 1, 1);
+        endDate = new Date(parseInt(selectedYear), month, 0);
+        // Set the monthFilter dropdown to show the selected month
+        $("#monthFilter").val(selectedMonth);
     } else {
         // All time - use a very old date and future date
-        startDate = new Date(2000, 0, 1);
+        const earliestYear = window.earliestAttendanceYear || 2000; // Fallback to 2000 if not set
+        startDate = new Date(earliestYear, 0, 1);
         endDate = new Date(2100, 0, 1);
+        // Reset the monthFilter dropdown to default
+        $("#monthFilter").val('');
+    }
+
+    // Show/hide month filter based on filter
+    if (filter === 'all') {
+        $("#monthFilter").show();
+        $("#attendanceHistoryArea").addClass("alltime-filter-active");
+        loadAvailableMonths();
+    } else {
+        $("#monthFilter").hide();
+        $("#attendanceHistoryArea").removeClass("alltime-filter-active");
     }
 
     $.ajax({
@@ -434,14 +650,26 @@ function loadAttendanceHistory() {
                 let html = `
                     <div class="history-header">
                         <h3>Attendance History</h3>
-                        <span class="filter-badge">${filter === 'week' ? 'This Week' : filter === 'month' ? 'This Month' : 'All Time'}</span>
+                        <span class="filter-badge">${filter === 'week' ? 'This Week' : filter === 'lastweek' ? 'Last Week' : filter === 'month' ? 'This Month' : filter === 'lastmonth' ? 'Last Month' : 'All Time'}</span>
                     </div>
                 `;
                 
                 if (response.data.length > 0) {
                     html += `<div class="history-cards">`;
-                    
+
                     response.data.forEach(record => {
+                        // Check if this is a month header record
+                        if (record.month_header) {
+                            html += `
+                                <div class="month-header">
+                                    <h4>${record.month_header}</h4>
+                                    <span class="record-count">${record.record_count} record${record.record_count !== 1 ? 's' : ''}</span>
+                                </div>
+                                <hr class="month-separator" />
+                            `;
+                            return; // Skip to next record
+                        }
+
                         const recordDate = new Date(record.ON_DATE);
                         const formattedDate = recordDate.toLocaleDateString('en-PH', {
                             year: 'numeric', month: 'long', day: 'numeric'
@@ -451,21 +679,35 @@ function loadAttendanceHistory() {
                         });
                         const formattedTimeIn = record.TIMEIN ? formatTimeToPH(record.TIMEIN) : '--:--';
                         const formattedTimeOut = record.TIMEOUT ? formatTimeToPH(record.TIMEOUT) : '--:--';
-                        const status = record.TIMEIN && record.TIMEOUT ? 'Present' : record.TIMEIN ? 'Checked In' : 'Absent';
-                        
-                        // Determine status class and icon
+
+                        // Handle status display with timing information
+                        let statusDisplay = '';
                         let statusClass = '';
                         let statusIcon = '';
-                        if (status === 'Present') {
-                            statusClass = 'status-present';
-                            statusIcon = 'fa-check-circle';
-                        } else if (status === 'Checked In') {
+
+                        if (record.TIMEIN && record.TIMEOUT) {
+                            // Determine if on time or late based on TIMEIN (On Time up to 08:00:59)
+                            const timeInParts = record.TIMEIN.split(':');
+                            const hours = parseInt(timeInParts[0]);
+                            const minutes = parseInt(timeInParts[1]);
+                            const seconds = parseInt(timeInParts[2]);
+                            const isLate = hours > 8 || (hours === 8 && minutes > 0);
+
+                            if (isLate) {
+                                statusDisplay = '<span class="status-present-text">Present</span> <span class="status-timing status-late">Late</span>';
+                                statusClass = 'status-present';
+                                statusIcon = 'fa-check-circle';
+                            } else {
+                                statusDisplay = '<span class="status-present-text">Present</span> <span class="status-timing status-on-time">On Time</span>';
+                                statusClass = 'status-present';
+                                statusIcon = 'fa-check-circle';
+                            }
+                        } else if (record.TIMEIN) {
+                            statusDisplay = '<span class="status-present-text">Checked In</span>';
                             statusClass = 'status-checked-in';
                             statusIcon = 'fa-clock';
-                        } else {
-                            statusClass = 'status-absent';
-                            statusIcon = 'fa-times-circle';
                         }
+                        // No status display for records with no attendance data
 
                         html += `
                             <div class="history-card ${statusClass}">
@@ -487,7 +729,7 @@ function loadAttendanceHistory() {
                                 </div>
                                 <div class="history-status">
                                     <i class="fas ${statusIcon}"></i>
-                                    <span>${status}</span>
+                                    <span>${statusDisplay}</span>
                                 </div>
                             </div>
                         `;
@@ -1448,6 +1690,78 @@ function submitFinalReport() {
                 $("#submitReportBtn").text('Submit Report').prop('disabled', false);
             }
         });
+    }
+}
+
+
+
+function loadAvailableYears() {
+    const yearFilter = $("#yearFilter");
+    yearFilter.empty(); // Clear existing options
+
+    // Add a default option
+    yearFilter.append('<option value="">Select Year</option>');
+
+    // Fetch the earliest year from the database
+    $.ajax({
+        url: "ajaxhandler/studentDashboardAjax.php",
+        type: "POST",
+        dataType: "json",
+        data: {
+            action: "getEarliestAttendanceYear"
+        },
+        success: function(response) {
+            if (response.status === "success") {
+                window.earliestAttendanceYear = parseInt(response.data.earliest_year);
+                const currentYear = new Date().getFullYear();
+
+                // Generate years from current year back to the earliest year
+                for (let year = currentYear; year >= window.earliestAttendanceYear; year--) {
+                    yearFilter.append(`<option value="${year}">${year}</option>`);
+                }
+            } else {
+                console.error("Error fetching earliest attendance year:", response.message);
+                // Fallback to current year only if API fails
+                const currentYear = new Date().getFullYear();
+                window.earliestAttendanceYear = currentYear;
+                yearFilter.append(`<option value="${currentYear}">${currentYear}</option>`);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error fetching earliest attendance year:", error);
+            // Fallback to current year only if AJAX fails
+            const currentYear = new Date().getFullYear();
+            window.earliestAttendanceYear = currentYear;
+            yearFilter.append(`<option value="${currentYear}">${currentYear}</option>`);
+        }
+    });
+}
+
+function loadAvailableMonths(year) {
+    console.log("loadAvailableMonths called with year:", year);
+    const monthFilter = $("#monthFilter");
+    console.log("Month filter element:", monthFilter);
+    monthFilter.empty(); // Clear existing options
+
+    // Add a default option
+    monthFilter.append('<option value="">Select Month</option>');
+
+    // Always show all 12 months regardless of current date or database records
+    for (let month = 1; month <= 12; month++) {
+        // Use month-only value (1-12) regardless of year selection
+        const monthValue = month.toString();
+        const monthName = new Date(2000, month - 1, 1).toLocaleString('default', { month: 'long' });
+        monthFilter.append(`<option value="${monthValue}">${monthName}</option>`);
+    }
+
+    console.log("Month filter options after population:", monthFilter.html());
+    // Make sure the filter is visible
+    monthFilter.show();
+
+    // Set the current month as selected unconditionally to ensure dropdown shows current month
+    if (window.currentMonth) {
+        const month = window.currentMonth.getMonth() + 1; // 1-based
+        monthFilter.val(month.toString());
     }
 }
 

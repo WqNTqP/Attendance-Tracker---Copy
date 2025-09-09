@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 03, 2025 at 05:48 AM
+-- Generation Time: Sep 05, 2025 at 10:25 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -46,7 +46,7 @@ CREATE TABLE `coordinator` (
 
 INSERT INTO `coordinator` (`COORDINATOR_ID`, `NAME`, `EMAIL`, `CONTACT_NUMBER`, `DEPARTMENT`, `USERNAME`, `PASSWORD`, `ROLE`, `PROFILE`, `HTE_ID`) VALUES
 (123, 'ch', 'kim69@gmail.com', '09513762404', 'it', 'test', 'test', 'COORDINATOR', NULL, NULL),
-(59828994, 'Kim Charles', 'shadowd6163@gmail.com', '09513762404', 'IT', 'shadow', '123456', 'ADMIN', '68b1991cc6ef8_59828994.jpg', 1),
+(59828994, 'Kim Charles', 'shadowd6163@gmail.com', '09513762404', 'IT', 'shadow', '123456', 'ADMIN', '68b9682366dc5_59828994.jpg', 1),
 (59828996, 'KIM CHARLES', 'kimcharles.emping@hcdc.edu.ph', '09513762404', 'IT_DEPARTMENT', 'kimcharles', 'test1', 'COORDINATOR', NULL, NULL),
 (59828999, 'superadmin', 'superadmin@gmail.com', '09513762404', 'IT', 'super', 'admin', 'SUPERADMIN', NULL, NULL);
 
@@ -133,7 +133,9 @@ INSERT INTO `interns_attendance` (`COORDINATOR_ID`, `HTE_ID`, `ID`, `INTERNS_ID`
 (59828996, 1, 1, 190, '2025-08-26', '10:52:00', '20:52:00'),
 (59828996, 1, 1, 190, '2025-08-27', '11:02:00', '12:02:00'),
 (59828996, 1, 1, 190, '2025-08-28', '08:00:00', '14:09:00'),
-(59828996, 1, 1, 190, '2025-08-29', '11:25:00', '11:25:00');
+(59828996, 1, 1, 190, '2025-08-29', '08:16:00', '11:25:00'),
+(59828996, 1, 1, 190, '2025-09-04', '12:52:00', '12:52:00'),
+(59828996, 3, 2, 259, '2025-09-04', '18:23:00', '18:24:00');
 
 -- --------------------------------------------------------
 
@@ -203,7 +205,7 @@ INSERT INTO `interns_details` (`INTERNS_ID`, `STUDENT_ID`, `NAME`, `SURNAME`, `A
 (252, 59823608, 'Kylie', 'Campbell', 24, 'FEMALE', 'Kylie@hcdc.edu.ph', NULL, '\'09823261752\'', NULL),
 (253, 59823609, 'Ken', 'Parker', 22, 'MALE', 'Ken@hcdc.edu.ph', NULL, '\'09823261753\'', NULL),
 (254, 59823610, 'Maya', 'Evans', 23, 'FEMALE', 'Maya@hcdc.edu.ph', NULL, '\'09823261754\'', NULL),
-(259, 598289964, 'Ako', 'Emping', 61, 'Male', 'kim69@gmail.com', NULL, '09513762404', NULL);
+(259, 598289964, 'Ako', 'Emping', 61, 'Male', 'kim69@gmail.com', '123456', '09513762404', NULL);
 
 --
 -- Triggers `interns_details`
@@ -306,7 +308,10 @@ INSERT INTO `pending_attendance` (`ID`, `INTERNS_ID`, `HTE_ID`, `ON_DATE`, `TIME
 (45, 190, 1, '2025-08-26', '10:52:00', '10:52:00', 'approved'),
 (46, 190, 1, '2025-08-27', '11:02:00', '11:02:00', 'approved'),
 (50, 190, 1, '2025-08-28', '14:09:00', '14:09:00', 'approved'),
-(51, 190, 1, '2025-08-29', '11:25:00', '11:25:00', 'approved');
+(51, 190, 1, '2025-08-29', '11:25:00', '11:25:00', 'approved'),
+(54, 190, 1, '2025-09-04', '12:52:00', '12:52:00', 'approved'),
+(55, 259, 3, '2025-09-04', '18:23:00', '18:24:00', 'approved'),
+(60, 190, 1, '2025-09-05', '16:22:00', NULL, 'pending');
 
 -- --------------------------------------------------------
 
@@ -327,11 +332,11 @@ CREATE TABLE `report_images` (
 --
 
 INSERT INTO `report_images` (`image_id`, `report_id`, `image_filename`, `day_of_week`, `uploaded_at`) VALUES
-(81, 4, '68b6cecc4edae_1756810956_monday.jpg', 'monday', '2025-09-03 03:27:19'),
-(82, 4, '68b67ef92f8ee_1756790521_tuesday.jpg', 'tuesday', '2025-09-03 03:27:19'),
-(83, 4, '68b6cfd63a7ea_1756811222_wednesday.jpg', 'wednesday', '2025-09-03 03:27:19'),
-(84, 4, '68b67ef9302e7_1756790521_thursday.jpg', 'thursday', '2025-09-03 03:27:19'),
-(85, 4, '68b6c59bbd60a_1756808603_friday.jpg', 'friday', '2025-09-03 03:27:19');
+(130, 4, '68b81644996d0_1756894788_monday.jpg', 'monday', '2025-09-03 10:21:17'),
+(131, 4, '68b816449a1f6_1756894788_tuesday.jpg', 'tuesday', '2025-09-03 10:21:17'),
+(132, 4, '68b816449ab57_1756894788_wednesday.jpg', 'wednesday', '2025-09-03 10:21:17'),
+(133, 4, '68b816449b32f_1756894788_thursday.jpg', 'thursday', '2025-09-03 10:21:17'),
+(134, 4, '68b816449ba0b_1756894788_friday.jpg', 'friday', '2025-09-03 10:21:17');
 
 -- --------------------------------------------------------
 
@@ -403,6 +408,9 @@ CREATE TABLE `weekly_reports` (
   `week_start` date NOT NULL,
   `week_end` date NOT NULL,
   `report_content` text DEFAULT NULL,
+  `challenges_faced` text DEFAULT NULL,
+  `lessons_learned` text DEFAULT NULL,
+  `goals_next_week` text DEFAULT NULL,
   `status` enum('draft','submitted') DEFAULT 'draft',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
@@ -412,8 +420,8 @@ CREATE TABLE `weekly_reports` (
 -- Dumping data for table `weekly_reports`
 --
 
-INSERT INTO `weekly_reports` (`report_id`, `interns_id`, `week_start`, `week_end`, `report_content`, `status`, `created_at`, `updated_at`) VALUES
-(4, 190, '2025-09-01', '2025-09-07', '{\"monday\":\"Monday\",\"tuesday\":\"Tuesday\",\"wednesday\":\"Wednesday\",\"thursday\":\"Thursday\",\"friday\":\"Friday\"}', 'submitted', '2025-09-01 06:56:44', '2025-09-03 03:27:19');
+INSERT INTO `weekly_reports` (`report_id`, `interns_id`, `week_start`, `week_end`, `report_content`, `challenges_faced`, `lessons_learned`, `goals_next_week`, `status`, `created_at`, `updated_at`) VALUES
+(4, 190, '2025-09-01', '2025-09-07', '[]', 'Challenges=============================================================================================================================================================================================================================================================================================================================================================================================================', 'Lessons', 'Goals', 'submitted', '2025-09-01 06:56:44', '2025-09-05 05:02:50');
 
 --
 -- Indexes for dumped tables
@@ -507,7 +515,7 @@ ALTER TABLE `weekly_reports`
 -- AUTO_INCREMENT for table `coordinator`
 --
 ALTER TABLE `coordinator`
-  MODIFY `COORDINATOR_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59829000;
+  MODIFY `COORDINATOR_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=123456791;
 
 --
 -- AUTO_INCREMENT for table `host_training_establishment`
@@ -525,13 +533,13 @@ ALTER TABLE `interns_details`
 -- AUTO_INCREMENT for table `pending_attendance`
 --
 ALTER TABLE `pending_attendance`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
 
 --
 -- AUTO_INCREMENT for table `report_images`
 --
 ALTER TABLE `report_images`
-  MODIFY `image_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
+  MODIFY `image_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=135;
 
 --
 -- AUTO_INCREMENT for table `session_details`

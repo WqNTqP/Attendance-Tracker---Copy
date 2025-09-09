@@ -285,8 +285,8 @@ switch ($action) {
         }
 
         try {
-            // Base query to fetch attendance for the student
-            $query = "SELECT * FROM interns_attendance WHERE INTERNS_ID = ?";
+            // Base query to fetch attendance for the student (one record per date with latest times)
+            $query = "SELECT ON_DATE, MAX(TIMEIN) as TIMEIN, MAX(TIMEOUT) as TIMEOUT FROM interns_attendance WHERE INTERNS_ID = ?";
             $params = [$studentId];
 
             // Check if startDate and endDate are provided and add to query
@@ -296,7 +296,7 @@ switch ($action) {
                 $params[] = $endDate;
             }
 
-            $query .= " ORDER BY ON_DATE DESC";
+            $query .= " GROUP BY ON_DATE ORDER BY ON_DATE DESC";
 
             // Execute the query
             $stmt = $dbo->conn->prepare($query);
@@ -305,20 +305,56 @@ switch ($action) {
             // Fetch results
             $attendanceHistory = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Also check pending attendance for today
-            $today = date('Y-m-d');
+            // Also check pending attendance for the date range (one record per date with latest times)
             $stmtPending = $dbo->conn->prepare("
-                SELECT ON_DATE, TIMEIN, TIMEOUT, STATUS 
-                FROM pending_attendance 
-                WHERE INTERNS_ID = ? AND ON_DATE = ? AND STATUS = 'approved'
+                SELECT ON_DATE, MAX(TIMEIN) as TIMEIN, MAX(TIMEOUT) as TIMEOUT
+                FROM pending_attendance
+                WHERE INTERNS_ID = ? AND STATUS = 'approved'
+                " . ($startDate && $endDate ? "AND ON_DATE BETWEEN ? AND ?" : "") . "
+                GROUP BY ON_DATE ORDER BY ON_DATE DESC
             ");
-            $stmtPending->execute([$studentId, $today]);
-            $pendingToday = $stmtPending->fetch(PDO::FETCH_ASSOC);
-
-            // Merge results if there's approved pending attendance for today
-            if ($pendingToday) {
-                $attendanceHistory = array_merge([$pendingToday], $attendanceHistory);
+            $paramsPending = [$studentId];
+            if ($startDate && $endDate) {
+                $paramsPending[] = $startDate;
+                $paramsPending[] = $endDate;
             }
+            $stmtPending->execute($paramsPending);
+            $pendingRecords = $stmtPending->fetchAll(PDO::FETCH_ASSOC);
+
+            // Merge pending records with main attendance history, avoiding duplicates by date
+            if (!empty($pendingRecords)) {
+                $existingDates = [];
+                foreach ($attendanceHistory as $record) {
+                    $existingDates[$record['ON_DATE']] = true;
+                }
+
+                foreach ($pendingRecords as $pending) {
+                    if (!isset($existingDates[$pending['ON_DATE']])) {
+                        $attendanceHistory[] = $pending;
+                        $existingDates[$pending['ON_DATE']] = true;
+                    }
+                }
+            }
+
+            // Sort the entire attendanceHistory descending by ON_DATE and TIMEIN
+            usort($attendanceHistory, function($a, $b) {
+                // Handle null ON_DATE (month headers) by placing them at the start
+                if ($a['ON_DATE'] === null) return -1;
+                if ($b['ON_DATE'] === null) return 1;
+
+                // Compare dates first (descending)
+                $dateCompare = strcmp($b['ON_DATE'], $a['ON_DATE']);
+                if ($dateCompare !== 0) {
+                    return $dateCompare;
+                }
+
+                // If dates are same, compare TIMEIN (descending), handle nulls
+                $timeA = $a['TIMEIN'] ?? '00:00:00';
+                $timeB = $b['TIMEIN'] ?? '00:00:00';
+                return strcmp($timeB, $timeA);
+            });
+
+            // Records are already sorted by date descending, no need for month grouping
 
             // Return results
             sendResponse('success', $attendanceHistory, 'Attendance history retrieved successfully');
@@ -405,6 +441,26 @@ switch ($action) {
         } catch (Exception $e) {
             logError("Error retrieving current week dates: " . $e->getMessage());
             sendResponse('error', null, 'Error retrieving current week dates');
+        }
+        break;
+
+    case "getEarliestAttendanceYear":
+        try {
+            // Get the earliest year from attendance records
+            $stmt = $dbo->conn->prepare("
+                SELECT MIN(YEAR(ON_DATE)) as earliest_year
+                FROM interns_attendance
+                WHERE ON_DATE IS NOT NULL
+            ");
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            $earliestYear = $result['earliest_year'] ?? date('Y');
+
+            sendResponse('success', ['earliest_year' => $earliestYear], 'Earliest attendance year retrieved successfully');
+        } catch (Exception $e) {
+            logError("Error retrieving earliest attendance year: " . $e->getMessage());
+            sendResponse('error', null, 'Error retrieving earliest attendance year');
         }
         break;
 

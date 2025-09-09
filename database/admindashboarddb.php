@@ -1,4 +1,11 @@
-<?php 
+<?php
+// Configure session to work across different hostnames/IPs
+ini_set('session.cookie_domain', '');
+ini_set('session.cookie_path', '/');
+ini_set('session.cookie_secure', false); // Set to true if using HTTPS
+ini_set('session.cookie_httponly', true);
+ini_set('session.use_only_cookies', true);
+
 // Start the session
 session_start();
 
@@ -58,11 +65,9 @@ if(isset($_SESSION["admin_user"])) {
 
         // Fetch attendance records for these students (today only) - Statistics
         $stmt = $dbo->conn->prepare("
-            SELECT 
+            SELECT
                 COUNT(CASE WHEN TIMEIN IS NOT NULL AND TIMEOUT IS NOT NULL AND TIMEIN <= '08:00:59' THEN 1 END) AS on_time,
-                COUNT(CASE WHEN TIMEIN IS NOT NULL AND TIMEOUT IS NOT NULL AND TIMEIN > '08:00:59' AND TIMEIN < '08:15:00' THEN 1 END) AS late,
-                COUNT(CASE WHEN (TIMEIN IS NOT NULL AND TIMEOUT IS NOT NULL AND TIMEIN >= '08:15:00') THEN 1 END) + 
-                COUNT(CASE WHEN (TIMEIN IS NULL AND TIMEOUT IS NULL) THEN 1 END) AS absent
+                COUNT(CASE WHEN TIMEIN IS NOT NULL AND TIMEOUT IS NOT NULL AND TIMEIN > '08:00:59' AND TIMEIN <= '16:00:00' THEN 1 END) AS late
             FROM interns_attendance
             WHERE HTE_ID = :hteId AND ON_DATE = CURDATE()
         ");
@@ -71,17 +76,16 @@ if(isset($_SESSION["admin_user"])) {
 
         // Fetch detailed attendance lists for today
         $stmt = $dbo->conn->prepare("
-            SELECT 
+            SELECT
                 id.INTERNS_ID,
                 id.STUDENT_ID,
                 CONCAT(id.SURNAME, ' ', LEFT(id.NAME, 1), '.') as SURNAME,
                 ia.TIMEIN,
                 ia.TIMEOUT,
-                CASE 
+                CASE
                     WHEN ia.TIMEIN IS NOT NULL AND ia.TIMEOUT IS NOT NULL AND ia.TIMEIN <= '08:00:59' THEN 'On Time'
-                    WHEN ia.TIMEIN IS NOT NULL AND ia.TIMEOUT IS NOT NULL AND ia.TIMEIN > '08:00:59' AND ia.TIMEIN < '08:15:00' THEN 'Late'
-                    WHEN (ia.TIMEIN IS NOT NULL AND ia.TIMEOUT IS NOT NULL AND ia.TIMEIN >= '08:15:00') THEN 'Absent'
-                    WHEN (ia.TIMEIN IS NULL AND ia.TIMEOUT IS NULL) THEN 'Absent'
+                    WHEN ia.TIMEIN IS NOT NULL AND ia.TIMEOUT IS NOT NULL AND ia.TIMEIN > '08:00:59' AND ia.TIMEIN <= '16:00:00' THEN 'Late'
+                    ELSE 'Present'
                 END as status
             FROM interns_attendance ia
             JOIN interns_details id ON ia.INTERNS_ID = id.INTERNS_ID
@@ -91,17 +95,14 @@ if(isset($_SESSION["admin_user"])) {
         $stmt->execute([':hteId' => $hteId]);
         $attendanceDetails = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Separate the details into on time, present, absent, and late lists
+        // Separate the details into on time, present, and late lists
         $onTimeList = array_filter($attendanceDetails, function($record) {
             return $record['status'] === 'On Time';
         });
         $lateList = array_filter($attendanceDetails, function($record) {
             return $record['status'] === 'Late';
         });
-        $absentList = array_filter($attendanceDetails, function($record) {
-            return $record['status'] === 'Absent';
-        });
-        
+
         // Present list is a combination of On Time and Late lists
         $presentList = array_merge($onTimeList, $lateList);
 
@@ -125,17 +126,16 @@ if(isset($_SESSION["admin_user"])) {
 
         // Fetch historical attendance records (all records except today)
         $stmt = $dbo->conn->prepare("
-            SELECT 
+            SELECT
                 ia.INTERNS_ID,
                 CONCAT(id.SURNAME, ' ', LEFT(id.NAME, 1), '.') as SURNAME,
                 ia.ON_DATE,
                 ia.TIMEIN,
                 ia.TIMEOUT,
-                CASE 
+                CASE
                     WHEN ia.TIMEIN IS NOT NULL AND ia.TIMEOUT IS NOT NULL AND ia.TIMEIN <= '08:00:59' THEN 'On Time'
-                    WHEN ia.TIMEIN IS NOT NULL AND ia.TIMEOUT IS NOT NULL AND ia.TIMEIN > '08:00:59' AND ia.TIMEIN < '08:15:00' THEN 'Late'
-                    WHEN (ia.TIMEIN IS NOT NULL AND ia.TIMEOUT IS NOT NULL AND ia.TIMEIN >= '08:15:00') THEN 'Absent'
-                    WHEN (ia.TIMEIN IS NULL AND ia.TIMEOUT IS NULL) THEN 'Absent'
+                    WHEN ia.TIMEIN IS NOT NULL AND ia.TIMEOUT IS NOT NULL AND ia.TIMEIN > '08:00:59' AND ia.TIMEIN <= '16:00:00' THEN 'Late'
+                    ELSE 'Present'
                 END as status
             FROM interns_attendance ia
             JOIN interns_details id ON ia.INTERNS_ID = id.INTERNS_ID

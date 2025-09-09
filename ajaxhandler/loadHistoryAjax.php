@@ -35,11 +35,9 @@ if (!$adminDetails) {
 $hteId = $adminDetails['HTE_ID'];
 
 $stmt = $dbo->conn->prepare("
-    SELECT 
+    SELECT
         COUNT(CASE WHEN TIMEIN IS NOT NULL AND TIMEOUT IS NOT NULL AND TIMEIN <= '08:00:59' THEN 1 END) AS on_time,
-        COUNT(CASE WHEN TIMEIN IS NOT NULL AND TIMEOUT IS NOT NULL AND TIMEIN > '08:00:59' AND TIMEIN < '08:15:00' THEN 1 END) AS late,
-        COUNT(CASE WHEN (TIMEIN IS NOT NULL AND TIMEOUT IS NOT NULL AND TIMEIN >= '08:15:00') THEN 1 END) + 
-        COUNT(CASE WHEN (TIMEIN IS NULL AND TIMEOUT IS NULL) THEN 1 END) AS absent
+        COUNT(CASE WHEN TIMEIN IS NOT NULL AND TIMEOUT IS NOT NULL AND TIMEIN > '08:00:59' AND TIMEIN <= '16:00:00' THEN 1 END) AS late
     FROM interns_attendance
     WHERE HTE_ID = :hteId AND ON_DATE = :date
 ");
@@ -47,17 +45,16 @@ $stmt->execute([':hteId' => $hteId, ':date' => $date]);
 $attendanceStats = $stmt->fetch(PDO::FETCH_ASSOC);
 
 $stmt = $dbo->conn->prepare("
-    SELECT 
+    SELECT
         COALESCE(id.STUDENT_ID, ia.INTERNS_ID) as STUDENT_ID,
                 CONCAT(id.SURNAME, ' ', LEFT(id.NAME, 1), '.') as SURNAME,
         ia.ON_DATE,
         ia.TIMEIN,
         ia.TIMEOUT,
-        CASE 
+        CASE
             WHEN ia.TIMEIN IS NOT NULL AND ia.TIMEOUT IS NOT NULL AND ia.TIMEIN <= '08:00:59' THEN 'On Time'
-            WHEN ia.TIMEIN IS NOT NULL AND ia.TIMEOUT IS NOT NULL AND ia.TIMEIN > '08:00:59' AND ia.TIMEIN < '08:15:00' THEN 'Late'
-            WHEN (ia.TIMEIN IS NOT NULL AND ia.TIMEOUT IS NOT NULL AND ia.TIMEIN >= '08:15:00') THEN 'Absent'
-            WHEN (ia.TIMEIN IS NULL AND ia.TIMEOUT IS NULL) THEN 'Absent'
+            WHEN ia.TIMEIN IS NOT NULL AND ia.TIMEOUT IS NOT NULL AND ia.TIMEIN > '08:00:59' AND ia.TIMEIN <= '16:00:00' THEN 'Late'
+            ELSE 'Present'
         END as status
     FROM interns_attendance ia
     JOIN interns_details id ON ia.INTERNS_ID = id.INTERNS_ID
@@ -69,25 +66,21 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $on_time = $attendanceStats['on_time'] ?? 0;
 $late = $attendanceStats['late'] ?? 0;
-$absent = $attendanceStats['absent'] ?? 0;
 
 // Calculate present as on_time + late
 $present = $on_time + $late;
-$total = $present + $absent;
+$total = $present;
 
 // Group students by status
 $presentList = [];
 $onTimeList = [];
 $lateList = [];
-$absentList = [];
 
 foreach ($records as $record) {
     if ($record['status'] === 'On Time') {
         $onTimeList[] = $record;
     } elseif ($record['status'] === 'Late') {
         $lateList[] = $record;
-    } elseif ($record['status'] === 'Absent') {
-        $absentList[] = $record;
     } else {
         // Treat other statuses as present
         $presentList[] = $record;
@@ -98,7 +91,6 @@ echo json_encode([
     'status' => 'success',
     'summary' => [
         'present' => $present,
-        'absent' => $absent,
         'late' => $late,
         'on_time' => $on_time,
         'total' => $total
@@ -106,7 +98,6 @@ echo json_encode([
     'records' => $records,
     'presentList' => $presentList,
     'onTimeList' => $onTimeList,
-    'lateList' => $lateList,
-    'absentList' => $absentList
+    'lateList' => $lateList
 ]);
 ?>

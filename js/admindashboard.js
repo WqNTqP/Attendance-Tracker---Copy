@@ -7,6 +7,15 @@ const URLs = {
     weeklyReports: "ajaxhandler/weeklyReportAjax.php"
 };
 
+// Function to format time to 12-hour format with AM/PM
+function formatTimeToPH(timeString) {
+    if (!timeString || timeString === '--:--') return '--:--';
+    const timeParts = timeString.split(':');
+    const date = new Date();
+    date.setHours(parseInt(timeParts[0]), parseInt(timeParts[1]), parseInt(timeParts[2]));
+    return date.toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', hour12: true });
+}
+
 $(function () {
     // Close sidebar when clicking outside
     $(document).click(function(e) {
@@ -202,7 +211,6 @@ $(function () {
                     document.getElementById('selectedDate').textContent = date;
                     document.getElementById('historyPresent').textContent = response.summary.present || 0;
                     document.getElementById('historyOnTime').textContent = response.summary.on_time || 0;
-                    document.getElementById('historyAbsent').textContent = response.summary.absent || 0;
                     document.getElementById('historyLate').textContent = response.summary.late || 0;
                     document.getElementById('historyTotal').textContent = response.summary.total || 0;
                     document.getElementById('historySummary').style.display = 'block';
@@ -261,8 +269,8 @@ $(function () {
                                 <tr>
                                     <td>${record.STUDENT_ID}</td>
                                     <td>${record.SURNAME}</td>
-                                    <td>${record.TIMEIN || '--:--'}</td>
-                                    <td>${record.TIMEOUT || '--:--'}</td>
+                                    <td>${formatTimeToPH(record.TIMEIN)}</td>
+                                    <td>${formatTimeToPH(record.TIMEOUT)}</td>
                                     <td class="status-${statusClass}">${record.status}</td>
                                 </tr>
                             `;

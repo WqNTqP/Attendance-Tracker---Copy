@@ -267,15 +267,27 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
                     <div class="card">
                         <div class="card-header">
                             <h3><i class="fas fa-history"></i> Attendance History</h3>
-                            <div class="date-filter">
-                                <select id="historyFilter">
-                                    <option value="week">This Week</option>
-                                    <option value="month">This Month</option>
-                                    <option value="all">All Time</option>
-                                </select>
-                            </div>
+                    <div class="date-filter" style="display: flex; align-items: center; gap: 10px;">
+                        <button id="clearFiltersBtn" class="btn-clear-filter" style="display: none;" title="Clear all filters">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                        <select id="monthFilter" style="display: none;">
+                            <option value="">Select Month</option>
+                        </select>
+                        <select id="yearFilter" style="display: none; margin: 0 10px;">
+                            <option value="">Select Year</option>
+                        </select>
+                        <select id="historyFilter" style="margin-left: 10px;">
+                            <option value="week">This Week</option>
+                            <option value="lastweek">Last Week</option>
+                            <option value="month">This Month</option>
+                            <option value="lastmonth">Last Month</option>
+                            <option value="all">All Time</option>
+                        </select>
+                    </div>
                         </div>
                         <div class="card-body">
+
                             <div id="attendanceHistoryArea">
                                 <!-- History will be populated here -->
                             </div>

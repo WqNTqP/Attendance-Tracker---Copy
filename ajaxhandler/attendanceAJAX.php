@@ -202,23 +202,17 @@ function createPDFReport($list, $filename) {
             $email = $_POST['email'] ?? null;
             $contact_number = $_POST['contactNumber'] ?? null;
             $coordinator_id = $_SESSION['current_user'] ?? null;
-            $hte_id = $_POST['hteId'] ?? null; // This line is crucial
-            $session_id = $_POST['sessionId'] ?? null;
+            $hte_id = $_POST['hteId'] ?? null; // This line is now optional
+            $session_id = $_POST['sessionId'] ?? null; // This line is now optional
         
             // Add these lines for debugging
             error_log("Received POST data: " . print_r($_POST, true));
             error_log("HTE_ID: " . $hte_id);
             error_log("Coordinator ID: " . $coordinator_id);
         
-            // Check if HTE_ID is set
-            if (!$hte_id) {
-                echo json_encode(['success' => false, 'message' => 'Error: HTE_ID is missing.']);
-                return;
-            }
-    
-            // Check for required fields
-            if (!$student_id || !$name || !$age || !$gender || !$email || !$contact_number || !$hte_id || !$session_id) {
-                echo json_encode(['success' => false, 'message' => 'Error: All fields are required.']);
+            // Check for required fields except hte_id and session_id
+            if (!$student_id || !$name || !$age || !$gender || !$email || !$contact_number) {
+                echo json_encode(['success' => false, 'message' => 'Error: All student fields are required.']);
                 return; // Stop execution if validation fails
             }
     
@@ -407,24 +401,61 @@ function createPDFReport($list, $filename) {
     if ($action == "getHTEList") {
         $dbo = new Database();
         $ado = new attendanceDetails();
-        
+
         try {
             // Get all HTEs for the dropdown
-            $c = "SELECT hte.HTE_ID, hte.NAME, hte.INDUSTRY 
-                  FROM host_training_establishment hte 
+            $c = "SELECT hte.HTE_ID, hte.NAME, hte.INDUSTRY
+                  FROM host_training_establishment hte
                   ORDER BY hte.NAME";
             $s = $dbo->conn->prepare($c);
             $s->execute();
             $htes = $s->fetchAll(PDO::FETCH_ASSOC);
-            
+
             echo json_encode(['success' => true, 'htes' => $htes]);
         } catch (Exception $e) {
             echo json_encode(['success' => false, 'message' => 'Error loading HTEs: ' . $e->getMessage()]);
         }
     }
 
+    if ($action == "assignStudents") {
+        $studentIds = isset($_POST['studentIds']) ? json_decode($_POST['studentIds'], true) : [];
+        $sessionId = $_POST['sessionId'] ?? null;
+        $hteId = $_POST['hteId'] ?? null;
+        $coordinatorId = $_SESSION['current_user'] ?? null;
 
+        if (empty($studentIds) || !$sessionId || !$hteId || !$coordinatorId) {
+            echo json_encode(['success' => false, 'message' => 'Missing required parameters.']);
+            exit;
+        }
 
+        $dbo = new Database();
+        $ado = new attendanceDetails();
+
+        try {
+            $result = $ado->assignStudents($dbo, $studentIds, $sessionId, $hteId, $coordinatorId);
+            echo json_encode($result);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Error assigning students: ' . $e->getMessage()]);
+        }
+    }
+
+    if ($action == "getAllStudentsUnderCoordinator") {
+        $cdrid = $_POST['cdrid'] ?? null;
+        if (!$cdrid) {
+            echo json_encode(['success' => false, 'message' => 'Coordinator ID not provided.']);
+            exit;
+        }
+
+        $dbo = new Database();
+        $ado = new attendanceDetails();
+
+        try {
+            $students = $ado->getAllStudentsUnderCoordinator($dbo, $cdrid);
+            echo json_encode(['success' => true, 'data' => $students]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Error fetching students: ' . $e->getMessage()]);
+        }
+    }
 
 // Handle deleteHTE action with permission check
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'deleteHTE') {
@@ -509,11 +540,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
+// Profile management actions
+if (isset($_POST['action']) && $_POST['action'] == 'updateCoordinatorProfilePicture') {
+    $cdrid = $_POST['cdrid'];
+    if (isset($_FILES['profilePicture']) && $_FILES['profilePicture']['error'] == 0) {
+        $uploadDir = '../uploads/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        $fileName = basename($_FILES['profilePicture']['name']);
+        $targetFilePath = $uploadDir . $fileName;
+        if (move_uploaded_file($_FILES['profilePicture']['tmp_name'], $targetFilePath)) {
+            // Update profile picture path in database
+            $attendanceDetails = new attendanceDetails();
+            $updateResult = $attendanceDetails->updateCoordinatorProfilePicture($dbo, $cdrid, $fileName);
+            if ($updateResult) {
+                echo json_encode(['success' => true, 'message' => 'Profile picture updated successfully', 'filename' => $fileName]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Failed to update profile picture in database']);
+            }
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to upload profile picture']);
+        }
+    } else {
+        echo json_encode(['success' => false, 'message' => 'No profile picture uploaded or upload error']);
+    }
+    exit;
+}
 
+if (isset($_POST['action']) && $_POST['action'] == 'updateCoordinatorDetails') {
+    $cdrid = $_POST['cdrid'];
+    $name = $_POST['name'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $contactNumber = $_POST['contactNumber'] ?? '';
+    $department = $_POST['department'] ?? '';
 
+    $attendanceDetails = new attendanceDetails();
+    $updateResult = $attendanceDetails->updateCoordinatorDetails($dbo, $cdrid, $name, $email, $contactNumber, $department);
+    if ($updateResult) {
+        echo json_encode(['success' => true, 'message' => 'Profile details updated successfully']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Failed to update profile details']);
+    }
+    exit;
+}
 
+if (isset($_POST['action']) && $_POST['action'] == 'updateCoordinatorPassword') {
+    $cdrid = $_POST['cdrid'];
+    $currentPassword = $_POST['currentPassword'] ?? '';
+    $newPassword = $_POST['newPassword'] ?? '';
 
+    $attendanceDetails = new attendanceDetails();
 
+    // Verify current password
+    $isValid = $attendanceDetails->verifyCoordinatorPassword($dbo, $cdrid, $currentPassword);
+    if (!$isValid) {
+        echo json_encode(['success' => false, 'message' => 'Current password is incorrect']);
+        exit;
+    }
+
+    // Update password
+    $updateResult = $attendanceDetails->updateCoordinatorPassword($dbo, $cdrid, $newPassword);
+    if ($updateResult) {
+        echo json_encode(['success' => true, 'message' => 'Password updated successfully']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Failed to update password']);
+    }
+    exit;
+}
 
   }
 ?>

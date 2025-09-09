@@ -1,4 +1,11 @@
 <?php
+// Configure session to work across different hostnames/IPs
+ini_set('session.cookie_domain', '');
+ini_set('session.cookie_path', '/');
+ini_set('session.cookie_secure', false); // Set to true if using HTTPS
+ini_set('session.cookie_httponly', true);
+ini_set('session.use_only_cookies', true);
+
 session_start();
 require_once '../database/database.php';
 
@@ -22,6 +29,12 @@ $conn = $dbo->conn;
 if (isset($_SESSION['student_user'])) {
     $_SESSION['user_id'] = $_SESSION['student_user'];
     $_SESSION['user_type'] = 'student';
+}
+
+// Handle admin session from admindashboarddb.php
+if (isset($_SESSION['admin_user'])) {
+    $_SESSION['user_id'] = $_SESSION['admin_user'];
+    $_SESSION['user_type'] = 'admin';
 }
 
 // Check if user is logged in

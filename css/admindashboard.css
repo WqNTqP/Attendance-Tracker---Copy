@@ -403,48 +403,7 @@ body {
     box-shadow: 0 2px 10px rgba(231, 76, 60, 0.3);
 }
 
-/* Mark Absent Button Styles */
-.btn-mark-absent {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.btn-mark-absent:hover {
-    background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 10px rgba(231, 76, 60, 0.3);
-}
-
-.btn-undo-absent {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.btn-undo-absent:hover {
-    background: linear-gradient(135deg, #2980b9 0%, #1f618d 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 10px rgba(52, 152, 219, 0.3);
-}
+/* Mark Absent Button Styles - Removed */
 
 
 /* Status Messages */
@@ -470,7 +429,7 @@ body {
     width: 100%;
     height: 100%;
     background: rgba(0,0,0,0.5);
-    z-index: 1000;
+    z-index: 10000;
     align-items: center;
     justify-content: center;
 }
@@ -1456,8 +1415,8 @@ select:focus {
     }
 
     .admin-report-preview .activity-image {
-        width: 40px;
-        height: 40px;
+        min-width: 120px;
+        height: auto;
     }
 
     .admin-report-preview .report-footer {
@@ -1552,9 +1511,18 @@ select:focus {
 }
 
 #historySummary .stats-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.5rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
     margin-top: 1rem;
+}
+
+#historyTable {
+    table-layout: fixed;
+}
+
+#historyTable th,
+#historyTable td {
+    width: 20%;
 }
 
 /* Total Students Section for History */
@@ -1639,9 +1607,7 @@ select:focus {
     color: #27ae60 !important;
 }
 
-.status-absent {
-    color: #e74c3c !important;
-}
+
 
 .status-late {
     color: #f39c12 !important;
@@ -1690,10 +1656,16 @@ select:focus {
         grid-template-columns: repeat(2, 1fr);
     }
     
+    #historyTable {
+        table-layout: auto;
+    }
+    
     #historyTable th,
     #historyTable td {
         padding: 0.75rem;
         font-size: 0.9rem;
+        width: auto;
+        min-width: 80px;
     }
 }
 
@@ -1704,12 +1676,15 @@ select:focus {
     
     #historyTable {
         font-size: 0.8rem;
+        table-layout: auto;
     }
     
     #historyTable th,
     #historyTable td {
         padding: 0.5rem;
         font-size: 0.8rem;
+        width: auto;
+        min-width: 60px;
     }
 }
 
@@ -1874,13 +1849,7 @@ select:focus {
     color: #ffc107;
 }
 
-.stat-item.absent {
-    border-color: #dc3545;
-}
 
-.stat-item.absent .stat-value {
-    color: #dc3545;
-}
 
 .stat-label {
     font-size: 0.9rem;
@@ -1988,7 +1957,6 @@ select:focus {
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     padding: 1rem 1.5rem;
     flex: 1 1 220px;
-    max-width: 23%;
     min-width: 180px;
     display: flex;
     flex-direction: column;
@@ -2043,9 +2011,7 @@ select:focus {
     border-left: 5px solid #ffc107;
 }
 
-.absent-list {
-    border-left: 5px solid #dc3545;
-}
+
 
 /* Responsive adjustments */
 @media (max-width: 1024px) {
@@ -2289,7 +2255,6 @@ select:focus {
     background: white;
     min-width: 200px;
     width: 100%;
-    max-width: 300px;
 }
 
 #studentFilter:focus {
