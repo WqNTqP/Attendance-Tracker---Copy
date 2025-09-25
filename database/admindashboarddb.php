@@ -66,8 +66,9 @@ if(isset($_SESSION["admin_user"])) {
         // Fetch attendance records for these students (today only) - Statistics
         $stmt = $dbo->conn->prepare("
             SELECT
-                COUNT(CASE WHEN TIMEIN IS NOT NULL AND TIMEOUT IS NOT NULL AND TIMEIN <= '08:00:59' THEN 1 END) AS on_time,
-                COUNT(CASE WHEN TIMEIN IS NOT NULL AND TIMEOUT IS NOT NULL AND TIMEIN > '08:00:59' AND TIMEIN <= '16:00:00' THEN 1 END) AS late
+                COUNT(CASE WHEN TIMEIN IS NOT NULL THEN 1 END) as present,
+                COUNT(CASE WHEN TIMEIN IS NOT NULL AND TIMEIN <= '08:00:59' THEN 1 END) AS on_time,
+                COUNT(CASE WHEN TIMEIN IS NOT NULL AND TIMEIN > '08:00:59' AND TIMEIN <= '16:00:00' THEN 1 END) AS late
             FROM interns_attendance
             WHERE HTE_ID = :hteId AND ON_DATE = CURDATE()
         ");

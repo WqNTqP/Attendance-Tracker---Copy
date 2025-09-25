@@ -210,16 +210,8 @@ $adminName = $name ?? 'Admin';
             <div id="historyTabContent" class="tab-content" style="display: none;">
                 <div class="date-selector" style="margin-bottom: 20px;">
                     <label for="historyDate" style="margin-right: 10px;">Select Date:</label>
-                    <select id="historyDate" style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
-                        <?php foreach ($availableDates as $date): ?>
-                            <option value="<?php echo htmlspecialchars($date['ON_DATE']); ?>">
-                                <?php echo htmlspecialchars($date['ON_DATE']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                    <button id="loadHistoryBtn" style="margin-left: 10px; padding: 8px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                        Load Records
-                    </button>
+                    <input type="date" id="historyDate" style="padding: 8px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer;" 
+                           value="<?php echo date('Y-m-d'); ?>" />
                 </div>
 
                 <h3>Historical Attendance Records</h3>
@@ -341,21 +333,10 @@ $adminName = $name ?? 'Admin';
                                 <?php endforeach; ?>
                             </datalist>
 
-                            <label for="weekFilter">Filter by Week:</label>
-                            <select id="weekFilter">
-                                <option value="">All Weeks</option>
-                                <?php
-                                // Generate week options for the current year
-                                $currentYear = date('Y');
-                                for ($week = 1; $week <= 52; $week++):
-                                    $weekStart = date('Y-m-d', strtotime($currentYear . 'W' . str_pad($week, 2, '0', STR_PAD_LEFT)));
-                                    $weekEnd = date('Y-m-d', strtotime($weekStart . ' +6 days'));
-                                ?>
-                                    <option value="<?php echo $week; ?>">
-                                        Week <?php echo $week; ?> (<?php echo $weekStart; ?> to <?php echo $weekEnd; ?>)
-                                    </option>
-                                <?php endfor; ?>
-                            </select>
+                            <label for="dateFilter">Select Date:</label>
+                            <input type="date" id="dateFilter" name="dateFilter" class="form-control" style="width: auto; display: inline-block; margin-right: 10px;"
+                                   value="<?php echo date('Y-m-d'); ?>"
+                            >
 
                             <button id="loadReportsBtn">Load Reports</button>
                         </div>
@@ -463,6 +444,13 @@ $adminName = $name ?? 'Admin';
     <script src="js/jquery.js"></script>
     <script src="js/admindashboard.js"></script>
     <script>
+        // Automatically load the weekly report for the current week on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            var loadReportsBtn = document.getElementById('loadReportsBtn');
+            if (loadReportsBtn) {
+                loadReportsBtn.click();
+            }
+        });
         // Add sidebar toggle functionality
         document.getElementById('sidebarToggle').addEventListener('click', function() {
             document.querySelector('.sidebar').classList.toggle('sidebar-open');
@@ -514,6 +502,52 @@ $adminName = $name ?? 'Admin';
         });
 
 
+    
+        // Return Report Modal Event Handlers
+        $(document).ready(function() {
+            $('#closeReturnModal, #cancelReturn').on('click', function() {
+                $('#returnReportModal').hide();
+                currentReportId = null;
+            });
+
+            $('#confirmReturn').on('click', function() {
+                submitReturnReport();
+            });
+
+            // Close modal when clicking outside
+            $('#returnReportModal').on('click', function(e) {
+                if (e.target === this) {
+                    $(this).hide();
+                    currentReportId = null;
+                }
+            });
+
+            // Close modal with Escape key
+            $(document).on('keyup', function(e) {
+                if (e.key === "Escape") {
+                    $('#returnReportModal').hide();
+                    currentReportId = null;
+                }
+            });
+        });
     </script>
+
+    <!-- Return Report Modal -->
+    <div id="returnReportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Return Report</h2>
+                <span class="close" id="closeReturnModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Please provide the reason for returning this report. The student will be able to edit the report after it is returned.</p>
+                <textarea id="returnReason" rows="4" placeholder="Enter return reason..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelReturn" class="modal-btn cancel-btn">Cancel</button>
+                <button id="confirmReturn" class="modal-btn confirm-btn">Return Report</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

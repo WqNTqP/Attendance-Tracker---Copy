@@ -2,8 +2,33 @@
 let currentHteId;
 let currentSessionId;
 
-// Tab switching functionality
+// Function to format contact number to Philippine format: +63 951 3762 404
+function formatPhilippineContactNumber(input) {
+    let value = input.value.replace(/\D/g, ''); // Remove non-numeric characters
+
+    if (value.startsWith('09') && value.length === 11) {
+        // Convert 09123456789 to +63 912 345 6789
+        value = '+63 ' + value.substring(1, 4) + ' ' + value.substring(4, 7) + ' ' + value.substring(7);
+    } else if (value.startsWith('639') && value.length === 12) {
+        // Convert 639123456789 to +63 912 345 6789
+        value = '+63 ' + value.substring(2, 5) + ' ' + value.substring(5, 8) + ' ' + value.substring(8);
+    } else if (value.length === 10 && !value.startsWith('0')) {
+        // Assume it's 9123456789, format as +63 912 345 6789
+        value = '+63 ' + value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6);
+    }
+
+    input.value = value;
+}
+
+// Attach formatting to contact number inputs
+$(document).on('blur', '#contactNumber, #hteContactNumber, #profileContact', function() {
+    formatPhilippineContactNumber(this);
+});
+
+    // Tab switching functionality
 function switchTab(tabName) {
+    console.log('switchTab called with:', tabName);
+    
     // Hide all tab contents
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
@@ -15,40 +40,197 @@ function switchTab(tabName) {
     });
 
     // Show selected tab content
-    document.getElementById(tabName + 'Content').classList.add('active');
+    const tabContent = document.getElementById(tabName + 'Content');
+    console.log('Tab content element:', tabContent);
+    if (tabContent) {
+        tabContent.classList.add('active');
+        console.log('Added active class to tab content');
+    } else {
+        console.error('Tab content element not found:', tabName + 'Content');
+    }
 
     // Add active class to selected sidebar item
-    document.getElementById(tabName + 'Tab').classList.add('active');
+    const sidebarItem = document.getElementById(tabName + 'Tab');
+    console.log('Sidebar item element:', sidebarItem);
+    if (sidebarItem) {
+        sidebarItem.classList.add('active');
+        console.log('Added active class to sidebar item');
+    } else {
+        console.error('Sidebar item not found:', tabName + 'Tab');
+    }
+
+    // Just log which tab we switched to
+    console.log('Tab switched to: ' + tabName);
 }
 
-$(document).ready(function() {
-    // Toggle user dropdown
-    $('#userProfile').on('click', function() {
-        $('#userDropdown').toggle();
-    });
+// Utility functions
+function getSessionHTML(rv) {
+    let x = `<option value=-1>SELECT ONE</option>`;
+    let i = 0;
+    for(i = 0; i < rv.length; i++) {
+        let cs = rv[i];
+        x = x + `<option value=${cs['ID']}>${cs['YEAR']+" "+cs['TERM']}</option>`;
+    }
+    return x;
+}
 
+function loadSeassions() {
+    $.ajax({
+        url: "ajaxhandler/attendanceAJAX.php",
+        type: "POST",
+        dataType: "json",
+        data: {action: "getSession"},
+        success: function(response) {
+            if (response.success) {
+                $("#sessionSelect").html(getSessionHTML(response.data));
+            }
+        }
+    });
+}
+
+// Document ready handler
+$(function() {
+    // Toggle user dropdown on profile click
+    $(document).on('click', '#userProfile', function(e) {
+        $('#userDropdown').toggle();
+        e.stopPropagation();
+    });
     // Hide dropdown when clicking outside
-    $(document).on('click', function(event) {
-        if (!$(event.target).closest('#userProfile').length) {
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#userProfile').length) {
             $('#userDropdown').hide();
         }
     });
+    // Tab click event for sidebar
+    $('.sidebar-item').click(function() {
+        var tabName = $(this).data('tab');
+        switchTab(tabName);
+        if (tabName === 'control') {
+            loadAllStudentsData();
+        }
+    });
+    // ...existing code...
 
-    // Logout button click handler moved to dropdown logout button
-    $(document).on('click', '#logoutBtn', function() {
+    // --- Report Tab Filters ---
+    function loadStudentFilterDropdown() {
+        var coordinatorId = $("#hiddencdrid").val();
         $.ajax({
-            url: "ajaxhandler/logoutAjax.php",
+            url: "ajaxhandler/adminDashboardAjax.php",
             type: "POST",
             dataType: "json",
-            data: {id:1},
+            data: { action: "getAllStudents", coordinatorId: coordinatorId },
             success: function(rv) {
-                document.location.replace("index.php");
+                let options = `<option value=\"all\">All Students</option>`;
+                if (rv && rv.data && Array.isArray(rv.data)) {
+                    rv.data.forEach(function(stu) {
+                        // Use INTERNS_ID for filtering
+                        options += `<option value=\"${stu.INTERNS_ID}\">${stu.SURNAME}, ${stu.NAME}</option>`;
+                    });
+                }
+                $("#filterStudent").html(options);
             },
-            error: function(xhr, status, error) {
-                alert("Logout failed! Please try again.");
+            error: function() {
+                $("#filterStudent").html('<option value=\"all\">All Students</option>');
             }
         });
+    }
+
+    function loadApprovedReportsWithFilters() {
+        let studentId = $("#filterStudent").val() || "all";
+        let date = $("#filterDate").val();
+        let weekStart = date || null;
+        let weekEnd = date || null;
+        $.ajax({
+            url: "ajaxhandler/coordinatorWeeklyReportAjax.php",
+            type: "POST",
+            dataType: "json",
+            data: {
+                action: "getWeeklyReports",
+                studentId: studentId,
+                weekStart: weekStart,
+                weekEnd: weekEnd
+            },
+            beforeSend: function() {
+                $("#approvedReportsList").html("<p>Loading approved weekly reports...</p>");
+            },
+            success: function(rv) {
+                // Render reports from rv.reports if status is success
+                if (rv && rv.status === "success" && Array.isArray(rv.reports) && rv.reports.length > 0) {
+                    let html = "";
+                    rv.reports.forEach(function(report) {
+                        html += `<div class='report-card admin-report-preview'>`;
+                        html += `<div class='report-header'>`;
+                        html += `<h3>${report.student_name} - Week ${getWeekNumber(report.week_start)}</h3>`;
+                        html += `<div class='report-meta'>`;
+                        html += `<span class='report-period'>Period: ${report.week_start} to ${report.week_end}</span>`;
+                        html += `<span class='approval-status ${report.approval_status}'>${report.approval_status.charAt(0).toUpperCase() + report.approval_status.slice(1)}</span>`;
+                        html += `</div></div>`;
+
+                        html += `<div class='report-grid'>`;
+                        ['monday','tuesday','wednesday','thursday','friday'].forEach(function(day) {
+                            html += `<div class='day-section ${day}'>`;
+                            html += `<h4>${capitalize(day)}</h4>`;
+                            html += `<div class='day-images'>`;
+                            if (report.imagesPerDay && report.imagesPerDay[day] && report.imagesPerDay[day].length > 0) {
+                                report.imagesPerDay[day].forEach(function(img) {
+                                    html += `<img src='http://localhost/Attendance Tracker - Copy - NP/uploads/reports/${img.filename}' alt='${capitalize(day)} activity' class='activity-image'>`;
+                                });
+                            }
+                            html += `</div>`;
+                            html += `<div class='day-description'><p>${report[day+'_description'] || report[day+'Description'] || ''}</p></div>`;
+                            html += `</div>`;
+                        });
+                        html += `</div>`;
+
+                        html += `<div class='report-footer'>`;
+                        html += `<div class='footer-left'><span class='updated-date'>Last Updated: ${report.updated_at}</span></div>`;
+                        html += `</div>`;
+                        html += `</div>`;
+                    });
+                    $("#approvedReportsList").html(html);
+
+                    // Helper to capitalize day names
+                    function capitalize(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
+                } else {
+                    $("#approvedReportsList").html("<p>No approved reports found.</p>");
+                }
+
+                // Helper to get week number from date
+                function getWeekNumber(dateStr) {
+                    const date = new Date(dateStr);
+                    const firstJan = new Date(date.getFullYear(),0,1);
+                    const days = Math.floor((date - firstJan) / (24*60*60*1000));
+                    return Math.ceil((days + firstJan.getDay()+1) / 7);
+                }
+            },
+            error: function() {
+                $("#approvedReportsList").html("<p>Error loading reports.</p>");
+            }
+        });
+    }
+
+
+    // Track if report tab has loaded
+    let reportTabLoaded = false;
+    $(document).on('click', '#reportTab', function() {
+        if (!reportTabLoaded) {
+            loadStudentFilterDropdown();
+            setTimeout(loadApprovedReportsWithFilters, 300); // slight delay to ensure dropdown is populated
+            reportTabLoaded = true;
+        }
     });
+
+    // Reset flag if user changes filter (forces reload)
+    $(document).on('change', '#filterStudent, #filterDate', function() {
+        reportTabLoaded = false;
+    });
+
+    // Apply filters button
+    $(document).on('click', '#applyReportFilters', function() {
+        loadApprovedReportsWithFilters();
+    });
+
+    // ...existing code...
 
     // Profile button click handler
     $(document).on('click', '#btnProfile', function() {
@@ -81,69 +263,69 @@ $(document).ready(function() {
     // Function to display coordinator details modal with Edit Profile and Change Password buttons
     function displayCoordinatorDetails(coordinatorData) {
         let html = `
-            <div class="modal-overlay">
-                <div id="coordinatorDetailsModal" class="modal" style="display: flex;">
-                    <div class="modal-content" style="max-width: 600px;">
-                        <div class="modal-header">
-                            <h2>Coordinator Details</h2>
-                            <button class="modal-close" id="closeCoordinatorDetailsModal">&times;</button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label>Coordinator ID:</label>
-                                <span>${coordinatorData.COORDINATOR_ID}</span>
-                            </div>
-                            <div class="form-group">
-                                <label>Name:</label>
-                                <span>${coordinatorData.NAME}</span>
-                            </div>
-                            <div class="form-group">
-                                <label>Email:</label>
-                                <span>${coordinatorData.EMAIL}</span>
-                            </div>
-                            <div class="form-group">
-                                <label>Contact Number:</label>
-                                <span>${coordinatorData.CONTACT_NUMBER}</span>
-                            </div>
-                            <div class="form-group">
-                                <label>Department:</label>
-                                <span>${coordinatorData.DEPARTMENT}</span>
-                            </div>
-                            <div class="form-actions">
-                                <button type="button" id="btnEditProfile" class="btn-submit">Edit Profile</button>
-                                <button type="button" id="btnChangePassword" class="btn-secondary">Change Password</button>
-                                <button type="button" id="btnCloseCoordinatorDetails" class="btn-cancel">Close</button>
-                            </div>
-                        </div>
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        ${coordinatorData.PROFILE 
+                            ? `<img src="uploads/${coordinatorData.PROFILE}" alt="Profile" class="profile-image">` 
+                            : `<div class="avatar-placeholder">${coordinatorData.NAME.charAt(0)}</div>`
+                        }
                     </div>
+                    <h2>${coordinatorData.NAME}</h2>
+                    <p class="profile-subtitle">Coordinator</p>
+                </div>
+
+                <div class="profile-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Coordinator ID</span>
+                        <span class="detail-value">${coordinatorData.COORDINATOR_ID}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Department</span>
+                        <span class="detail-value">${coordinatorData.DEPARTMENT}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Contact Number</span>
+                        <span class="detail-value">${coordinatorData.CONTACT_NUMBER}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Email</span>
+                        <span class="detail-value">${coordinatorData.EMAIL}</span>
+                    </div>
+                </div>
+
+                <div class="profile-actions">
+                    <button type="button" id="btnEditProfile" class="btn-edit">Edit Profile</button>
+                    <button type="button" id="btnChangePassword" class="btn-change-password">Change Password</button>
                 </div>
             </div>
         `;
 
-        $('body').append(html);
-        $("#coordinatorDetailsModal").hide().fadeIn();
+        // Clear existing content and add new content to the modal body
+        $("#profileModalContent").html(html);
+        
+        // Show the profile modal
+        $("#profileModal").css('display', 'flex');
     }
 
-    // Close coordinator details modal
-    $(document).on('click', '#closeCoordinatorDetailsModal, #btnCloseCoordinatorDetails', function() {
-        $('#coordinatorDetailsModal').fadeOut(function() {
+    // Close profile modal and all other modals
+    $(document).on('click', '#closeProfileModal', function() {
+        // Hide the profile modal
+        $("#profileModal").fadeOut();
+        
+        // Close any other open modals
+        $('#editableProfileModal, #changePasswordModal').fadeOut(function() {
             $(this).remove();
         });
     });
 
     // Edit Profile button click handler inside coordinator details modal
     $(document).on('click', '#btnEditProfile', function() {
-        $('#coordinatorDetailsModal').fadeOut(function() {
-            $(this).remove();
-        });
         loadEditableProfile();
     });
 
     // Change Password button click handler inside coordinator details modal
     $(document).on('click', '#btnChangePassword', function() {
-        $('#coordinatorDetailsModal').fadeOut(function() {
-            $(this).remove();
-        });
         showChangePasswordModal();
     });
 
@@ -179,42 +361,31 @@ $(document).ready(function() {
     function displayEditableProfileModal(coordinatorData) {
         let html = `
             <div id="editableProfileModal" class="modal" style="display: flex;">
-                <div class="modal-content" style="max-width: 600px;">
+                <div class="modal-content">
                     <div class="modal-header">
-                        <h2>Edit Profile</h2>
+                        <h2>Edit Profile Picture</h2>
                         <button class="modal-close" id="closeEditableProfileModal">&times;</button>
                     </div>
                     <div class="modal-body">
-                        <form id="editProfileForm">
-                            <div class="form-group">
-                                <label for="profileCoordinatorId">Coordinator ID:</label>
-                                <input type="text" id="profileCoordinatorId" value="${coordinatorData.COORDINATOR_ID}" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label for="profileName">Name:</label>
-                                <input type="text" id="profileName" name="name" value="${coordinatorData.NAME || ''}" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="profileEmail">Email:</label>
-                                <input type="email" id="profileEmail" name="email" value="${coordinatorData.EMAIL || ''}" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="profileContact">Contact Number:</label>
-                                <input type="tel" id="profileContact" name="contact_number" value="${coordinatorData.CONTACT_NUMBER || ''}" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="profileDepartment">Department:</label>
-                                <input type="text" id="profileDepartment" name="department" value="${coordinatorData.DEPARTMENT || ''}" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="profilePicture">Profile Picture:</label>
-                                <input type="file" id="profilePicture" name="profile_picture" accept="image/*">
-                                <small style="color: #666;">Leave empty to keep current picture</small>
+                        <form id="editProfileForm" class="edit-profile-picture-form" enctype="multipart/form-data">
+                            <div class="profile-picture-section">
+                                <div class="current-profile-picture">
+                                    ${coordinatorData.PROFILE_PICTURE ? 
+                                        `<img src="uploads/${coordinatorData.PROFILE_PICTURE}" alt="Current Profile" class="current-image">` :
+                                        `<div class="avatar-placeholder">
+                                            <i class="fas fa-user"></i>
+                                        </div>`
+                                    }
+                                </div>
+                                <div class="profile-picture-upload file-upload-group">
+                                    <label for="profilePicture">Upload Profile Picture:</label>
+                                    <input type="file" id="profilePicture" name="profilePicture" accept="image/*" class="file-input-wrapper">
+                                    <small>Max file size: 2MB (JPG, PNG, GIF)</small>
+                                </div>
                             </div>
                             <div class="form-actions">
-                                <button type="submit" class="btn-submit">Update Profile</button>
-                                <button type="button" id="changePasswordBtn" class="btn-secondary">Change Password</button>
-                                <button type="button" id="cancelProfileEdit" class="btn-cancel">Cancel</button>
+                                <button type="submit" class="btn-submit">Save Changes</button>
+                                <button type="button" class="btn-cancel" id="closeEditableProfileModalCancel">Cancel</button>
                             </div>
                         </form>
                     </div>
@@ -227,58 +398,196 @@ $(document).ready(function() {
     }
 
     // Close editable profile modal
-    $(document).on('click', '#closeEditableProfileModal, #cancelProfileEdit', function() {
+    $(document).on('click', '#closeEditableProfileModal', function(e) {
+        e.stopPropagation(); // Prevent event from bubbling up
+        $('#editableProfileModal').fadeOut(function() {
+            $(this).remove();
+        });
+    });
+
+    // Cancel profile edit
+    $(document).on('click', '#closeEditableProfileModalCancel', function(e) {
+        e.stopPropagation(); // Prevent event from bubbling up
         $('#editableProfileModal').fadeOut(function() {
             $(this).remove();
         });
     });
 
     // Close modal when clicking outside
-    $(document).on('click', function(event) {
-        if ($(event.target).is('#editableProfileModal')) {
-            $('#editableProfileModal').fadeOut(function() {
+    $(document).on('click', '#editableProfileModal', function(e) {
+        if (e.target === this) {
+            $(this).fadeOut(function() {
                 $(this).remove();
             });
         }
     });
 
+    // Prevent clicks inside the modal from propagating to parent
+    $(document).on('click', '#editableProfileModal .modal-content', function(e) {
+        e.stopPropagation();
+    });
+
+    // Handle file input change for preview
+    $(document).on('change', '#profilePicture', function(e) {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('.image-preview').show();
+                $('.preview-image').attr('src', e.target.result);
+            }
+            reader.readAsDataURL(file);
+        } else {
+            $('.image-preview').hide();
+        }
+    });
+
     // Handle profile form submission
-    $(document).on('submit', '#editProfileForm', function(e) {
+    function handleProfileFormSubmit(e) {
         e.preventDefault();
 
-        let formData = new FormData(this);
-        formData.append('action', 'updateCoordinatorDetails');
-        formData.append('coordinator_id', $('#profileCoordinatorId').val());
-
-        // Handle profile picture upload
-        let profilePicture = $('#profilePicture')[0].files[0];
-        if (profilePicture) {
-            formData.append('profile_picture', profilePicture);
+        // Validate profile picture file size and type if selected
+        const fileInput = $('#profilePicture')[0];
+        if (fileInput.files.length === 0) {
+            alert('Please select a profile picture to upload.');
+            return;
         }
 
+        const file = fileInput.files[0];
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        const maxSize = 2 * 1024 * 1024; // 2MB
+
+        if (!allowedTypes.includes(file.type)) {
+            alert('Invalid file type. Only JPG, PNG, and GIF are allowed.');
+            return;
+        }
+        if (file.size > maxSize) {
+            alert('File size exceeds 2MB limit.');
+            return;
+        }
+
+        // Prepare FormData for AJAX
+        const formData = new FormData();
+        formData.append('action', 'updateCoordinatorProfilePicture');
+        formData.append('cdrid', $('#hiddencdrid').val());
+        formData.append('profilePicture', file);
+
+        // Show loading state
+        const $submitButton = $('.btn-submit');
+        $submitButton.prop('disabled', true).text('Uploading...');
+
+        // Create loading indicator
+        const $loadingIndicator = $('<div class="upload-progress">Uploading profile picture...</div>');
+        $submitButton.after($loadingIndicator);
+
+        console.log('Uploading profile picture for coordinator:', $('#hiddencdrid').val());
+        
         $.ajax({
             url: "ajaxhandler/attendanceAJAX.php",
             type: "POST",
             data: formData,
             contentType: false,
             processData: false,
-            dataType: 'json',
             success: function(response) {
-                if (response.success) {
-                    alert("Profile updated successfully!");
-                    $('#editableProfileModal').fadeOut(function() {
-                        $(this).remove();
-                    });
-                } else {
-                    alert("Error updating profile: " + (response.message || "Unknown error"));
+                console.log('Upload response:', response);
+                $submitButton.prop('disabled', false).text('Update Profile Picture');
+                $loadingIndicator.remove();
+                
+                try {
+                    // Try to parse the response as JSON if it's a string
+                    let jsonResponse = typeof response === 'string' ? JSON.parse(response) : response;
+                    
+                    if (jsonResponse.success) {
+                        console.log('Profile picture updated successfully:', jsonResponse.filename);
+                        // Show success message
+                        const $successMessage = $('<div class="alert alert-success">Profile picture updated successfully!</div>');
+                        $submitButton.after($successMessage);
+                        
+                        // Update the profile picture display
+                        $('.profile-image, .profile-image-preview').attr('src', 'uploads/' + jsonResponse.filename);
+                        
+                        // Fade out the modal and show profile after a short delay
+                        setTimeout(() => {
+                            $('#editableProfileModal').fadeOut(function() {
+                                $(this).remove();
+                                // Show coordinator details modal again
+                                let cdrid = $("#hiddencdrid").val();
+                                $.ajax({
+                                    url: "ajaxhandler/attendanceAJAX.php",
+                                    type: "POST",
+                                    dataType: "json",
+                                    data: {cdrid: cdrid, action: "getCoordinatorDetails"},
+                                    success: function(response) {
+                                        if (response.success) {
+                                            displayCoordinatorDetails(response.data);
+                                        } else {
+                                            console.error("Error fetching updated profile:", response.message);
+                                        }
+                                    },
+                                    error: function(xhr, status, error) {
+                                        console.error("Error fetching updated profile:", error);
+                                    }
+                                });
+                            });
+                        }, 1500);
+                    } else {
+                        // Show error message with details from server
+                        const errorMessage = jsonResponse.message || "Unknown error occurred";
+                        const $errorMessage = $('<div class="alert alert-danger">Error: ' + errorMessage + '</div>');
+                        $submitButton.after($errorMessage);
+                        console.error("Server error:", errorMessage);
+                    }
+                } catch (e) {
+                    console.error("Error parsing response:", e);
+                    console.error("Raw response:", response);
+                    
+                    let errorMessage;
+                    if (typeof response === 'string') {
+                        if (response.includes('Warning') || response.includes('Notice')) {
+                            errorMessage = "Server error: " + response.split("\n")[0];
+                            console.error("PHP Error:", response);
+                        } else {
+                            errorMessage = "Invalid server response format";
+                        }
+                    } else {
+                        errorMessage = "Unexpected response type";
+                    }
+                    
+                    const $errorMessage = $('<div class="alert alert-danger">' + errorMessage + '</div>');
+                    $submitButton.after($errorMessage);
                 }
             },
             error: function(xhr, status, error) {
-                console.error("Error updating profile:", error);
-                alert("Error updating profile. Please try again.");
+                $('.btn-submit').prop('disabled', false).text('Update Profile Picture');
+                console.error("Error updating profile - Status:", status);
+                console.error("Error updating profile - Error:", error);
+                console.error("Server response:", xhr.responseText);
+                console.error("Response headers:", xhr.getAllResponseHeaders());
+                
+                let errorMessage = "Error updating profile picture. ";
+                if (xhr.responseText) {
+                    try {
+                        let response = JSON.parse(xhr.responseText);
+                        errorMessage += response.message || "Please try again.";
+                    } catch (e) {
+                        if (xhr.responseText.includes('Warning') || xhr.responseText.includes('Error')) {
+                            errorMessage += "Server error encountered. Please try again or contact support.";
+                            console.error("PHP Error:", xhr.responseText);
+                        } else {
+                            errorMessage += "Unexpected server response. Please try again.";
+                        }
+                    }
+                } else {
+                    errorMessage += xhr.statusText || "Please try again.";
+                }
+                
+                alert(errorMessage);
             }
         });
-    });
+    }
+
+    // Attach submit handler for profile form
+    $(document).on('submit', '#editProfileForm', handleProfileFormSubmit);
 
     // Change password button handler
     $(document).on('click', '#changePasswordBtn', function() {
@@ -289,30 +598,31 @@ $(document).ready(function() {
     function showChangePasswordModal() {
         let html = `
             <div id="changePasswordModal" class="modal" style="display: flex;">
-                <div class="modal-content" style="max-width: 400px;">
+                <div class="modal-content">
                     <div class="modal-header">
                         <h2>Change Password</h2>
-                        <button class="modal-close" id="closeChangePasswordModal">&times;</button>
+                        <button type="button" class="modal-close" id="closeChangePasswordModal">&times;</button>
                     </div>
-                    <div class="modal-body">
-                        <form id="changePasswordForm">
-                            <div class="form-group">
-                                <label for="currentPassword">Current Password:</label>
-                                <input type="password" id="currentPassword" name="current_password" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="newPassword">New Password:</label>
-                                <input type="password" id="newPassword" name="new_password" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="confirmPassword">Confirm New Password:</label>
-                                <input type="password" id="confirmPassword" name="confirm_password" required>
-                            </div>
-                            <div class="form-actions">
-                                <button type="submit" class="btn-submit">Change Password</button>
-                                <button type="button" id="cancelPasswordChange" class="btn-cancel">Cancel</button>
-                            </div>
-                        </form>
+                        <div class="modal-body">
+                            <form id="changePasswordForm">
+                                <div class="form-group">
+                                    <label for="currentPassword">Current Password:</label>
+                                    <input type="password" id="currentPassword" name="current_password" required style="position: relative; z-index: 1501;">
+                                </div>
+                                <div class="form-group">
+                                    <label for="newPassword">New Password:</label>
+                                    <input type="password" id="newPassword" name="new_password" required style="position: relative; z-index: 1501;">
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirmPassword">Confirm New Password:</label>
+                                    <input type="password" id="confirmPassword" name="confirm_password" required style="position: relative; z-index: 1501;">
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-submit">Change Password</button>
+                                    <button type="button" id="cancelPasswordChange" class="btn-cancel">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -322,12 +632,34 @@ $(document).ready(function() {
         $("#changePasswordModal").hide().fadeIn();
     }
 
-    // Close change password modal
-    $(document).on('click', '#closeChangePasswordModal, #cancelPasswordChange', function() {
+    // Modal event handlers
+    $(document).on('click', '#closeChangePasswordModal', function() {
         $('#changePasswordModal').fadeOut(function() {
             $(this).remove();
         });
     });
+
+    $(document).on('click', '#cancelPasswordChange', function() {
+        $('#changePasswordModal').fadeOut(function() {
+            $(this).remove();
+        });
+    });
+
+    $(document).on('click', '#changePasswordModal', function(e) {
+        if (e.target === this) {
+            $(this).fadeOut(function() {
+                $(this).remove();
+            });
+        }
+    });
+
+    $(document).on('click', '#changePasswordModal .modal-content', function(e) {
+        e.stopPropagation();
+    });
+
+    // Load sessions on page load
+    loadSeassions();
+}); // End of document ready
 
     // Handle change password form submission
     $(document).on('submit', '#changePasswordForm', function(e) {
@@ -336,6 +668,14 @@ $(document).ready(function() {
         let currentPassword = $('#currentPassword').val();
         let newPassword = $('#newPassword').val();
         let confirmPassword = $('#confirmPassword').val();
+        let coordinatorId = $('#hiddencdrid').val();
+
+        console.log('Attempting to change password for coordinator:', coordinatorId);
+
+        if (!coordinatorId) {
+            alert("Error: Coordinator ID not found. Please try logging in again.");
+            return;
+        }
 
         if (newPassword !== confirmPassword) {
             alert("New passwords do not match!");
@@ -347,8 +687,12 @@ $(document).ready(function() {
             return;
         }
 
-        let coordinatorId = $('#hiddencdrid').val();
-
+        // Show loading state
+        $('.btn-submit').prop('disabled', true).text('Verifying...');
+        
+        console.log("Starting password change for coordinator:", coordinatorId);
+        
+        // First verify the current password
         $.ajax({
             url: "ajaxhandler/attendanceAJAX.php",
             type: "POST",
@@ -356,11 +700,17 @@ $(document).ready(function() {
             data: {
                 action: 'verifyCoordinatorPassword',
                 coordinator_id: coordinatorId,
-                password: currentPassword
+                current_password: currentPassword
             },
             success: function(response) {
+                console.log("Password verification response:", response);
+                $('.btn-submit').prop('disabled', false).text('Change Password');
+                
                 if (response.success) {
+                    console.log("Password verified, proceeding with update");
                     // Password verified, now update it
+                    $('.btn-submit').text('Updating...');
+                    
                     $.ajax({
                         url: "ajaxhandler/attendanceAJAX.php",
                         type: "POST",
@@ -368,21 +718,39 @@ $(document).ready(function() {
                         data: {
                             action: 'updateCoordinatorPassword',
                             coordinator_id: coordinatorId,
+                            current_password: currentPassword,
                             new_password: newPassword
                         },
                         success: function(updateResponse) {
+                            console.log("Password update response:", updateResponse);
                             if (updateResponse.success) {
                                 alert("Password changed successfully!");
                                 $('#changePasswordModal').fadeOut(function() {
                                     $(this).remove();
+                                    console.log("Change password modal removed");
+                                    // Show coordinator details modal again
+                                    $.ajax({
+                                        url: "ajaxhandler/attendanceAJAX.php",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: {
+                                            cdrid: coordinatorId, 
+                                            action: "getCoordinatorDetails"
+                                        },
+                                        success: function(response) {
+                                            if (response.success) {
+                                                displayCoordinatorDetails(response.data);
+                                            }
+                                        }
+                                    });
                                 });
                             } else {
-                                alert("Error changing password: " + (updateResponse.message || "Unknown error"));
+                                alert("Error: " + (updateResponse.message || "Failed to update password"));
                             }
                         },
                         error: function(xhr, status, error) {
-                            console.error("Error changing password:", error);
-                            alert("Error changing password. Please try again.");
+                            console.error("Error updating password:", error);
+                            alert("Error updating password. Please try again.");
                         }
                     });
                 } else {
@@ -390,8 +758,21 @@ $(document).ready(function() {
                 }
             },
             error: function(xhr, status, error) {
-                console.error("Error verifying password:", error);
-                alert("Error verifying current password. Please try again.");
+                $('.btn-submit').prop('disabled', false).text('Change Password');
+                console.error("Error verifying password - Status:", status);
+                console.error("Error verifying password - Error:", error);
+                
+                let errorMessage = "Error verifying password. ";
+                try {
+                    // Try to parse error response as JSON
+                    let response = JSON.parse(xhr.responseText);
+                    errorMessage += response.message || "Please try again.";
+                } catch (e) {
+                    // If response is not JSON, use status text
+                    errorMessage += xhr.statusText || "Please try again.";
+                }
+                
+                alert(errorMessage);
             }
         });
     });
@@ -429,8 +810,21 @@ $(document).ready(function() {
         }
     });
 
-    // View All Students button click handler
-    $(document).on('click', '#btnViewAllStudents', function() {
+    // Function to load all students data
+    function loadAllStudentsData() {
+        console.log('loadAllStudentsData function called');
+        console.log('Coordinator ID:', $("#hiddencdrid").val()); // Log the coordinator ID
+        // Close other forms
+        $('#studentFormContainer').fadeOut(function() {
+            $('#studentForm')[0].reset();
+            $('#studentForm input, #studentForm select').prop('disabled', false);
+        });
+        $('#addHTEFormContainer').hide();
+        $('#sessionFormContainer').hide();
+        $('#deleteHTEFormContainer').hide();
+        $('#deleteSessionFormContainer').hide();
+        $('#deleteStudentFormContainer').hide();
+
         let cdrid = $("#hiddencdrid").val();
 
         if (!cdrid) {
@@ -438,15 +832,19 @@ $(document).ready(function() {
             return;
         }
 
+        console.log('Making AJAX request with cdrid:', cdrid);
         $.ajax({
             url: "ajaxhandler/attendanceAJAX.php",
             type: "POST",
             dataType: "json",
             data: {cdrid: cdrid, action: "getAllStudentsUnderCoordinator"},
             success: function(response) {
+                console.log('AJAX response received:', response);
                 if (response.success) {
+                    console.log('Success - Displaying students data');
                     displayAllStudents(response.data);
                 } else {
+                    console.error('Error in response:', response.message);
                     alert("Error: " + (response.message || "Unknown error occurred."));
                 }
             },
@@ -455,10 +853,16 @@ $(document).ready(function() {
                 alert("Error fetching students. Please check the console for more information.");
             }
         });
+    }
+
+    // View All Students button click handler
+    $(document).on('click', '#btnViewAllStudents', function() {
+        loadAllStudentsData();
     });
 
     // Function to display all students under coordinator
     function displayAllStudents(students) {
+        console.log('displayAllStudents called with data:', students);
         let tbodyHtml = '';
 
         if (students && students.length > 0) {
@@ -467,6 +871,7 @@ $(document).ready(function() {
                     <tr>
                         <td>${student.STUDENT_ID || ''}</td>
                         <td>${student.NAME || ''}</td>
+                        <td>${student.SURNAME || ''}</td>
                         <td>${student.AGE || ''}</td>
                         <td>${student.GENDER || ''}</td>
                         <td>${student.EMAIL || ''}</td>
@@ -477,20 +882,17 @@ $(document).ready(function() {
                 `;
             });
         } else {
-            tbodyHtml = `<tr><td colspan="8">No students found under this coordinator.</td></tr>`;
+            tbodyHtml = `<tr><td colspan="9">No students found under this coordinator.</td></tr>`;
         }
 
         $('#allStudentsTableBody').html(tbodyHtml);
-        $('#allStudentsContainer').show();
+        $('#allStudentsContainer').fadeIn();
     }
 
     // Close all students container
     $(document).on('click', '#closeAllStudents', function() {
-        $('#allStudentsContainer').hide();
+        $('#allStudentsContainer').fadeOut();
     });
-});
-
-
 
 function getSessionHTML(rv)
 {
@@ -625,15 +1027,88 @@ function getStudentListHTML(studentList) {
 
         studentList.forEach((cs, index) => {
             x += `<div class="studentdetails">`;
-            // Removed checkbox column for each student
-            // x += `<div class="select-area"><input type="checkbox" class="student-checkbox" data-studentid="${cs['INTERNS_ID']}"></div>`;
             x += `<div class="rollno-area">${cs['STUDENT_ID']}</div>`;
-            x += `<div class="name-area">${cs['SURNAME']}</div>`;
+            x += `<div class="name-area">${cs['SURNAME']}, ${cs['NAME']}</div>`;
 
             // Delete button in separate column
             x += `<div class="delete-area">`;
-            x += `<button class="btnDelete" data-studentid="${cs['INTERNS_ID']}">Delete</button>`;
+            x += `<button class="btnProfileStudent" data-studentid="${cs['INTERNS_ID']}">Profile</button>`;
             x += `</div>`;
+// Student Profile Modal (view-only)
+if ($("#studentProfileModal").length === 0) {
+    $("body").append(`
+        <div id="studentProfileModal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Student Profile</h2>
+                    <button class="modal-close" id="closeStudentProfileModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="studentProfileModalContent">
+                        <!-- Student profile details will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+$(document).on("click", ".btnProfileStudent", function() {
+    let studentId = $(this).data('studentid');
+    if (!studentId) {
+        alert("Student ID not found.");
+        return;
+    }
+    console.log('[Student Profile Modal] Fetching profile for studentId:', studentId);
+    $.ajax({
+        url: "ajaxhandler/studentDashboardAjax.php",
+        type: "POST",
+        dataType: "json",
+        data: {
+            action: "getStudentProfile",
+            studentId: studentId
+        },
+        success: function(response) {
+            console.log('[Student Profile Modal] AJAX response:', response);
+            if (response.status === "success" && response.data) {
+                let profile = response.data;
+                let html = `<div class='profile-header'>`;
+                html += `<div class='profile-avatar'>`;
+                html += `<img src='${profile.profile_picture ? 'uploads/' + profile.profile_picture : 'icon/nobglogo.ico'}' alt='Profile Picture' class='avatar-placeholder'>`;
+                html += `</div>`;
+                html += `<h2>${profile.NAME} ${profile.SURNAME}</h2>`;
+                html += `<p class='profile-subtitle'>Student Profile</p>`;
+                html += `</div>`;
+                html += `<div class='profile-details'>`;
+                html += `<div class='detail-row'><span class='detail-label'>Intern ID:</span><span class='detail-value'>${profile.INTERNS_ID || ''}</span></div>`;
+                html += `<div class='detail-row'><span class='detail-label'>Student ID:</span><span class='detail-value'>${profile.STUDENT_ID || ''}</span></div>`;
+                html += `<div class='detail-row'><span class='detail-label'>Full Name:</span><span class='detail-value'>${profile.NAME} ${profile.SURNAME}</span></div>`;
+                html += `<div class='detail-row'><span class='detail-label'>Age:</span><span class='detail-value'>${profile.AGE || ''}</span></div>`;
+                html += `<div class='detail-row'><span class='detail-label'>Gender:</span><span class='detail-value'>${profile.GENDER || ''}</span></div>`;
+                html += `<div class='detail-row'><span class='detail-label'>Email:</span><span class='detail-value'>${profile.EMAIL || ''}</span></div>`;
+                html += `<div class='detail-row'><span class='detail-label'>Contact Number:</span><span class='detail-value'>${profile.CONTACT_NUMBER || ''}</span></div>`;
+                html += `<div class='detail-row'><span class='detail-label'>HTE Name:</span><span class='detail-value'>${profile.HTE_NAME || 'N/A'}</span></div>`;
+                html += `</div>`;
+                $("#studentProfileModalContent").html(html);
+                $("#studentProfileModal").fadeIn();
+                console.log('[Student Profile Modal] Profile loaded and modal shown.');
+            } else {
+                console.error('[Student Profile Modal] Student profile not found.', response);
+                alert("Student profile not found.");
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('[Student Profile Modal] AJAX error:', error, xhr.responseText);
+            alert("Error loading student profile: " + error);
+        }
+    });
+});
+
+$(document).on("click", "#closeStudentProfileModal", function() {
+    $("#studentProfileModal").fadeOut();
+});
 
             // Convert time to AM/PM format for timein and timeout, or display '--:-- --' if empty
             const formatTime = (time) => {
@@ -778,7 +1253,7 @@ function downloadPDF(sessionid, classid, cdrid) {
 
 $(function(e)
 {
-    $(document).on("click","#btnLogout",function(ee)
+    $(document).on("click","#logoutBtn",function(ee)
     {
             $.ajax(
             {
@@ -804,7 +1279,7 @@ $(function(e)
 
 
     loadSeassions();
-  
+
     $(document).on("change", "#ddlclass", function(e) {
         currentSessionId = $(this).val();
         $("#hiddenSelectedSessionId").val(currentSessionId);
@@ -821,6 +1296,8 @@ $(function(e)
     });
 
     $(document).on("click", ".classcard", function(e ) {
+        // Hide control panel forms when showing student list
+        $('.form-container').slideUp();
         let building = $(this).data('building');
         currentHteId = building['HTE_ID'];
         $("#hiddenSelectedHteID").val(currentHteId);
@@ -900,11 +1377,14 @@ $(function(e)
         $(document).on("click", ".btnAdd", function(e) {
             e.preventDefault();
             let hteId = $("#hiddenSelectedHteID").val();
-    
+
             if (!hteId || hteId === "") {
                 alert("Please Select HTE Before Adding Student");
                 return;
             }
+            // Close other forms
+            $('#allStudentsContainer').fadeOut();
+            $('#addHTEForm').fadeOut();
             $("#addStudentForm").show();
         });
     

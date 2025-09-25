@@ -33,6 +33,42 @@ if (empty($action)) {
 }
 
 switch ($action) {
+    case "getStudentProfile":
+        $studentId = $_POST['studentId'] ?? null;
+        if (!$studentId) {
+            sendResponse('error', null, 'Student ID is required');
+        }
+        try {
+            // Fetch main student info
+            $stmt = $dbo->conn->prepare("SELECT INTERNS_ID, STUDENT_ID, NAME, SURNAME, AGE, GENDER, EMAIL, CONTACT_NUMBER, profile_picture FROM interns_details WHERE INTERNS_ID = ?");
+            $stmt->execute([$studentId]);
+            $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($profile) {
+                // Fetch HTE_ID from intern_details
+                $stmt2 = $dbo->conn->prepare("SELECT HTE_ID FROM intern_details WHERE INTERNS_ID = ? LIMIT 1");
+                $stmt2->execute([$studentId]);
+                $internDetail = $stmt2->fetch(PDO::FETCH_ASSOC);
+                $hteName = 'N/A';
+                if ($internDetail && !empty($internDetail['HTE_ID'])) {
+                    $hteId = $internDetail['HTE_ID'];
+                    // Try to fetch HTE name from hte/building table
+                    $stmt3 = $dbo->conn->prepare("SELECT NAME FROM host_training_establishment WHERE HTE_ID = ? LIMIT 1");
+                    $stmt3->execute([$hteId]);
+                    $hteRow = $stmt3->fetch(PDO::FETCH_ASSOC);
+                    if ($hteRow && !empty($hteRow['NAME'])) {
+                        $hteName = $hteRow['NAME'];
+                    }
+                }
+                $profile['HTE_NAME'] = $hteName;
+                sendResponse('success', $profile, 'Student profile retrieved successfully');
+            } else {
+                sendResponse('error', null, 'Student profile not found');
+            }
+        } catch (Exception $e) {
+            logError("Error retrieving student profile: " . $e->getMessage());
+            sendResponse('error', null, 'Error retrieving student profile');
+        }
+        break;
     case "getDashboardStats":
         $studentId = $_POST['studentId'] ?? null;
         if (!$studentId) {

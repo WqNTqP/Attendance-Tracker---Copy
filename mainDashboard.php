@@ -3,6 +3,12 @@
 //kani na code kay condition ni siya 
 //para if wala naka login mo balik raka sa login page
 session_start();
+// Ensure coordinator session variables are set for backend access
+if (isset($_SESSION["current_user"]) && !isset($_SESSION["coordinator_user"])) {
+    $_SESSION["coordinator_user"] = $_SESSION["current_user"];
+    $_SESSION["user_type"] = "coordinator";
+    $_SESSION["user_id"] = $_SESSION["current_user"];
+}
     if(isset($_SESSION["current_user"]))
         {
             $cdrid=$_SESSION["current_user"];
@@ -62,9 +68,16 @@ session_start();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/mainDashboard.css">
     <link rel="icon" type="image/x-icon" href="icon/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <title>Attendance</title>
 </head>
 <body>
+
+    <!-- Report Tab Loader -->
+    <div id="reportLoader" class="lockscreen" style="z-index:9999;">
+        <div class="spinner"></div>
+    </div>
+
 
 
 
@@ -87,9 +100,10 @@ session_start();
 
         <div class="sidebar">
             <ul class="sidebar-menu">
-                <li class="sidebar-item active" id="attendanceTab" onclick="switchTab('attendance')">Attendance</li>
-                <li class="sidebar-item" id="evaluationTab" onclick="switchTab('evaluation')">Evaluation</li>
-                <li class="sidebar-item" id="controlTab" onclick="switchTab('control')">Control</li>
+                <li class="sidebar-item active" id="attendanceTab" data-tab="attendance">Attendance</li>
+                <li class="sidebar-item" id="evaluationTab" data-tab="evaluation">Evaluation</li>
+                <li class="sidebar-item" id="controlTab" data-tab="control">Control</li>
+                <li class="sidebar-item" id="reportTab" data-tab="report">Report</li>
             </ul>
         </div>
 
@@ -125,6 +139,25 @@ session_start();
 
 
     </div>
+        <!-- Report Tab Content -->
+        <div id="reportContent" class="tab-content">
+            <div class="reports-container">
+                <div class="reports-header">
+                    <h2>Approved Weekly Reports</h2>
+                    <p class="welcome-subtitle">Attendance Tracker System</p>
+                    <div class="report-filters">
+                        <label for="filterStudent">Student:</label>
+                        <select id="filterStudent"></select>
+                        <label for="filterDate">Date:</label>
+                        <input type="date" id="filterDate" />
+                        <button id="applyReportFilters" class="btnReport">Apply Filters</button>
+                    </div>
+                </div>
+                <div id="approvedReportsList">
+                    <p>Loading approved weekly reports...</p>
+                </div>
+            </div>
+        </div>
             <!-- Evaluation Tab Content -->
         <div id="evaluationContent" class="tab-content">
             <div class="welcome-container">
@@ -139,18 +172,19 @@ session_start();
 
         <!-- Control Tab Content -->
         <div id="controlContent" class="tab-content">
-            <div class="control-left">
+            <div class="control-top">
                 <div class="control-buttons">
-                    <button id="btnViewAllStudents" class="control-btn">View All Students</button>
-                    <button id="btnAddStudent" class="control-btn">Add Student</button>
-                    <button id="btnAddHTE" class="control-btn">Add HTE</button>
-                    <button id="btnAddSession" class="control-btn">Add Session</button>
-                    <button id="btnDeleteHTE" class="control-btn">Delete HTE</button>
-                    <button id="btnDeleteSession" class="control-btn">Delete Session</button>
+                    <button id="btnViewAllStudents" class="control-btn" aria-label="View All Students" title="View All Students"><i class="fas fa-users"></i></button>
+                    <button id="btnAddStudent" class="control-btn" aria-label="Add Student" title="Add Student"><i class="fas fa-user-plus"></i></button>
+                    <button id="btnAddHTE" class="control-btn" aria-label="Add HTE" title="Add HTE"><i class="fas fa-building"></i></button>
+                    <button id="btnAddSession" class="control-btn" aria-label="Add Session" title="Add Session"><i class="fas fa-calendar-plus"></i></button>
+                    <button id="btnDeleteStudent" class="control-btn" aria-label="Delete Student" title="Delete Student"><i class="fas fa-user-minus"></i></button>
+                    <button id="btnDeleteHTE" class="control-btn" aria-label="Delete HTE" title="Delete HTE"><i class="fas fa-building"></i></button>
+                    <button id="btnDeleteSession" class="control-btn" aria-label="Delete Session" title="Delete Session"><i class="fas fa-calendar-minus"></i></button>
                 </div>
             </div>
 
-            <div class="control-right">
+            <div class="control-bottom">
                 <div class="control-forms">
                         <!-- Add Session Form -->
                         <div id="sessionFormContainer" class="form-container" style="display:none;">
@@ -178,49 +212,65 @@ session_start();
                         <!-- Add Student Form -->
                         <div id="studentFormContainer" class="form-container" style="display:none;">
                             <h3>Add New Student</h3>
-                            <form id="studentForm" method="POST" enctype="multipart/form-data">
-                                <div class="form-group">
+                            <form id="studentForm" method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="form-group" style="grid-column: 1 / 3;">
                                     <label for="studentId">Student ID:</label>
-                                    <input type="text" id="studentId" name="studentId" required>
+                                    <input type="text" id="studentId" name="studentId" required placeholder="Enter Student ID">
                                 </div>
-                                <div class="form-group">
-                                    <label for="name">Name:</label>
-                                    <input type="text" id="name" name="name" required>
+                                <div class="form-group" style="grid-column: 1 / 2;">
+                                    <label for="name">First Name:</label>
+                                    <input type="text" id="name" name="name" required placeholder="Enter First Name">
                                 </div>
-                                <div class="form-group">
-                                    <label for="age">Age:</label>
-                                    <input type="number" id="age" name="age" min="15" max="100" required>
+                                <div class="form-group" style="grid-column: 2 / 3;">
+                                    <label for="surname">Last Name:</label>
+                                    <input type="text" id="surname" name="surname" required placeholder="Enter Last Name">
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" style="grid-column: 1 / 2;">
                                     <label for="gender">Gender:</label>
                                     <select id="gender" name="gender" required>
-                                        <option value="">Select Gender</option>
+                                        <option value="" disabled selected>Select Gender</option>
                                         <option value="Male">Male</option>
                                         <option value="Female">Female</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" style="grid-column: 2 / 3;">
+                                    <label for="age">Age:</label>
+                                    <input type="number" id="age" name="age" min="15" max="100" required placeholder="Enter Age">
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / 2;">
                                     <label for="email">Email:</label>
-                                    <input type="email" id="email" name="email" required>
+                                    <input type="email" id="email" name="email" required placeholder="Enter Email">
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" style="grid-column: 2 / 3;">
                                     <label for="contactNumber">Contact Number:</label>
-                                    <input type="tel" id="contactNumber" name="contactNumber" pattern="[0-9+\-\s()]{7,20}" required>
+                                    <input type="tel" id="contactNumber" name="contactNumber" pattern="[0-9+\-\s()]{7,20}" required placeholder="Enter Contact Number">
                                 </div>
-
-
-                                <!-- CSV Upload Section -->
-                                <div class="form-group">
+                                <div class="form-group" style="grid-column: 1 / 2;">
+                                    <label for="sessionSelectStudent">Assign to Session:</label>
+                                    <select id="sessionSelectStudent" name="sessionId">
+                                        <option value="">Select Session</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="grid-column: 2 / 3;">
+                                    <label for="hteSelectStudent">Assign to HTE:</label>
+                                    <select id="hteSelectStudent" name="hteId">
+                                        <option value="">Select HTE</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / 2;">
                                     <label for="csvFile">Upload CSV File (Bulk Import):</label>
                                     <input type="file" id="csvFile" name="csvFile" accept=".csv">
                                     <small style="color: #666; font-size: 0.8em;">
-                                        CSV format: student_id,name,age,gender,email,contact_number
+                                        CSV format: student_id,name,surname,age,gender,email,contact_number
                                     </small>
+                                    <br/>
+                                    <a href="sample_students.csv" download="sample_students.csv" style="font-size: 0.9em;">Download Sample CSV Format</a>
                                 </div>
-
-                                <div class="form-actions">
-                                    <button type="submit" class="btn-submit">Add Student</button>
-                                    <button type="button" id="closeStudentForm" class="btn-cancel">Cancel</button>
+                                <div class="form-group" style="grid-column: 2 / 3; display: flex; flex-direction: column; justify-content: flex-end;">
+                                    <div class="form-actions" style="display: flex; gap: 1rem;">
+                                        <button type="submit" class="btn-submit" style="flex: 1;">Add Student</button>
+                                        <button type="button" id="closeStudentForm" class="btn-cancel" style="flex: 1;">Close</button>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -228,40 +278,42 @@ session_start();
                         <!-- Add HTE Form -->
                         <div id="addHTEFormContainer" class="form-container" style="display:none;">
                             <h3>Add New HTE</h3>
-                            <form id="hteForm">
-                                <div class="form-group">
+                            <form id="hteForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="form-group" style="grid-column: 1 / 2;">
                                     <label for="hteName">Name:</label>
                                     <input type="text" id="hteName" name="NAME" required>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" style="grid-column: 2 / 3;">
                                     <label for="hteIndustry">Industry:</label>
                                     <input type="text" id="hteIndustry" name="INDUSTRY" required>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" style="grid-column: 1 / 2;">
                                     <label for="hteAddress">Address:</label>
                                     <input type="text" id="hteAddress" name="ADDRESS" required>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" style="grid-column: 2 / 3;">
                                     <label for="hteEmail">Contact Email:</label>
                                     <input type="email" id="hteEmail" name="CONTACT_EMAIL" required>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" style="grid-column: 1 / 2;">
                                     <label for="hteContactPerson">Contact Person:</label>
                                     <input type="text" id="hteContactPerson" name="CONTACT_PERSON" required>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" style="grid-column: 2 / 3;">
                                     <label for="hteContactNumber">Contact Number:</label>
                                     <input type="text" id="hteContactNumber" name="CONTACT_NUMBER" required>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" style="grid-column: 1 / 2;">
                                     <label for="sessionSelect">Assign to Session:</label>
                                     <select id="sessionSelect" name="sessionId" required>
                                         <option value="">Select Session</option>
                                     </select>
                                 </div>
-                                <div class="form-actions">
-                                    <button type="submit" class="btn-submit">Add HTE</button>
-                                    <button type="button" id="closeHTEForm" class="btn-cancel">Cancel</button>
+                                <div class="form-group" style="grid-column: 2 / 3; display: flex; flex-direction: column; justify-content: flex-end;">
+                                    <div class="form-actions" style="display: flex; gap: 1rem;">
+                                        <button type="submit" class="btn-submit" style="flex: 1;">Add HTE</button>
+                                        <button type="button" id="closeHTEForm" class="btn-cancel" style="flex: 1;">Cancel</button>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -279,6 +331,37 @@ session_start();
                                 <div class="form-actions">
                                     <button type="submit" class="btn-submit" style="background-color: #e74c3c;">Delete HTE</button>
                                     <button type="button" id="closeDeleteHTEForm" class="btn-cancel">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Delete Student Form -->
+                        <div id="deleteStudentFormContainer" class="form-container" style="display:none;">
+                            <h3>Delete Student(s)</h3>
+                            <form id="deleteStudentForm">
+                                <div style="display: flex; gap: 1rem;">
+                                    <div class="form-group" style="flex: 1;">
+                                        <label for="deleteStudentSessionSelect">Select Session:</label>
+                                        <select id="deleteStudentSessionSelect" name="sessionId" required>
+                                            <option value="">Select Session</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="flex: 1;">
+                                        <label for="deleteStudentHteSelect">Select HTE:</label>
+                                        <select id="deleteStudentHteSelect" name="hteId" required>
+                                            <option value="">Select HTE</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Students:</label>
+                                    <div id="deleteStudentList" style="max-height: 700px; overflow-y: auto; border: 1px solid #ccc; padding: 0.5rem;">
+                                        <!-- Student checkboxes will be loaded here -->
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-submit" style="background-color: #e74c3c;">Delete Selected Students</button>
+                                    <button type="button" id="closeDeleteStudentForm" class="btn-cancel">Cancel</button>
                                 </div>
                             </form>
                         </div>
@@ -304,7 +387,7 @@ session_start();
                         </div>
 
                         <!-- View All Students Container -->
-                        <div id="allStudentsContainer" class="form-container" style="display:none;">
+                        <div id="allStudentsContainer" class="form-container">
                             <h3>All Students Under Coordinator</h3>
                             <div class="table-container">
                                 <table id="allStudentsTable" class="students-table">
@@ -312,6 +395,7 @@ session_start();
                                         <tr>
                                             <th>Student ID</th>
                                             <th>Name</th>
+                                            <th>Surname</th>
                                             <th>Age</th>
                                             <th>Gender</th>
                                             <th>Email</th>
@@ -355,6 +439,80 @@ session_start();
     <script src="js/mainDashboard.js"></script>
 
     <script>
+        // Load approved weekly reports when Report tab is shown
+        function loadApprovedWeeklyReports() {
+            $.ajax({
+                url: 'ajaxhandler/coordinatorWeeklyReportAjax.php',
+                type: 'POST',
+                dataType: 'json',
+                data: { action: 'getWeeklyReports' },
+                success: function(response) {
+                    if (response.status === 'success' && response.reports && response.reports.length > 0) {
+                        let html = '<div class="reports-list">';
+                        response.reports.forEach(function(report) {
+                            // Calculate week number
+                            const weekNumber = (function(start) {
+                                const d = new Date(start);
+                                d.setHours(0,0,0,0);
+                                d.setDate(d.getDate() + 4 - (d.getDay()||7));
+                                const yearStart = new Date(d.getFullYear(),0,1);
+                                return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+                            })(report.week_start);
+                            html += '<div class="report-card admin-report-preview">';
+                            html += '<div class="report-header">';
+                            html += `<h3>${report.student_name || ''} - Week ${weekNumber}</h3>`;
+                            html += '<div class="report-meta">';
+                            html += `<span class="report-period">Period: ${report.week_start} to ${report.week_end}</span>`;
+                            html += `<span class="approval-status approved">Approved</span>`;
+                            html += '</div></div>';
+                            html += '<div class="report-grid">';
+                            ["monday","tuesday","wednesday","thursday","friday"].forEach(function(day) {
+                                html += `<div class='day-section ${day}'>`;
+                                html += `<h4>${day.charAt(0).toUpperCase() + day.slice(1)}</h4>`;
+                                html += `<div class='day-content'>`;
+                                html += `<div class='day-images'>`;
+                                if (report.imagesPerDay && report.imagesPerDay[day]) {
+                                    report.imagesPerDay[day].forEach(function(img) {
+                                        html += `<img src='${img.url}' alt='${day} activity' class='activity-image'>`;
+                                    });
+                                }
+                                html += '</div>';
+                                // Show description for each day (prefer dayDescription if available)
+                                let desc = "";
+                                if (report[day + 'Description']) {
+                                    desc = report[day + 'Description'];
+                                } else if (report.contentPerDay && report.contentPerDay[day]) {
+                                    desc = report.contentPerDay[day];
+                                }
+                                html += `<div class='day-description'><p>${desc}</p></div>`;
+                                html += '</div>';
+                                html += '</div>';
+                            });
+                            html += '</div>';
+                            html += `<div class='report-footer'><div class='footer-left'><span class='updated-date'>Last Updated: ${report.updated_at || ''}</span></div></div>`;
+                            html += '</div>';
+                        });
+                        html += '</div>';
+                        $('#approvedReportsList').html(html);
+                    } else {
+                        $('#approvedReportsList').html('<p>No approved weekly reports found.</p>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('#approvedReportsList').html('<p>Error loading reports. Please try again.</p>');
+                }
+            });
+        }
+
+        // Hook into tab switching to load reports when Report tab is activated
+        $(document).ready(function() {
+            $('.sidebar-item').click(function() {
+                var tabName = $(this).data('tab');
+                if (tabName === 'report') {
+                    loadApprovedWeeklyReports();
+                }
+            });
+        });
         // Tab switching functionality
         function switchTab(tabName) {
             // Hide all tab contents
@@ -368,14 +526,24 @@ session_start();
             });
 
             // Show selected tab content
-            document.getElementById(tabName + 'Content').classList.add('active');
+            var tabContent = document.getElementById(tabName + 'Content');
+            if(tabContent) tabContent.classList.add('active');
 
             // Add active class to selected sidebar item
-            document.getElementById(tabName + 'Tab').classList.add('active');
+            var tabSidebar = document.getElementById(tabName + 'Tab');
+            if(tabSidebar) tabSidebar.classList.add('active');
         }
+
+
 
         // Control Panel JavaScript
         $(document).ready(function() {
+            // Tab click event for sidebar
+            $('.sidebar-item').click(function() {
+                var tabName = $(this).data('tab');
+                switchTab(tabName);
+            });
+
             // Function to close all form containers
             function closeAllForms() {
                 $('.form-container').slideUp();
@@ -384,11 +552,13 @@ session_start();
                 $('#deleteHTEFormSubmit')[0].reset();
                 $('#sessionForm')[0].reset();
                 $('#deleteSessionFormSubmit')[0].reset();
+                $('#studentlistarea').html(''); // Hide student list
             }
 
             // Show Add Student Form with session and HTE loading
             $('#btnAddStudent').click(function() {
                 closeAllForms();
+                $('#studentlistarea').html(''); // Hide student list
                 $('#studentFormContainer').slideDown();
                 loadSessionOptionsForStudent();
                 $('#studentForm')[0].reset();
@@ -725,6 +895,149 @@ session_start();
             $('#btnDeleteSession').click(function() {
                 loadSessionOptionsForDelete();
                 $('#deleteSessionFormContainer').slideDown();
+            });
+
+            // Show Delete Student Form
+            $('#btnDeleteStudent').click(function() {
+                closeAllForms();
+                loadSessionOptionsForDeleteStudent();
+                $('#deleteStudentFormContainer').slideDown();
+            });
+
+            // Close Delete Student Form
+            $('#closeDeleteStudentForm').click(function() {
+                $('#deleteStudentFormContainer').slideUp();
+                $('#deleteStudentForm')[0].reset();
+                $('#deleteStudentList').empty();
+            });
+
+            // Load sessions for Delete Student form
+            function loadSessionOptionsForDeleteStudent() {
+                $.ajax({
+                    url: "ajaxhandler/attendanceAJAX.php",
+                    type: "POST",
+                    dataType: "json",
+                    data: {action: "getSession"},
+                    success: function(response) {
+                        if (response && response.length > 0) {
+                            let options = '<option value="">Select Session</option>';
+                            response.forEach(function(session) {
+                                const sessionId = session.ID;
+                                const sessionName = session.YEAR + " " + session.TERM;
+                                options += `<option value="${sessionId}">${sessionName}</option>`;
+                            });
+                            $('#deleteStudentSessionSelect').html(options);
+                        } else {
+                            alert("No sessions found. Please add a session first.");
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error loading sessions:", error);
+                        alert("Error loading sessions. Please try again.");
+                    }
+                });
+            }
+
+            // Load HTEs based on selected session for Delete Student form
+            $('#deleteStudentSessionSelect').change(function() {
+                let sessionId = $(this).val();
+                if (!sessionId) {
+                    $('#deleteStudentHteSelect').html('<option value="">Select HTE</option>');
+                    $('#deleteStudentList').empty();
+                    return;
+                }
+                let cdrid = $('#hiddencdrid').val();
+                $.ajax({
+                    url: "ajaxhandler/attendanceAJAX.php",
+                    type: "POST",
+                    dataType: "json",
+                    data: {cdrid: cdrid, sessionid: sessionId, action: "getHTE"},
+                    success: function(response) {
+                        if (response && response.length > 0) {
+                            let options = '<option value="">Select HTE</option>';
+                            response.forEach(function(hte) {
+                                options += `<option value="${hte.HTE_ID}">${hte.NAME} (${hte.INDUSTRY})</option>`;
+                            });
+                            $('#deleteStudentHteSelect').html(options);
+                        } else {
+                            $('#deleteStudentHteSelect').html('<option value="">No HTEs found for this session</option>');
+                            $('#deleteStudentList').empty();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error loading HTEs:", error);
+                        alert("Error loading HTEs. Please try again.");
+                    }
+                });
+            });
+
+            // Load students based on selected session and HTE for Delete Student form
+            $('#deleteStudentHteSelect').change(function() {
+                let sessionId = $('#deleteStudentSessionSelect').val();
+                let hteId = $(this).val();
+                if (!sessionId || !hteId) {
+                    $('#deleteStudentList').empty();
+                    return;
+                }
+                let cdrid = $('#hiddencdrid').val();
+                $.ajax({
+                    url: "ajaxhandler/attendanceAJAX.php",
+                    type: "POST",
+                    dataType: "json",
+                    data: {cdrid: cdrid, sessionid: sessionId, hteid: hteId, action: "getStudentsBySessionAndHTE"},
+                    success: function(response) {
+                        if (response && response.length > 0) {
+                            let html = '<table class="student-delete-table"><thead><tr><th>Student ID</th><th>Name</th><th>Surname</th><th>Checkbox</th></tr></thead><tbody>';
+                            response.forEach(function(student) {
+                            html += `<tr><td>${student.STUDENT_ID}</td><td>${student.NAME}</td><td>${student.SURNAME}</td><td style="text-align: center;"><input type="checkbox" class="deleteStudentCheckbox" value="${student.STUDENT_ID}" id="student_${student.STUDENT_ID}"></td></tr>`;
+                            });
+                            html += '</tbody></table>';
+                            $('#deleteStudentList').html(html);
+                        } else {
+                            $('#deleteStudentList').html('<p>No students found for the selected session and HTE.</p>');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error loading students:", error);
+                        alert("Error loading students. Please try again.");
+                    }
+                });
+            });
+
+            // Handle Delete Student form submission
+            $('#deleteStudentForm').submit(function(e) {
+                e.preventDefault();
+                let selectedStudents = [];
+                $('.deleteStudentCheckbox:checked').each(function() {
+                    selectedStudents.push($(this).val());
+                });
+                if (selectedStudents.length === 0) {
+                    alert("Please select at least one student to delete.");
+                    return;
+                }
+                if (!confirm("Are you sure you want to delete the selected student(s)?")) {
+                    return;
+                }
+                $.ajax({
+                    url: "ajaxhandler/attendanceAJAX.php",
+                    type: "POST",
+                    dataType: "json",
+                    data: {studentIds: selectedStudents, action: "deleteStudents"},
+                    success: function(response) {
+                        if (response.success) {
+                            alert("Selected student(s) deleted successfully!");
+                            $('#deleteStudentFormContainer').slideUp();
+                            $('#deleteStudentForm')[0].reset();
+                            $('#deleteStudentList').empty();
+                        } else {
+                            alert("Error deleting students: " + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error deleting students:", error);
+                        alert("Error deleting students. Please try again.");
+                    }
+                });
             });
 
             // Close Delete Session Form

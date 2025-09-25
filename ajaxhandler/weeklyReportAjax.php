@@ -81,7 +81,14 @@ function getWeeklyReports() {
     global $conn;
 
     $studentId = $_POST['studentId'] ?? null;
-    $week = $_POST['week'] ?? null;
+    $weekStart = $_POST['weekStart'] ?? null;
+    $weekEnd = $_POST['weekEnd'] ?? null;
+
+    // Debug logging
+    error_log("Searching for weekly reports with:");
+    error_log("Student ID: " . $studentId);
+    error_log("Week Start: " . $weekStart);
+    error_log("Week End: " . $weekEnd);
 
     // Get base URL
     $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF'], 2) . '/';
@@ -89,12 +96,14 @@ function getWeeklyReports() {
     // Build the query based on filters
     $query = "
         SELECT r.*,
-               i.SURNAME as student_name,
-               ri.image_filename, ri.day_of_week
-        FROM weekly_reports r
-        LEFT JOIN interns_details i ON r.interns_id = i.INTERNS_ID
-        LEFT JOIN report_images ri ON r.report_id = ri.report_id
-        WHERE r.status = 'submitted'
+       i.SURNAME as student_name,
+       ri.image_filename, 
+       ri.day_of_week
+FROM weekly_reports r
+LEFT JOIN interns_details i ON r.interns_id = i.INTERNS_ID
+LEFT JOIN report_images ri ON r.report_id = ri.report_id
+WHERE r.status = 'submitted'
+  AND r.approval_status = 'pending'
     ";
 
     $params = [];
@@ -104,12 +113,10 @@ function getWeeklyReports() {
         $params[] = $studentId;
     }
 
-    if ($week && $week !== 'all') {
-        // Calculate week start and end dates based on week number
-        $year = date('Y');
-        $weekStart = date('Y-m-d', strtotime($year . 'W' . str_pad($week, 2, '0', STR_PAD_LEFT)));
-        $weekEnd = date('Y-m-d', strtotime($weekStart . ' +6 days'));
+    $weekStart = $_POST['weekStart'] ?? null;
+    $weekEnd = $_POST['weekEnd'] ?? null;
 
+    if ($weekStart && $weekEnd) {
         $query .= " AND r.week_start = ? AND r.week_end = ?";
         $params[] = $weekStart;
         $params[] = $weekEnd;
@@ -117,13 +124,21 @@ function getWeeklyReports() {
 
     $query .= " ORDER BY r.created_at DESC, ri.day_of_week, ri.uploaded_at";
 
+    // Debug logging
+    error_log("SQL Query: " . $query);
+    error_log("Parameters: " . print_r($params, true));
+
     $stmt = $conn->prepare($query);
     if (!$stmt) {
+        error_log("Prepare failed: " . print_r($conn->errorInfo(), true));
         echo json_encode(['status' => 'error', 'message' => 'Prepare failed']);
         exit;
     }
 
     $result = $stmt->execute($params);
+    if (!$result) {
+        error_log("Execute failed: " . print_r($stmt->errorInfo(), true));
+    }
     if (!$result) {
         echo json_encode(['status' => 'error', 'message' => 'Execute failed']);
         exit;
@@ -355,10 +370,12 @@ function saveReportDraft($studentId) {
         }
     }
 
-    // Collect summary fields
-    $challengesFaced = $_POST['challengesFaced'] ?? '';
-    $lessonsLearned = $_POST['lessonsLearned'] ?? '';
-    $goalsNextWeek = $_POST['goalsNextWeek'] ?? '';
+    // Collect daily descriptions
+    $mondayDescription = $_POST['mondayDescription'] ?? '';
+    $tuesdayDescription = $_POST['tuesdayDescription'] ?? '';
+    $wednesdayDescription = $_POST['wednesdayDescription'] ?? '';
+    $thursdayDescription = $_POST['thursdayDescription'] ?? '';
+    $fridayDescription = $_POST['fridayDescription'] ?? '';
 
     // Check if report already exists
     $existingReport = getReportByWeek($studentId, $week);
@@ -428,10 +445,12 @@ function saveReportDraft($studentId) {
 
     if ($existingReport) {
         // Update existing draft
-        updateReportPerDay($existingReport['report_id'], $contentPerDay, $allImagesPerDay, 'draft', $challengesFaced, $lessonsLearned, $goalsNextWeek);
+        updateReportPerDay($existingReport['report_id'], $contentPerDay, $allImagesPerDay, 'draft', 
+            $mondayDescription, $tuesdayDescription, $wednesdayDescription, $thursdayDescription, $fridayDescription);
     } else {
         // Create new draft
-        createReportPerDay($studentId, $week, $contentPerDay, $allImagesPerDay, 'draft', $challengesFaced, $lessonsLearned, $goalsNextWeek);
+        createReportPerDay($studentId, $week, $contentPerDay, $allImagesPerDay, 'draft',
+            $mondayDescription, $tuesdayDescription, $wednesdayDescription, $thursdayDescription, $fridayDescription);
     }
 
     // Debug: Log images being saved
@@ -454,17 +473,25 @@ function submitFinalReport($studentId) {
         }
     }
 
-    // Collect summary fields
-    $challengesFaced = trim($_POST['challengesFaced'] ?? '');
-    $lessonsLearned = trim($_POST['lessonsLearned'] ?? '');
-    $goalsNextWeek = trim($_POST['goalsNextWeek'] ?? '');
+    // Collect daily descriptions
+    $mondayDescription = trim($_POST['mondayDescription'] ?? '');
+    $tuesdayDescription = trim($_POST['tuesdayDescription'] ?? '');
+    $wednesdayDescription = trim($_POST['wednesdayDescription'] ?? '');
+    $thursdayDescription = trim($_POST['thursdayDescription'] ?? '');
+    $fridayDescription = trim($_POST['fridayDescription'] ?? '');
 
-    // Check if there's any content in summary fields or per-day content
+    // Check if there's any content in daily descriptions or per-day content
     $hasContent = false;
 
-    if (!empty($challengesFaced) || !empty($lessonsLearned) || !empty($goalsNextWeek)) {
-        $hasContent = true;
-    } else {
+    $descriptions = [$mondayDescription, $tuesdayDescription, $wednesdayDescription, $thursdayDescription, $fridayDescription];
+    foreach ($descriptions as $desc) {
+        if (!empty(trim($desc))) {
+            $hasContent = true;
+            break;
+        }
+    }
+
+    if (!$hasContent) {
         foreach ($contentPerDay as $dayContent) {
             if (!empty(trim($dayContent))) {
                 $hasContent = true;
@@ -546,10 +573,12 @@ function submitFinalReport($studentId) {
 
     if ($existingReport) {
         // Update and submit existing report
-        updateReportPerDay($existingReport['report_id'], $contentPerDay, $allImagesPerDay, 'submitted', $challengesFaced, $lessonsLearned, $goalsNextWeek);
+        updateReportPerDay($existingReport['report_id'], $contentPerDay, $allImagesPerDay, 'submitted',
+            $mondayDescription, $tuesdayDescription, $wednesdayDescription, $thursdayDescription, $fridayDescription);
     } else {
         // Create and submit new report
-        createReportPerDay($studentId, $week, $contentPerDay, $allImagesPerDay, 'submitted', $challengesFaced, $lessonsLearned, $goalsNextWeek);
+        createReportPerDay($studentId, $week, $contentPerDay, $allImagesPerDay, 'submitted',
+            $mondayDescription, $tuesdayDescription, $wednesdayDescription, $thursdayDescription, $fridayDescription);
     }
 
     echo json_encode(['status' => 'success', 'message' => 'Report submitted successfully']);
@@ -944,7 +973,7 @@ function handleImageUploadsPerDay($files) {
     return $uploadedImagesPerDay;
 }
 
-function createReportPerDay($studentId, $week, $contentPerDay, $imagesPerDay, $status, $challengesFaced = '', $lessonsLearned = '', $goalsNextWeek = '') {
+function createReportPerDay($studentId, $week, $contentPerDay, $imagesPerDay, $status, $mondayDescription = '', $tuesdayDescription = '', $wednesdayDescription = '', $thursdayDescription = '', $fridayDescription = '') {
     global $conn;
 
     $conn->beginTransaction();
@@ -958,13 +987,14 @@ function createReportPerDay($studentId, $week, $contentPerDay, $imagesPerDay, $s
         // Convert per-day content to JSON for storage
         $contentJson = json_encode($contentPerDay);
 
-        // Insert report with additional summary fields
+        // Insert report with daily descriptions
         $stmt = $conn->prepare("
-            INSERT INTO weekly_reports (interns_id, week_start, week_end, report_content, challenges_faced, lessons_learned, goals_next_week, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO weekly_reports (interns_id, week_start, week_end, report_content, monday_description, tuesday_description, wednesday_description, thursday_description, friday_description, status, approval_status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
-        $stmt->execute([$studentId, $weekStart, $weekEnd, $contentJson, $challengesFaced, $lessonsLearned, $goalsNextWeek, $status]);
+        // For new reports and resubmissions, set approval_status to 'pending'
+        $stmt->execute([$studentId, $weekStart, $weekEnd, $contentJson, $mondayDescription, $tuesdayDescription, $wednesdayDescription, $thursdayDescription, $fridayDescription, $status, $status === 'submitted' ? 'pending' : NULL]);
 
         $reportId = $conn->lastInsertId();
 
@@ -978,7 +1008,7 @@ function createReportPerDay($studentId, $week, $contentPerDay, $imagesPerDay, $s
     }
 }
 
-function updateReportPerDay($reportId, $contentPerDay, $imagesPerDay, $status, $challengesFaced = '', $lessonsLearned = '', $goalsNextWeek = '') {
+function updateReportPerDay($reportId, $contentPerDay, $imagesPerDay, $status, $mondayDescription = '', $tuesdayDescription = '', $wednesdayDescription = '', $thursdayDescription = '', $fridayDescription = '') {
     global $conn;
 
     $conn->beginTransaction();
@@ -987,15 +1017,16 @@ function updateReportPerDay($reportId, $contentPerDay, $imagesPerDay, $status, $
         // Convert per-day content to JSON for storage
         $contentJson = json_encode($contentPerDay);
 
-        // Update report with additional summary fields
+        // Update report with daily descriptions
         $stmt = $conn->prepare("
             UPDATE weekly_reports
-            SET report_content = ?, challenges_faced = ?, lessons_learned = ?, goals_next_week = ?, status = ?,
+            SET report_content = ?, monday_description = ?, tuesday_description = ?, wednesday_description = ?, 
+                thursday_description = ?, friday_description = ?, status = ?, approval_status = 'pending',
                 updated_at = CURRENT_TIMESTAMP
             WHERE report_id = ?
         ");
 
-        $stmt->execute([$contentJson, $challengesFaced, $lessonsLearned, $goalsNextWeek, $status, $reportId]);
+        $stmt->execute([$contentJson, $mondayDescription, $tuesdayDescription, $wednesdayDescription, $thursdayDescription, $fridayDescription, $status, $reportId]);
 
         // Delete existing images
         $deleteStmt = $conn->prepare("DELETE FROM report_images WHERE report_id = ?");

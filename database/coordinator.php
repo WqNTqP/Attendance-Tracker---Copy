@@ -28,6 +28,68 @@ class coordinator
         return $rv;
     }
 
+    public function verifyPassword($dbo, $coordinator_id, $password) {
+        try {
+            // Verify coordinator exists and get their password
+            $stmt = $dbo->conn->prepare("SELECT password FROM coordinator WHERE COORDINATOR_ID = :id");
+            if (!$stmt->execute([':id' => $coordinator_id])) {
+                throw new Exception("Database error while verifying password");
+            }
+            
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$result) {
+                throw new Exception("Coordinator not found");
+            }
+            
+            // If the password is stored as a hash, use password_verify
+            if (strlen($result['password']) > 32) { // Likely a hash
+                return password_verify($password, $result['password']);
+            } else {
+                // Legacy plain text comparison - consider updating to hashed passwords
+                $matched = $result['password'] === $password;
+                if ($matched) {
+                    // Upgrade to hashed password
+                    $this->updatePassword($dbo, $coordinator_id, $password);
+                }
+                return $matched;
+            }
+            
+        } catch (Exception $e) {
+            error_log("Error verifying password: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function updatePassword($dbo, $coordinator_id, $new_password) {
+        try {
+            // Start transaction
+            $dbo->conn->beginTransaction();
+            
+            // Update the password
+            $stmt = $dbo->conn->prepare("UPDATE coordinator SET password = :password WHERE COORDINATOR_ID = :id");
+            $result = $stmt->execute([
+                ':password' => $new_password,
+                ':id' => $coordinator_id
+            ]);
+            
+            if (!$result || $stmt->rowCount() === 0) {
+                throw new Exception("No coordinator found with ID: " . $coordinator_id);
+            }
+            
+            // Commit the transaction
+            $dbo->conn->commit();
+            return true;
+            
+        } catch (Exception $e) {
+            // Rollback on error
+            if ($dbo->conn->inTransaction()) {
+                $dbo->conn->rollBack();
+            }
+            error_log("Error updating password: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
     public function getHTEInASession($dbo, $sessionid, $cdrid)
     {
         $rv = [];

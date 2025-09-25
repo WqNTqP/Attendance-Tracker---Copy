@@ -424,3 +424,165 @@
 [2025-09-05 16:30] ERROR: Error checking new data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'wr.submitted_at' in 'where clause'
 [2025-09-05 16:30] ERROR: Error checking new data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'wr.submitted_at' in 'where clause'
 [2025-09-05 16:31] ERROR: Error checking new data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'wr.submitted_at' in 'where clause'
+[2025-09-22 14:05] ERROR: Error retrieving students for coordinator: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:15] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:15] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:15] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:16] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:17] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-23 17:19] ERROR: Error retrieving student list: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.student' doesn't exist
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:14] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:16] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:17] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'SESSION_ID' in 'field list'
+[2025-09-24 20:21] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'HTE_NAME' in 'field list'
+[2025-09-24 20:25] ERROR: Error retrieving student profile: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'HTE_NAME' in 'field list'
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:34] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist
+[2025-09-24 20:35] ERROR: Error retrieving student profile: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'attendancetrackernp.building_registration_details' doesn't exist

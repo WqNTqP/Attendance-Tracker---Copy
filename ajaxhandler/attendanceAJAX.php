@@ -7,8 +7,15 @@ require_once $path."/Attendance Tracker - Copy - NP/database/coordinator.php";
 require_once $path."/Attendance Tracker - Copy - NP/database/buildingRegistrationDetails.php";
 require_once $path."/Attendance Tracker - Copy - NP/database/attendanceDetails.php";
 require('C:/xampp/htdocs/Attendance Tracker - Copy - NP/fpdf/fpdf.php');
+// Prevent any direct output of errors
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+
+// Start output buffering to catch any unexpected output
+ob_start();
+
+// Set JSON header
 header('Content-Type: application/json');
 
 
@@ -62,7 +69,7 @@ function createPDFReport($list, $filename) {
             $line = $list[$i];
             $pdf->Cell($widths[0], 10, $line['INTERNS_ID'], 1, 0, 'C');
             $pdf->Cell($widths[1], 10, $line['STUDENT_ID'], 1, 0, 'C');
-            $pdf->Cell($widths[2], 10, $line['SURNAME'], 1, 0, 'L');
+            $pdf->Cell($widths[2], 10, $line['SURNAME'] . ', ' . $line['NAME'], 1, 0, 'L');
             $pdf->Cell($widths[4], 10, $line['TIMEIN'], 1, 0, 'C');
             $pdf->Cell($widths[5], 10, $line['TIMEOUT'], 1, 0, 'C');
             $pdf->Ln();
@@ -137,7 +144,18 @@ function createPDFReport($list, $filename) {
                     break;
                 }
             }
+            // Add display_name: Surname, Name
+            $student['display_name'] = $student['SURNAME'] . ', ' . $student['NAME'];
         }
+
+        // Sort students alphabetically by SURNAME, then NAME
+        usort($allStudents, function($a, $b) {
+            $surnameCmp = strcasecmp($a['SURNAME'], $b['SURNAME']);
+            if ($surnameCmp === 0) {
+                return strcasecmp($a['NAME'], $b['NAME']);
+            }
+            return $surnameCmp;
+        });
 
         echo json_encode($allStudents);
     }
@@ -197,6 +215,7 @@ function createPDFReport($list, $filename) {
             $intern_id = $_POST['internId'] ?? null;
             $student_id = $_POST['studentId'] ?? null;
             $name = $_POST['name'] ?? null;
+            $surname = $_POST['surname'] ?? null;
             $age = $_POST['age'] ?? null;
             $gender = $_POST['gender'] ?? null;
             $email = $_POST['email'] ?? null;
@@ -217,7 +236,7 @@ function createPDFReport($list, $filename) {
             }
     
             // Debugging: Log all parameters to check their values
-            error_log("Adding student with: internId=$intern_id, studentId=$student_id, name=$name, age=$age, gender=$gender, email=$email, contact_number=$contact_number, coordinator_id=$coordinator_id, hte_id=$hte_id, session_id=$session_id");
+            error_log("Adding student with: internId=$intern_id, studentId=$student_id, name=$name, surname=$surname, age=$age, gender=$gender, email=$email, contact_number=$contact_number, coordinator_id=$coordinator_id, hte_id=$hte_id, session_id=$session_id");
     
             $dbo = new Database(); // Create a Database instance
             $ado = new attendanceDetails(); // Create an instance of attendanceDetails
@@ -226,6 +245,7 @@ function createPDFReport($list, $filename) {
             error_log("About to call addStudent with the following parameters:");
             error_log("student_id: " . $student_id);
             error_log("name: " . $name);
+            error_log("surname: " . $surname);
             error_log("age: " . $age);
             error_log("gender: " . $gender);
             error_log("email: " . $email);
@@ -236,7 +256,7 @@ function createPDFReport($list, $filename) {
     
             try {
                 // Call addStudent with the database instance
-                $new_intern_id = $ado->addStudent($dbo, $student_id, $name, $age, $gender, $email, $contact_number, $coordinator_id, $hte_id, $session_id);
+                $new_intern_id = $ado->addStudent($dbo, $student_id, $name, $surname, $age, $gender, $email, $contact_number, $coordinator_id, $hte_id, $session_id);
                 echo json_encode(['success' => true, 'message' => 'Student added successfully', 'new_intern_id' => $new_intern_id]);
             } catch (Exception $e) {
                 error_log("Exception caught: " . $e->getMessage());
@@ -386,7 +406,7 @@ function createPDFReport($list, $filename) {
     
 
 
-    if ($action == "deleteStudent") {
+if ($action == "deleteStudent") {
     $studentId = $_POST['studentId'] ?? null;
     if (!$studentId) {
         echo json_encode(['success' => false, 'message' => 'Student ID is required.']);
@@ -396,6 +416,47 @@ function createPDFReport($list, $filename) {
     $ado = new attendanceDetails();
     $response = $ado->deleteStudent($dbo, $studentId);
     echo json_encode($response);
+}
+
+if ($action=="getStudentsBySessionAndHTE") {
+    $sessionId = $_POST['sessionid'] ?? null;
+    $hteId = $_POST['hteid'] ?? null;
+    $cdrid = $_POST['cdrid'] ?? null;
+
+    if (!$sessionId || !$hteId || !$cdrid) {
+        echo json_encode([]);
+        exit;
+    }
+
+    $dbo = new Database();
+    $ado = new attendanceDetails();
+
+    try {
+        // Call the method to get students by session and HTE
+        $students = $ado->getStudentsBySessionAndHTE($dbo, $sessionId, $hteId, $cdrid);
+        echo json_encode($students);
+    } catch (Exception $e) {
+        error_log("Error in getStudentsBySessionAndHTE AJAX: " . $e->getMessage());
+        echo json_encode([]);
+    }
+}
+
+if ($action == "deleteStudents") {
+    $studentIds = $_POST['studentIds'] ?? [];
+    if (empty($studentIds)) {
+        echo json_encode(['success' => false, 'message' => 'No students selected for deletion.']);
+        exit;
+    }
+
+    $dbo = new Database();
+    $ado = new attendanceDetails();
+
+    try {
+        $result = $ado->deleteStudents($dbo, $studentIds);
+        echo json_encode(['success' => $result, 'message' => $result ? 'Students deleted successfully.' : 'Failed to delete students.']);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Error deleting students: ' . $e->getMessage()]);
+    }
 }
 
     if ($action == "getHTEList") {
@@ -542,28 +603,86 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // Profile management actions
 if (isset($_POST['action']) && $_POST['action'] == 'updateCoordinatorProfilePicture') {
-    $cdrid = $_POST['cdrid'];
-    if (isset($_FILES['profilePicture']) && $_FILES['profilePicture']['error'] == 0) {
-        $uploadDir = '../uploads/';
+    // Clear any previous output and set headers
+    if (ob_get_length()) ob_clean();
+    header('Content-Type: application/json');
+
+    try {
+        error_log("\n=== Profile Picture Update Request ===");
+        error_log("POST data: " . print_r($_POST, true));
+        error_log("FILES data: " . print_r($_FILES, true));
+
+        if (!isset($_POST['cdrid'])) {
+            throw new Exception('Coordinator ID is required');
+        }
+
+        $cdrid = $_POST['cdrid'];
+        error_log("Updating profile for coordinator: " . $cdrid);
+
+        if (!isset($_FILES['profilePicture']) || $_FILES['profilePicture']['error'] !== 0) {
+            throw new Exception('No profile picture uploaded or upload error: ' . 
+                ($_FILES['profilePicture']['error'] ?? 'No file uploaded'));
+        }
+
+        // Validate file type
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $_FILES['profilePicture']['tmp_name']);
+        finfo_close($finfo);
+
+        if (!in_array($mimeType, $allowedTypes)) {
+            throw new Exception('Invalid file type. Only JPG and PNG are allowed.');
+        }
+
+        // Create upload directory if it doesn't exist
+        $uploadDir = __DIR__ . '/../uploads/';
         if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-        $fileName = basename($_FILES['profilePicture']['name']);
-        $targetFilePath = $uploadDir . $fileName;
-        if (move_uploaded_file($_FILES['profilePicture']['tmp_name'], $targetFilePath)) {
-            // Update profile picture path in database
-            $attendanceDetails = new attendanceDetails();
-            $updateResult = $attendanceDetails->updateCoordinatorProfilePicture($dbo, $cdrid, $fileName);
-            if ($updateResult) {
-                echo json_encode(['success' => true, 'message' => 'Profile picture updated successfully', 'filename' => $fileName]);
-            } else {
-                echo json_encode(['success' => false, 'message' => 'Failed to update profile picture in database']);
+            if (!mkdir($uploadDir, 0755, true)) {
+                throw new Exception('Failed to create upload directory');
             }
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Failed to upload profile picture']);
         }
-    } else {
-        echo json_encode(['success' => false, 'message' => 'No profile picture uploaded or upload error']);
+
+        // Generate unique filename
+        $extension = pathinfo($_FILES['profilePicture']['name'], PATHINFO_EXTENSION);
+        $uniqueId = uniqid();
+        $fileName = $uniqueId . '_' . $cdrid . '.' . $extension;
+        $targetFilePath = $uploadDir . $fileName;
+
+        error_log("Attempting to move uploaded file to: " . $targetFilePath);
+
+        if (!move_uploaded_file($_FILES['profilePicture']['tmp_name'], $targetFilePath)) {
+            throw new Exception('Failed to move uploaded file. Check permissions and path.');
+        }
+
+        // Update database
+        $attendanceDetails = new attendanceDetails();
+        if (!isset($dbo)) {
+            $dbo = new Database();
+        }
+
+        $updateResult = $attendanceDetails->updateCoordinatorProfilePicture($dbo, $cdrid, $fileName);
+        
+        if (!$updateResult) {
+            // If database update fails, remove the uploaded file
+            if (file_exists($targetFilePath)) {
+                unlink($targetFilePath);
+            }
+            throw new Exception('Failed to update profile picture in database');
+        }
+
+        echo json_encode([
+            'success' => true, 
+            'message' => 'Profile picture updated successfully',
+            'filename' => $fileName
+        ]);
+
+    } catch (Exception $e) {
+        error_log("Error updating profile picture: " . $e->getMessage());
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => $e->getMessage()
+        ]);
     }
     exit;
 }
@@ -585,26 +704,159 @@ if (isset($_POST['action']) && $_POST['action'] == 'updateCoordinatorDetails') {
     exit;
 }
 
-if (isset($_POST['action']) && $_POST['action'] == 'updateCoordinatorPassword') {
-    $cdrid = $_POST['cdrid'];
-    $currentPassword = $_POST['currentPassword'] ?? '';
-    $newPassword = $_POST['newPassword'] ?? '';
+if (isset($_POST['action']) && $_POST['action'] == 'verifyCoordinatorPassword') {
+    // Clear any previous output
+    if (ob_get_length()) ob_clean();
+    
+    header('Content-Type: application/json'); // Ensure JSON content type
+    
+    try {
+        // Validate input parameters
+        $coordinator_id = $_POST['coordinator_id'] ?? $_POST['cdrid'] ?? null;
+        $current_password = $_POST['current_password'] ?? '';
 
-    $attendanceDetails = new attendanceDetails();
+        error_log("=== AJAX Request Debug ===");
+        error_log("POST data received: " . print_r($_POST, true));
+        error_log("Coordinator ID: " . $coordinator_id);
+        error_log("Current password received: " . $current_password);
 
-    // Verify current password
-    $isValid = $attendanceDetails->verifyCoordinatorPassword($dbo, $cdrid, $currentPassword);
-    if (!$isValid) {
-        echo json_encode(['success' => false, 'message' => 'Current password is incorrect']);
-        exit;
+        if (!$coordinator_id) {
+            throw new Exception('Coordinator ID is required');
+        }
+
+        if (!$current_password) {
+            throw new Exception('Password is required');
+        }
+
+        // Verify database connection
+        if (!isset($dbo)) {
+            $dbo = new Database(); // Create new connection if not exists
+        }
+
+        if (!$dbo->conn) {
+            throw new Exception('Database connection failed');
+        }
+
+        $attendanceDetails = new attendanceDetails();
+        error_log("Verifying password for coordinator: " . $coordinator_id);
+        
+        // Try to verify password
+        $isValid = $attendanceDetails->verifyCoordinatorPassword($dbo, $coordinator_id, $current_password);
+        error_log("Password verification result: " . ($isValid ? "valid" : "invalid"));
+
+        if ($isValid) {
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Password verified'
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false, 
+                'message' => 'Invalid password',
+                'debug' => 'Password verification failed for coordinator ' . $coordinator_id
+            ]);
+        }
+
+    } catch (Exception $e) {
+        error_log("Error in password verification: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+        http_response_code(500);
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Internal server error occurred', 
+            'error' => $e->getMessage(),
+            'debug' => true
+        ]);
     }
+    exit;
+}
 
-    // Update password
-    $updateResult = $attendanceDetails->updateCoordinatorPassword($dbo, $cdrid, $newPassword);
-    if ($updateResult) {
-        echo json_encode(['success' => true, 'message' => 'Password updated successfully']);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Failed to update password']);
+if (isset($_POST['action']) && $_POST['action'] == 'updateCoordinatorPassword') {
+    // Clear any previous output and set headers
+    if (ob_get_length()) ob_clean();
+    header('Content-Type: application/json');
+    
+    try {
+        error_log("\n=== Password Update Request ===");
+        error_log("POST data: " . print_r($_POST, true));
+        
+        // Ensure we have a database connection
+        if (!isset($dbo)) {
+            error_log("Creating new database connection");
+            $dbo = new Database();
+        }
+        
+        if (!$dbo || !$dbo->conn) {
+            throw new Exception("Failed to establish database connection");
+        }
+        
+        // Get and validate input parameters
+        $coordinator_id = $_POST['coordinator_id'] ?? null;
+        $currentPassword = $_POST['current_password'] ?? '';
+        $newPassword = $_POST['new_password'] ?? '';
+
+        error_log("Parsed parameters:");
+        error_log("Coordinator ID: " . ($coordinator_id ?? 'null'));
+        error_log("Current password length: " . strlen($currentPassword));
+        error_log("New password length: " . strlen($newPassword));
+
+        // Validate database connection
+        if (!isset($dbo) || !$dbo instanceof Database) {
+            error_log("Database connection issue - dbo: " . print_r($dbo, true));
+            throw new Exception('Database connection not properly initialized');
+        }
+
+        // Validate required parameters
+        if (!$coordinator_id) {
+            throw new Exception('Coordinator ID is required');
+        }
+
+        if (!$currentPassword) {
+            throw new Exception('Current password is required');
+        }
+
+        if (!$newPassword) {
+            throw new Exception('New password is required');
+        }
+
+        $attendanceDetails = new attendanceDetails();
+
+        // First verify the current password
+        error_log("Verifying current password for coordinator: " . $coordinator_id);
+        $isValid = $attendanceDetails->verifyCoordinatorPassword($dbo, $coordinator_id, $currentPassword);
+        
+        if (!$isValid) {
+            error_log("Password verification failed for coordinator: " . $coordinator_id);
+            throw new Exception('Current password is incorrect');
+        }
+        
+        error_log("Current password verified successfully. Proceeding with update.");
+
+        // Update the password
+        try {
+            $updateResult = $attendanceDetails->updateCoordinatorPassword($dbo, $coordinator_id, $newPassword);
+            
+            if ($updateResult) {
+                error_log("Password updated successfully for coordinator: " . $coordinator_id);
+                echo json_encode([
+                    'success' => true, 
+                    'message' => 'Password updated successfully'
+                ]);
+            } else {
+                throw new Exception('Failed to update password in database');
+            }
+        } catch (Exception $e) {
+            error_log("Error during password update: " . $e->getMessage());
+            throw new Exception('Error updating password: ' . $e->getMessage());
+        }
+
+    } catch (Exception $e) {
+        error_log("Password update error: " . $e->getMessage());
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => $e->getMessage(),
+            'debug' => true
+        ]);
     }
     exit;
 }

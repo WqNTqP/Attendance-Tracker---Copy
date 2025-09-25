@@ -4,8 +4,72 @@ const URLs = {
     attendance: "ajaxhandler/approveAttendanceAjax.php",
     history: "ajaxhandler/loadHistoryAjax.php",
     adminDashboard: "ajaxhandler/adminDashboardAjax.php",
-    weeklyReports: "ajaxhandler/weeklyReportAjax.php"
+    weeklyReports: "ajaxhandler/weeklyReportAjax.php",
+    reports: "ajaxhandler/approveReportAjax.php"
 };
+
+// Global variable to store current report ID for modal operations
+let currentReportId = null;
+
+// Function to handle returning a report
+function returnReport(reportId) {
+    currentReportId = reportId;
+    $('#returnReportModal').show();
+    $('#returnReason').val(''); // Clear any previous reason
+}
+
+// Function to submit return report
+function submitReturnReport() {
+    if (!currentReportId) return;
+
+    const reason = $('#returnReason').val().trim();
+    if (!reason) {
+        alert('Please provide a reason for returning the report.');
+        return;
+    }
+
+    $.ajax({
+        url: URLs.reports,
+        type: 'POST',
+        data: {
+            action: 'returnReport',
+            reportId: currentReportId,
+            returnReason: reason
+        },
+        success: function(response) {
+            window.isSubmittingReturn = false;
+            if (response.status === 'success') {
+                // First close the modal
+                closeReturnModal();
+                // Then show the alert
+                alert('Report returned successfully! The student can now edit it.');
+                
+                // Reset any loading states
+                isLoadingReports = false;
+                window.isRefreshing = false;
+                
+                // Clear any existing timeouts
+                if (window.refreshTimeout) clearTimeout(window.refreshTimeout);
+                if (window.loadingTimeout) clearTimeout(window.loadingTimeout);
+                if (window.reportsTimeout) clearTimeout(window.reportsTimeout);
+                
+                // Then refresh the reports once with current filters
+                const studentId = $('#studentFilter').val();
+                if (window.currentWeekNumber) {
+                    loadWeeklyReports(studentId, window.currentWeekNumber);
+                }
+            } else {
+                closeReturnModal();
+                alert('Error: ' + response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', status, error);
+            alert('Error connecting to server');
+            closeReturnModal();
+        }
+    });
+}
 
 // Function to format time to 12-hour format with AM/PM
 function formatTimeToPH(timeString) {
@@ -17,6 +81,32 @@ function formatTimeToPH(timeString) {
 }
 
 $(function () {
+    // Return Report Modal Event Handlers
+    $('#closeReturnModal, #cancelReturn').on('click', function() {
+        $('#returnReportModal').hide();
+        currentReportId = null;
+    });
+
+    $('#confirmReturn').on('click', function() {
+        submitReturnReport();
+    });
+
+    // Close modal when clicking outside
+    $('#returnReportModal').on('click', function(e) {
+        if (e.target === this) {
+            $(this).hide();
+            currentReportId = null;
+        }
+    });
+
+    // Close modal with Escape key
+    $(document).on('keyup', function(e) {
+        if (e.key === "Escape") {
+            $('#returnReportModal').hide();
+            currentReportId = null;
+        }
+    });
+
     // Close sidebar when clicking outside
     $(document).click(function(e) {
         // Check if sidebar is open and click is outside sidebar and not on the toggle button
@@ -53,15 +143,41 @@ $(function () {
             $('#historyTabContent').show();
             // Auto-load current date when history tab is opened
             const today = new Date().toISOString().split('T')[0];
-            const dateSelect = document.getElementById('historyDate');
-            const todayOption = Array.from(dateSelect.options).find(option => option.value === today);
-            
-            if (todayOption) {
-                dateSelect.value = today;
-                loadHistoryRecords(today);
-            }
+            const dateInput = document.getElementById('historyDate');
+            dateInput.value = today;
+            loadHistoryRecords(today);
         } else if (tabId === 'reportsTab') {
             $('#reportsTabContent').show();
+               // Automatically load the current week's report when Reports tab is opened
+               const today = new Date().toISOString().split('T')[0];
+               const dateInput = document.getElementById('dateFilter');
+               if (dateInput) {
+                   dateInput.value = today;
+               }
+               let studentId = document.getElementById('studentFilter').value;
+               const date = new Date(today);
+               const day = date.getDay();
+               const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+               const weekStart = new Date(date.setDate(diff));
+               const weekEnd = new Date(weekStart);
+               weekEnd.setDate(weekStart.getDate() + 6);
+               const formattedWeekStart = weekStart.toISOString().split('T')[0];
+               const formattedWeekEnd = weekEnd.toISOString().split('T')[0];
+               document.getElementById('previewWeekNumber').textContent = getWeekNumber(weekStart);
+               document.getElementById('previewWeekRange').textContent = `${formattedWeekStart} to ${formattedWeekEnd}`;
+               window.currentWeekStart = formattedWeekStart;
+               window.currentWeekEnd = formattedWeekEnd;
+               if (isNaN(studentId) && studentId !== "") {
+                   const options = document.getElementById('studentList').options;
+                   for (let i = 0; i < options.length; i++) {
+                       if (options[i].value === studentId) {
+                           studentId = options[i].getAttribute('data-intern-id');
+                           break;
+                       }
+                   }
+               }
+               const weekNumber = getWeekNumber(new Date(window.currentWeekStart));
+               loadWeeklyReports(studentId, weekNumber);
         } else if (tabId === 'contralTab') {
             $('#contralTabContent').show();
         }
@@ -159,8 +275,8 @@ $(function () {
     };
 
     // Load history records functionality
-    document.getElementById('loadHistoryBtn').addEventListener('click', function() {
-        const selectedDate = document.getElementById('historyDate').value;
+    document.getElementById('historyDate').addEventListener('change', function() {
+        const selectedDate = this.value;
         if (!selectedDate) {
             alert('Please select a date first.');
             return;
@@ -169,24 +285,72 @@ $(function () {
         loadHistoryRecords(selectedDate);
     });
 
+    // Function to get week range from a date
+    function getWeekRange(date) {
+        const currentDate = new Date(date);
+        const dayOfWeek = currentDate.getDay();
+        const diff = currentDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust when day is sunday
+        const monday = new Date(currentDate.setDate(diff));
+        const sunday = new Date(currentDate.setDate(diff + 6));
+        
+        return {
+            start: monday.toISOString().split('T')[0],
+            end: sunday.toISOString().split('T')[0],
+            weekNumber: getWeekNumber(monday)
+        };
+    }
+
+    // Function to get week number
+    function getWeekNumber(date) {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+        return weekNo;
+    }
+
     // Load weekly reports functionality
     document.getElementById('loadReportsBtn').addEventListener('click', function() {
         let studentId = document.getElementById('studentFilter').value;
-        const week = document.getElementById('weekFilter').value;
+        const selectedDate = document.getElementById('dateFilter').value;
+
+        if (!selectedDate) {
+            alert('Please select a date first.');
+            return;
+        }
+
+        // Convert selected date to week start and end dates
+        const date = new Date(selectedDate);
+        const day = date.getDay();
+        const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is sunday
+        const weekStart = new Date(date.setDate(diff));
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+
+        // Format dates as YYYY-MM-DD to match database format
+        const formattedWeekStart = weekStart.toISOString().split('T')[0];
+        const formattedWeekEnd = weekEnd.toISOString().split('T')[0];
+        
+        // Update the preview week range display
+        document.getElementById('previewWeekNumber').textContent = getWeekNumber(weekStart);
+        document.getElementById('previewWeekRange').textContent = `${formattedWeekStart} to ${formattedWeekEnd}`;
+
+        // Store week dates for the AJAX request
+        window.currentWeekStart = formattedWeekStart;
+        window.currentWeekEnd = formattedWeekEnd;
 
         // If studentId is not a number (because user typed a name), try to find matching INTERNS_ID from datalist options
         if (isNaN(studentId) && studentId !== "") {
             const options = document.getElementById('studentList').options;
             for (let i = 0; i < options.length; i++) {
                 if (options[i].value === studentId) {
-                    // Get the INTERNS_ID from the data-intern-id attribute
                     studentId = options[i].getAttribute('data-intern-id');
                     break;
                 }
             }
         }
 
-        loadWeeklyReports(studentId, week);
+        const weekNumber = getWeekNumber(new Date(window.currentWeekStart));
+        loadWeeklyReports(studentId, weekNumber);
     });
 
     // Function to load history records via AJAX
@@ -241,7 +405,7 @@ $(function () {
                                 const tr = document.createElement('tr');
                                 tr.innerHTML = `
                                     <td>${student.STUDENT_ID}</td>
-                                    <td>${student.SURNAME}</td>
+                                    <td>${student.display_name}</td>
                                     <td>${student.TIMEIN || '--:--'}</td>
                                     <td>${student.TIMEOUT || '--:--'}</td>
                                     <td>${student.status}</td>
@@ -400,8 +564,41 @@ function showEditProfileModal() {
     });
 }
 
+// Global loading flag to prevent multiple simultaneous calls
+let isLoadingReports = false;
+
 // Function to load weekly reports via AJAX
-function loadWeeklyReports(studentId, week) {
+function loadWeeklyReports(studentId, weekNumber) {
+    // Allow the request if it's after a return, regardless of loading state
+    if (isLoadingReports && !window.isAfterReturn) {
+        console.log('Reports are already being loaded, skipping this request...');
+        return;
+    }
+    
+    // Clear any existing timeouts
+    if (window.reportsTimeout) {
+        clearTimeout(window.reportsTimeout);
+    }
+    if (window.loadingTimeout) {
+        clearTimeout(window.loadingTimeout);
+    }
+    if (window.refreshTimeout) {
+        clearTimeout(window.refreshTimeout);
+    }
+    
+    // Set loading flag
+    isLoadingReports = true;
+    
+    // Clear refresh flag if it was set
+    window.isRefreshing = false;
+    
+    // Set a safety timeout to reset all flags after 5 seconds
+    window.loadingTimeout = setTimeout(() => {
+        isLoadingReports = false;
+        window.isRefreshing = false;
+        console.log('Loading flags reset by safety timeout');
+    }, 5000);
+
     $.ajax({
         url: URLs.weeklyReports,
         type: 'POST',
@@ -409,7 +606,9 @@ function loadWeeklyReports(studentId, week) {
         data: {
             action: 'getWeeklyReports',
             studentId: studentId,
-            week: week,
+            week: weekNumber,
+            weekStart: window.currentWeekStart,
+            weekEnd: window.currentWeekEnd,
             adminId: $('#userName').data('admin-id')
         },
         beforeSend: function() {
@@ -420,8 +619,20 @@ function loadWeeklyReports(studentId, week) {
         },
         success: function(response) {
             document.getElementById('reportsLoading').style.display = 'none';
-
-            console.log("Weekly Reports Response:", response);  // Added debug log
+            // Reset all flags
+            isLoadingReports = false;
+            window.isRefreshing = false;
+            
+            // Clear any timeouts
+            if (window.loadingTimeout) clearTimeout(window.loadingTimeout);
+            if (window.refreshTimeout) clearTimeout(window.refreshTimeout);
+            if (window.reportsTimeout) clearTimeout(window.reportsTimeout);
+            
+            // Only log response if it's from a return report refresh
+            if (window.isAfterReturn) {
+                console.log("Weekly Reports Response after return:", response);
+                window.isAfterReturn = false;
+            }
             
             if (response.status === 'success') {
                 if (response.reports && response.reports.length > 0) {
@@ -444,6 +655,8 @@ function loadWeeklyReports(studentId, week) {
             document.getElementById('reportsLoading').style.display = 'none';
             document.getElementById('reportsList').style.display = 'none';
             document.getElementById('noReports').style.display = 'block';
+            // Reset loading flag
+            isLoadingReports = false;
         }
     });
 }
@@ -521,7 +734,7 @@ function displayWeeklyReports(reports) {
                 <h3>${report.student_name} - Week ${weekNumber}</h3>
                 <div class="report-meta">
                     <span class="report-period">Period: ${report.week_start} to ${report.week_end}</span>
-                    <span class="report-status ${report.status.toLowerCase()}">${report.status}</span>
+                    <span class="approval-status ${report.approval_status.toLowerCase()}">${report.approval_status.charAt(0).toUpperCase() + report.approval_status.slice(1)}</span>
                 </div>
             </div>
 
@@ -534,6 +747,9 @@ function displayWeeklyReports(reports) {
                                 <img src="${image.url ? image.url : (image.image_path ? image.image_path : '')}" alt="Monday activity" class="activity-image">
                             `).join('')}
                         </div>
+                        <div class="day-description">
+                            <p>${report.monday_description || 'No description provided for Monday'}</p>
+                        </div>
                     </div>
                 </div>
 
@@ -544,6 +760,9 @@ function displayWeeklyReports(reports) {
                             ${imagesPerDay.tuesday.map(image => `
                                 <img src="${image.url ? image.url : (image.image_path ? image.image_path : '')}" alt="Tuesday activity" class="activity-image">
                             `).join('')}
+                        </div>
+                        <div class="day-description">
+                            <p>${report.tuesday_description || 'No description provided for Tuesday'}</p>
                         </div>
                     </div>
                 </div>
@@ -556,6 +775,9 @@ function displayWeeklyReports(reports) {
                                 <img src="${image.url ? image.url : (image.image_path ? image.image_path : '')}" alt="Wednesday activity" class="activity-image">
                             `).join('')}
                         </div>
+                        <div class="day-description">
+                            <p>${report.wednesday_description || 'No description provided for Wednesday'}</p>
+                        </div>
                     </div>
                 </div>
 
@@ -566,6 +788,9 @@ function displayWeeklyReports(reports) {
                             ${imagesPerDay.thursday.map(image => `
                                 <img src="${image.url ? image.url : (image.image_path ? image.image_path : '')}" alt="Thursday activity" class="activity-image">
                             `).join('')}
+                        </div>
+                        <div class="day-description">
+                            <p>${report.thursday_description || 'No description provided for Thursday'}</p>
                         </div>
                     </div>
                 </div>
@@ -578,28 +803,21 @@ function displayWeeklyReports(reports) {
                                 <img src="${image.url ? image.url : (image.image_path ? image.image_path : '')}" alt="Friday activity" class="activity-image">
                             `).join('')}
                         </div>
+                        <div class="day-description">
+                            <p>${report.friday_description || 'No description provided for Friday'}</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="report-summary">
-                <div class="summary-section">
-                    <h4>Challenges Faced</h4>
-                    <p>${report.challenges_faced || 'No challenges reported'}</p>
-                </div>
-                <div class="summary-section">
-                    <h4>Lessons Learned</h4>
-                    <p>${report.lessons_learned || 'No lessons reported'}</p>
-                </div>
-                <div class="summary-section">
-                    <h4>Goals for Next Week</h4>
-                    <p>${report.goals_next_week || 'No goals set'}</p>
-                </div>
-            </div>
-
             <div class="report-footer">
-                <span class="submitted-date">Submitted: ${report.submitted_at || 'Not submitted'}</span>
-                ${report.updated_at ? `<span class="updated-date">Last Updated: ${report.updated_at}</span>` : ''}
+                <div class="footer-left">
+                    ${report.updated_at ? `<span class="updated-date">Last Updated: ${report.updated_at}</span>` : ''}
+                </div>
+                <div class="footer-right">
+                    <button class="action-btn approve-btn" onclick="approveReport(${report.report_id})">Approve</button>
+                    <button class="action-btn return-btn" onclick="returnReport(${report.report_id})">Return</button>
+                </div>
             </div>
         `;
 
@@ -635,6 +853,131 @@ function loadAdminProfileDetails() {
         error: function(xhr, status, error) {
             console.error("AJAX Error:", error);
             alert('An error occurred while loading profile details.');
+        }
+    });
+}
+
+// Function to approve a report
+function approveReport(reportId) {
+    if (!confirm('Are you sure you want to approve this report?')) {
+        return;
+    }
+
+    $.ajax({
+        url: URLs.reports,
+        type: 'POST',
+        data: {
+            action: 'approveReport',
+            reportId: reportId
+        },
+        success: function(response) {
+            if (response.status === 'success') {
+                alert('Report approved successfully!');
+                // Refresh the reports list
+                loadWeeklyReports();
+            } else {
+                alert('Error: ' + response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error:', error);
+            alert('An error occurred while approving the report.');
+        }
+    });
+}
+
+// Function to return a report
+function returnReport(reportId) {
+    currentReportId = reportId;
+    const modal = document.getElementById('returnReportModal');
+    const textarea = document.getElementById('returnReason');
+    textarea.value = ''; // Clear previous input
+    modal.style.display = 'block';
+}
+
+// Modal event handlers
+$(document).ready(function() {
+    const closeBtn = document.getElementById('closeReturnModal');
+    const cancelBtn = document.getElementById('cancelReturn');
+    const confirmBtn = document.getElementById('confirmReturn');
+
+    if (closeBtn) closeBtn.onclick = closeReturnModal;
+    if (cancelBtn) cancelBtn.onclick = closeReturnModal;
+    if (confirmBtn) confirmBtn.onclick = submitReturnReport;
+});
+
+function closeReturnModal() {
+    const modal = document.getElementById('returnReportModal');
+    if (modal) {
+        modal.style.display = 'none';
+        $('#returnReason').val('');
+        currentReportId = null;
+    }
+}
+
+function submitReturnReport() {
+    const reason = document.getElementById('returnReason').value.trim();
+    if (!reason) {
+        alert('Please provide a return reason');
+        return;
+    }
+
+    if (!currentReportId) {
+        alert('No report selected');
+        return;
+    }
+
+    // Prevent duplicate submissions
+    if (window.isSubmittingReturn) {
+        return;
+    }
+    window.isSubmittingReturn = true;
+
+    $.ajax({
+        url: URLs.reports,
+        type: 'POST',
+        data: {
+            action: 'returnReport',
+            reportId: currentReportId,
+            returnReason: reason
+        },
+        success: function(response) {
+            window.isSubmittingReturn = false;
+            if (response.status === 'success') {
+                // First close the modal
+                closeReturnModal();
+                // Then show the alert
+                alert('Report returned successfully! The student can now edit it.');
+                
+                // Reset any loading states
+                isLoadingReports = false;
+                window.isRefreshing = false;
+                
+                // Clear any existing timeouts
+                if (window.refreshTimeout) clearTimeout(window.refreshTimeout);
+                if (window.loadingTimeout) clearTimeout(window.loadingTimeout);
+                if (window.reportsTimeout) clearTimeout(window.reportsTimeout);
+                
+                // Set flag to indicate this refresh is after a return
+                window.isAfterReturn = true;
+                
+                // Then refresh the reports with current filters
+                const studentId = $('#studentFilter').val();
+                // Get the current week number from the preview
+                const weekNumber = parseInt($('#previewWeekNumber').text());
+                if (weekNumber) {
+                    loadWeeklyReports(studentId, weekNumber);
+                }
+            } else {
+                closeReturnModal();
+                alert('Error: ' + response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            window.isSubmittingReturn = false;
+            console.error('Error:', error);
+            alert('An error occurred while returning the report.');
+            closeReturnModal();
         }
     });
 }

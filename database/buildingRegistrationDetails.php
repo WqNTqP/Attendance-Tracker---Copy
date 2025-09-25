@@ -23,7 +23,7 @@ class BuildingRegistrationDetails
     public function getRegisteredStudents($dbo, $sessionid, $courseid)
     {
         $rv = [];
-        $c = "SELECT id.INTERNS_ID, id.STUDENT_ID, id.SURNAME, id.GENDER 
+        $c = "SELECT id.INTERNS_ID, id.STUDENT_ID,id.NAME, id.SURNAME, id.GENDER 
             FROM interns_details AS id, intern_details AS itd 
             WHERE itd.INTERNS_ID = id.INTERNS_ID 
             AND itd.SESSION_ID = :sessionid 

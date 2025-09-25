@@ -48,6 +48,7 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <link rel="stylesheet" href="css/student_dashboard.css">
@@ -56,6 +57,7 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
     <title>Student Dashboard - Attendance Tracker</title>
 </head>
 <body>
+    <input type="hidden" id="hiddenStudentId" value="<?php echo htmlspecialchars($student_id); ?>">
     <!-- Top Header with Hamburger Menu -->
     <div class="top-header">
         <button id="sidebarToggle" class="hamburger-menu">
@@ -67,6 +69,13 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
             </div>
         </div>
         <div class="user-profile">
+            <div class="notification-icon" id="notificationIcon">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">0</span>
+                <div class="notification-dropdown" id="notificationDropdown">
+                    <!-- Notifications will be dynamically added here -->
+                </div>
+            </div>
             <span id="userName"><?php echo htmlspecialchars($studentName); ?></span>
             <span id="draftUserName" style="display:none;"></span>
             <div class="user-dropdown" id="userDropdown">
@@ -309,26 +318,15 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
 <div id="reportContainer">
                 <div class="report-editor">
     <div class="weekly-report-inputs">
-        <h4>Weekly Report</h4>
-        <div class="weekly-description">
-            <div class="report-field">
-                <label for="challengesFaced">Challenges Faced:</label>
-                <textarea id="challengesFaced" name="challengesFaced" rows="4" placeholder="Describe the challenges you faced this week..."></textarea>
-            </div>
-            <div class="report-field">
-                <label for="lessonsLearned">Lessons Learned:</label>
-                <textarea id="lessonsLearned" name="lessonsLearned" rows="4" placeholder="What lessons did you learn this week..."></textarea>
-            </div>
-            <div class="report-field">
-                <label for="goalsNextWeek">Goals for Next Week:</label>
-                <textarea id="goalsNextWeek" name="goalsNextWeek" rows="4" placeholder="What are your goals for next week..."></textarea>
-            </div>
-        </div>
+        <h4>Daily Activities Report</h4>
     </div>
 
     <div class="everyday-image">
         <div class="day-report">
-            <!-- Monday Description textarea removed as per request -->
+            <div class="day-description">
+                <label for="mondayDescription">Monday Description:</label>
+                <textarea id="mondayDescription" name="mondayDescription" rows="4" placeholder="Describe your activities for Monday..."></textarea>
+            </div>
             <label>Monday Images:</label>
                 <div class="image-upload-area" data-day="monday">
                         <div class="upload-placeholder" id="uploadPlaceholderMonday" onclick="document.getElementById('imageUploadMonday').click();">
@@ -342,7 +340,10 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
         </div>
 
         <div class="day-report">
-            <!-- Tuesday Description textarea removed as per request -->
+            <div class="day-description">
+                <label for="tuesdayDescription">Tuesday Description:</label>
+                <textarea id="tuesdayDescription" name="tuesdayDescription" rows="4" placeholder="Describe your activities for Tuesday..."></textarea>
+            </div>
             <label>Tuesday Images:</label>
             <div class="image-upload-area" data-day="tuesday">
                         <div class="upload-placeholder" id="uploadPlaceholderTuesday" onclick="document.getElementById('imageUploadTuesday').click();">
@@ -356,7 +357,10 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
         </div>
 
         <div class="day-report">
-            <!-- Wednesday Description textarea removed as per request -->
+            <div class="day-description">
+                <label for="wednesdayDescription">Wednesday Description:</label>
+                <textarea id="wednesdayDescription" name="wednesdayDescription" rows="4" placeholder="Describe your activities for Wednesday..."></textarea>
+            </div>
             <label>Wednesday Images:</label>
             <div class="image-upload-area" data-day="wednesday">
                         <div class="upload-placeholder" id="uploadPlaceholderWednesday" onclick="document.getElementById('imageUploadWednesday').click();">
@@ -370,7 +374,10 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
         </div>
 
         <div class="day-report">
-            <!-- Thursday Description textarea removed as per request -->
+            <div class="day-description">
+                <label for="thursdayDescription">Thursday Description:</label>
+                <textarea id="thursdayDescription" name="thursdayDescription" rows="4" placeholder="Describe your activities for Thursday..."></textarea>
+            </div>
             <label>Thursday Images:</label>
             <div class="image-upload-area" data-day="thursday">
                         <div class="upload-placeholder" id="uploadPlaceholderThursday" onclick="document.getElementById('imageUploadThursday').click();">
@@ -384,7 +391,10 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
         </div>
 
         <div class="day-report">
-            <!-- Friday Description textarea removed as per request -->
+            <div class="day-description">
+                <label for="fridayDescription">Friday Description:</label>
+                <textarea id="fridayDescription" name="fridayDescription" rows="4" placeholder="Describe your activities for Friday..."></textarea>
+            </div>
             <label>Friday Images:</label>
             <div class="image-upload-area" data-day="friday">
                         <div class="upload-placeholder" id="uploadPlaceholderFriday" onclick="document.getElementById('imageUploadFriday').click();">
@@ -414,7 +424,10 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
                         </button>
                     </div>
                     
-<div id="reportStatus" class="report-status"></div>
+<div class="status-container">
+    <div id="reportStatus" class="report-status"></div>
+    <div id="returnReasonContainer"></div>
+</div>
 <div id="draftPreview" class="draft-preview">
     <h4><i class="fas fa-eye"></i> Draft Preview</h4>
     <div id="draftContentPreview"></div>
@@ -435,9 +448,11 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
                         <div class="day-section">
                             <h4>Monday</h4>
                             <div class="day-content">
-                                <p id="draftMondayContent">No activities reported for Monday.</p>
                                 <div class="day-images" id="draftMondayImages">
                                     <!-- Images will be populated here -->
+                                </div>
+                                <div class="day-description" id="draftMondayDescription">
+                                    No description provided for Monday.
                                 </div>
                             </div>
                         </div>
@@ -445,9 +460,11 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
                         <div class="day-section">
                             <h4>Tuesday</h4>
                             <div class="day-content">
-                                <p id="draftTuesdayContent">No activities reported for Tuesday.</p>
                                 <div class="day-images" id="draftTuesdayImages">
                                     <!-- Images will be populated here -->
+                                </div>
+                                <div class="day-description" id="draftTuesdayDescription">
+                                    No description provided for Tuesday.
                                 </div>
                             </div>
                         </div>
@@ -455,9 +472,11 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
                         <div class="day-section">
                             <h4>Wednesday</h4>
                             <div class="day-content">
-                                <p id="draftWednesdayContent">No activities reported for Wednesday.</p>
                                 <div class="day-images" id="draftWednesdayImages">
                                     <!-- Images will be populated here -->
+                                </div>
+                                <div class="day-description" id="draftWednesdayDescription">
+                                    No description provided for Wednesday.
                                 </div>
                             </div>
                         </div>
@@ -465,9 +484,11 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
                         <div class="day-section">
                             <h4>Thursday</h4>
                             <div class="day-content">
-                                <p id="draftThursdayContent">No activities reported for Thursday.</p>
                                 <div class="day-images" id="draftThursdayImages">
                                     <!-- Images will be populated here -->
+                                </div>
+                                <div class="day-description" id="draftThursdayDescription">
+                                    No description provided for Thursday.
                                 </div>
                             </div>
                         </div>
@@ -475,26 +496,13 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
                         <div class="day-section">
                             <h4>Friday</h4>
                             <div class="day-content">
-                                <p id="draftFridayContent">No activities reported for Friday.</p>
                                 <div class="day-images" id="draftFridayImages">
                                     <!-- Images will be populated here -->
                                 </div>
+                                <div class="day-description" id="draftFridayDescription">
+                                    No description provided for Friday.
+                                </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="weekly-report-content">
-                        <div class="report-section">
-                            <h4>Challenges Faced:</h4>
-                            <p id="draftChallengesFaced">No challenges reported</p>
-                        </div>
-                        <div class="report-section">
-                            <h4>Lessons Learned:</h4>
-                            <p id="draftLessonsLearned">No lessons reported</p>
-                        </div>
-                        <div class="report-section">
-                            <h4>Goals for Next Week:</h4>
-                            <p id="draftGoalsNextWeek">No goals reported</p>
                         </div>
                     </div>
 

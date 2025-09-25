@@ -1,5 +1,215 @@
+// Function to manage shown notifications using sessionStorage
+const notificationTracker = {
+    getShown: function() {
+        const shown = sessionStorage.getItem('shownNotifications');
+        return shown ? new Set(JSON.parse(shown)) : new Set();
+    },
+    markAsShown: function(id) {
+        const shown = this.getShown();
+        shown.add(id);
+        sessionStorage.setItem('shownNotifications', JSON.stringify([...shown]));
+    },
+    isShown: function(id) {
+        return this.getShown().has(id);
+    }
+};
+
+// Function to load notifications
+function loadNotifications() {
+    const studentId = $("#hiddenStudentId").val();
+    
+    if (!studentId) {
+        console.error('No student ID found');
+        return;
+    }
+    
+    console.log('Loading notifications for student:', studentId);
+    $.ajax({
+        url: "ajaxhandler/getNotifications.php",
+        type: "POST",
+        dataType: "json",
+        data: {
+            action: "getNotifications",
+            studentId: studentId
+        },
+        success: function(response) {
+            console.log('Notifications response:', response);
+            
+            const $notificationDropdown = $("#notificationDropdown");
+            // Only clear if this is not a refresh after marking as read
+            if (!window.isMarkingAsRead) {
+                $notificationDropdown.empty();
+            }
+            
+            if (response.status === "success" && response.data && response.data.length > 0) {
+                // Keep track of unread notifications
+                let unreadCount = 0;
+                let hasNewNotifications = false;
+                
+                // Show all notifications, but track unread count
+                // Reverse so newest notifications are at the top
+                response.data.slice().reverse().forEach(notification => {
+                    // Count unread notifications
+                    if (!notification.isRead) {
+                        unreadCount++;
+                    }
+                    // Mark this notification as shown
+                    notificationTracker.markAsShown(notification.id);
+                    const formattedTime = notification.time || new Date().toLocaleTimeString('en-PH', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    // Show the notification
+                    notificationSystem.show(
+                        notification.title,
+                        notification.message,
+                        formattedTime,
+                        notification.id,
+                        notification.isRead
+                    );
+                });
+                
+                // Update badge only if there are actual unread notifications
+                if (unreadCount > 0) {
+                    $(".notification-badge").text(unreadCount).show();
+                } else {
+                    $(".notification-badge").hide();
+                }
+            } else {
+                $notificationDropdown.html('<div class="no-notifications">No notifications</div>');
+                $(".notification-badge").hide();
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error loading notifications:", error);
+        }
+    });
+}
+
+// Global Notification System
+const notificationSystem = {
+        init: function() {
+            const $dropdown = $('#notificationDropdown');
+            
+            // Add initial no notifications message
+            if ($dropdown.children().length === 0) {
+                $dropdown.html('<div class="no-notifications">No notifications</div>');
+            }
+            
+            $('#notificationIcon').on('click', function(e) {
+                e.stopPropagation();
+                $dropdown.toggleClass('show');
+            });
+
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#notificationIcon').length) {
+                    $('#notificationDropdown').removeClass('show');
+                }
+            });
+        },
+        show: function(title, message, time = null, id = null, isRead = false) {
+            const notificationDropdown = $('#notificationDropdown');
+            const badge = $('.notification-badge');
+            const timestamp = time || new Date().toLocaleTimeString('en-PH', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            // Remove 'No notifications' message if it exists
+            notificationDropdown.find('.no-notifications').remove();
+
+            // Create notification with proper message truncation
+            const truncatedMessage = message.length > 100 ? message.substring(0, 100) + '...' : message;
+            
+            const notification = $(`
+                <div class="notification-item ${isRead ? '' : 'unread'}" data-notification-id="${id}">
+                    <div class="notification-title">
+                        <i class="fas fa-bell-exclamation"></i>
+                        ${title}
+                    </div>
+                    <div class="notification-message">${truncatedMessage}</div>
+                    <div class="notification-time">
+                        <i class="fas fa-clock"></i>
+                        ${timestamp}
+                    </div>
+                </div>
+            `);
+
+            notificationDropdown.prepend(notification);
+
+            // Update badge
+            const unreadCount = $('.notification-item.unread').length;
+            badge.text(unreadCount);
+            badge.show();
+
+            // Mark notification as read when clicked
+            if (id) {
+                notification.on('click', function() {
+                    const $this = $(this);
+                    const notificationId = $this.data('notification-id');
+                    
+                    console.log('Notification clicked:', notificationId); // Debug log
+                    
+                    // Set flag to prevent clearing notifications on refresh
+                    window.isMarkingAsRead = true;
+                    
+                    // Proceed regardless of unread status to ensure it gets marked as read
+                    $.ajax({
+                        url: 'ajaxhandler/markNotificationRead.php',
+                        type: 'POST',
+                        data: { notificationId: notificationId },
+                        success: function(response) {
+                            console.log('Mark as read response:', response); // Debug log
+                            
+                            if (response.status === 'success') {
+                                // Update visual state
+                                $this.removeClass('unread');
+                                
+                                // Recalculate actual unread count
+                                const newUnreadCount = $('.notification-item.unread').length;
+                                
+                                // Update badge
+                                if (newUnreadCount > 0) {
+                                    badge.text(newUnreadCount).show();
+                                } else {
+                                    badge.hide();
+                                }
+                            }
+                            
+                            // Reset flag after a short delay
+                            setTimeout(function() {
+                                window.isMarkingAsRead = false;
+                            }, 100);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error marking notification as read:', error);
+                            console.error('Full error details:', xhr.responseText); // More detailed error
+                            window.isMarkingAsRead = false; // Reset flag on error
+                        }
+                    });
+                });
+            }
+        }
+    };
+
 $(function(e) {
     // Initialize dashboard
+    // Disable Time In/Out buttons after 4:00pm
+    var now = new Date();
+    var currentHour = now.getHours();
+    var currentMinute = now.getMinutes();
+    if (currentHour > 16 || (currentHour === 8 && currentMinute >= 16)) {
+        $("#timeInButton").prop('disabled', true);
+        $("#timeOutButton").prop('disabled', true);
+    }
+    notificationSystem.init();
+    
+    // Initial load of notifications
+    loadNotifications();
+    
+    // Only refresh notifications every minute to reduce server load
+    setInterval(loadNotifications, 60000);
+    
     loadDashboardStats();
     loadAttendanceStatus();
     loadCurrentWeek();
@@ -455,18 +665,35 @@ function updateAttendanceUI(data) {
     $("#timeOutButton").prop('disabled', false);
     $("#todayStatusBadge").text("Not Checked In").removeClass("present checked-in").addClass("pending");
 
+    // Unify logic: disable buttons and show message if time is 8:16am or later
+    var now = new Date();
+    var currentHour = now.getHours();
+    var currentMinute = now.getMinutes();
+    if ((currentHour === 8 && currentMinute > 15) || currentHour > 8) {
+        $("#timeInButton").prop('disabled', true);
+        $("#timeOutButton").prop('disabled', true);
+        $("#attendanceStatusMessage").text("Attendance for today is closed").show();
+    } else {
+        $("#attendanceStatusMessage").text("").hide();
+    // removed extra closing brace
+    }
+
     if (data.TIMEIN) {
         $("#timeInDisplay").text(convertTo12HourFormat(data.TIMEIN));
         $("#timeInButton").prop('disabled', true);
 
-        // Determine if on time or late based on TIMEIN (On Time up to 08:00:59)
-        const timeInParts = data.TIMEIN.split(':');
+        // Determine status based on TIMEIN
+        const timeInParts = data.TIMEIN.split(":");
         const hours = parseInt(timeInParts[0]);
         const minutes = parseInt(timeInParts[1]);
-        const isLate = hours > 8 || (hours === 8 && minutes > 0);
-
-        if (isLate) {
+        if (hours === 8 && minutes === 0) {
+            $("#todayStatusBadge").text("On Time - Checked In").removeClass("pending").addClass("checked-in");
+        } else if (hours === 8 && minutes >= 1 && minutes <= 15) {
             $("#todayStatusBadge").text("Late - Checked In").removeClass("pending").addClass("checked-in");
+        } else if ((hours === 8 && minutes > 15) || hours > 8) {
+            $("#todayStatusBadge").text("Attendance for today is closed").removeClass("pending").addClass("checked-in");
+            $("#timeInButton").prop('disabled', true);
+            $("#timeOutButton").prop('disabled', true);
         } else {
             $("#todayStatusBadge").text("On Time - Checked In").removeClass("pending").addClass("checked-in");
         }
@@ -1091,8 +1318,19 @@ function printAttendance() {
     alert('Print functionality will be implemented soon');
 }
 
+// Flag to track if report system has been initialized
+let reportSystemInitialized = false;
+
 // Weekly Report System Functions
 function initializeReportSystem() {
+    // Check if already initialized
+    if (reportSystemInitialized) {
+        loadCurrentWeekReport(); // Just refresh the report
+        return;
+    }
+    
+    reportSystemInitialized = true;
+    
     // Load current week's report on page load
     loadCurrentWeekReport();
 
@@ -1110,6 +1348,9 @@ function initializeReportSystem() {
     // Report action buttons
     $("#saveDraftBtn").click(saveReportDraft);
     $("#submitReportBtn").click(submitFinalReport);
+
+    // Hide the preview button since we now have auto-preview
+    $("#previewReportBtn").hide();
 }
 
 // Global variables to store current report week dates
@@ -1120,9 +1361,9 @@ function loadCurrentWeekReport() {
     const studentId = $("#hiddenStudentId").val();
     const selectedWeek = $("#reportWeek").val();
     
-    // Show loading state
-    $("#reportStatus").html('<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading report...</div>');
-    $("#submittedReports").html('<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading submitted reports...</div>');
+    // Clear old status
+    $("#reportStatus").empty();
+    $("#submittedReports").empty();
     
     $.ajax({
         url: "ajaxhandler/weeklyReportAjax.php",
@@ -1169,64 +1410,183 @@ function populateReportEditor(report) {
 
     console.log("Populating report editor with report data:", report);
 
-    // Clear existing content for all days - removed description clearing since textareas are removed
+    // Clear existing content and force refresh of all days
     days.forEach(day => {
         $(`#imagePreview${capitalize(day)}`).empty();
+        selectedFilesPerDay[day] = [];
+        existingImagesPerDay[day] = [];
     });
 
-    // Populate images per day if they exist (removed description population)
-    if (report) {
-        // Populate images per day
-                if (report.imagesPerDay) {
-                    days.forEach(day => {
-                        console.log(`Loading images for ${day}:`, report.imagesPerDay[day]);
-                        if (report.imagesPerDay[day] && report.imagesPerDay[day].length > 0) {
-                            report.imagesPerDay[day].forEach(image => {
-                                console.log(`Loading image for ${day}: ${image.url}`);
-                                addImagePreviewToDay(day, image.filename, image.url);
-                            });
-                            existingImagesPerDay[day] = report.imagesPerDay[day].map(img => img.filename);
-                        } else {
-                            existingImagesPerDay[day] = [];
-                        }
-                    });
-                } else if (report.images && report.images.length > 0) {
-                    // Fallback for old single image array format
-                    report.images.forEach(image => {
-                        addImagePreviewToDay('monday', image.filename, image.url);
-                    });
-                    existingImagesPerDay['monday'] = report.images.map(img => img.filename);
-                } else {
-                    days.forEach(day => {
-                        existingImagesPerDay[day] = [];
-                    });
-                }
+    // Add auto-preview functionality
+    function updatePreview() {
+        // Populate day sections with images
+        days.forEach(day => {
+            const dayImagesContainer = $(`#draft${capitalize(day)}Images`);
+            const dayContent = $(`#draft${capitalize(day)}Content`);
 
-        // Populate new weekly report fields
+            // Clear existing images
+            dayImagesContainer.empty();
+
+            // Get images from preview area
+            const images = $(`#imagePreview${capitalize(day)} .image-preview-item img`);
+
+            if (images.length > 0) {
+                images.each(function() {
+                    const imgSrc = $(this).attr('src');
+                    const imgElement = $(`<img src="${imgSrc}" alt="Image for ${capitalize(day)}" class="preview-image">`);
+                    dayImagesContainer.append(imgElement);
+                });
+                dayContent.text(''); // Clear "No activities reported" text if images exist
+            } else {
+                dayContent.text(`No activities reported for ${capitalize(day)}.`);
+            }
+
+            // Update description
+            const description = $(`#${day}Description`).val().trim();
+            $(`#draft${capitalize(day)}Description`).html(description ? description.replace(/\n/g, '<br>') : 'No description provided for this day');
+        });
+
+        // Show the report preview
+        $("#reportDraft").show();
+        $("#draftPreview").hide();
+    }
+
+    // Populate images and descriptions if they exist
+    if (report) {
+        // Populate descriptions for each day
+        days.forEach(day => {
+            // Load description if available
+            const descriptionKey = day.toLowerCase() + '_description';  // Match the backend field name
+            if (report[descriptionKey]) {
+                $(`#${day}Description`).val(report[descriptionKey]);
+            } else {
+                $(`#${day}Description`).val('');
+            }
+        });
+
+        // Populate images per day
+        if (report.imagesPerDay) {
+            days.forEach(day => {
+                console.log(`Loading images for ${day}:`, report.imagesPerDay[day]);
+                if (report.imagesPerDay[day] && report.imagesPerDay[day].length > 0) {
+                    report.imagesPerDay[day].forEach(image => {
+                        console.log(`Loading image for ${day}: ${image.url}`);
+                        addImagePreviewToDay(day, image.filename, image.url);
+                    });
+                    existingImagesPerDay[day] = report.imagesPerDay[day].map(img => img.filename);
+                } else {
+                    existingImagesPerDay[day] = [];
+                }
+            });
+        } else if (report.images && report.images.length > 0) {
+            // Fallback for old single image array format
+            report.images.forEach(image => {
+                addImagePreviewToDay('monday', image.filename, image.url);
+            });
+            existingImagesPerDay['monday'] = report.images.map(img => img.filename);
+        } else {
+            days.forEach(day => {
+                existingImagesPerDay[day] = [];
+            });
+        }
+
+        // Populate weekly report fields
         $("#challengesFaced").val(report.challenges_faced || '');
         $("#lessonsLearned").val(report.lessons_learned || '');
         $("#goalsNextWeek").val(report.goals_next_week || '');
     } else {
-        // Clear fields if no report data
+        // Clear all fields if no report data
+        days.forEach(day => {
+            $(`#${day}Description`).val('');
+            existingImagesPerDay[day] = [];
+        });
         $("#challengesFaced").val('');
         $("#lessonsLearned").val('');
         $("#goalsNextWeek").val('');
-        days.forEach(day => {
-            existingImagesPerDay[day] = [];
-        });
     }
 
     // Update image counters for all days
     updateImageCounters();
 
-    // Update buttons based on report status
-    if (report && report.status === 'submitted') {
-        $("#saveDraftBtn").prop('disabled', true).text('Report Submitted');
-        $("#submitReportBtn").prop('disabled', true).text('Already Submitted');
+                // Update buttons and fields based on report status and approval status
+                if (report && report.status === 'submitted') {
+                    let statusText = 'Report Submitted';
+                    let submitText = 'Already Submitted';
+                    
+                    // Change button text based on approval status
+                    if (report.approval_status) {
+                        switch(report.approval_status) {
+                            case 'pending':
+                                statusText = 'Report Pending Review';
+                                submitText = 'Waiting for Review';
+                                // Clear return reason when resubmitting
+                                $('#returnReasonContainer').empty();
+                                break;
+                            case 'approved':
+                                statusText = 'Report Approved';
+                                submitText = 'Report Approved';
+                                // Clear return reason
+                                $('#returnReasonContainer').empty();
+                                break;
+                            case 'returned':
+                                statusText = 'Report Returned';
+                                submitText = 'Returned for Revision';
+                                break;
+                        }
+                    }        // Update button text to reflect current status
+        $("#saveDraftBtn").prop('disabled', true).text(statusText);
+        $("#submitReportBtn").prop('disabled', true).text(submitText);
+        
+        // Disable all textareas
+        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+        days.forEach(day => {
+            $(`#${day}Description`).prop('disabled', true);
+            // Disable file upload inputs
+            $(`#imageUpload${capitalize(day)}`).prop('disabled', true);
+            // Disable drag and drop area
+            $(`.upload-placeholder[data-day="${day}"]`).addClass('disabled');
+        });
+        
+        // Disable additional weekly report fields if they exist
+        $("#challengesFaced").prop('disabled', true);
+        $("#lessonsLearned").prop('disabled', true);
+        $("#goalsNextWeek").prop('disabled', true);
     } else {
+        // Enable all buttons
         $("#saveDraftBtn").prop('disabled', false).text('Save Draft');
         $("#submitReportBtn").prop('disabled', false).text('Submit Report');
+        
+        // Enable all textareas
+        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+        days.forEach(day => {
+            $(`#${day}Description`).prop('disabled', false);
+            // Enable file upload inputs
+            $(`#imageUpload${capitalize(day)}`).prop('disabled', false);
+            // Enable drag and drop area
+            $(`.upload-placeholder[data-day="${day}"]`).removeClass('disabled');
+        });
+        
+        // Enable additional weekly report fields if they exist
+        $("#challengesFaced").prop('disabled', false);
+        $("#lessonsLearned").prop('disabled', false);
+        $("#goalsNextWeek").prop('disabled', false);
     }
+
+    // Add event listeners for real-time preview updates
+    days.forEach(day => {
+        // Update preview when description changes
+        $(`#${day}Description`).on('input', updatePreview);
+        
+        // Update preview when images change
+        const observer = new MutationObserver(updatePreview);
+        observer.observe($(`#imagePreview${capitalize(day)}`)[0], {
+            childList: true,
+            subtree: true
+        });
+    });
+
+    // Initial preview update
+    updatePreview();
 }
 
 // Restore image preview and removal functionality with file tracking
@@ -1250,40 +1610,49 @@ const existingImagesPerDay = {
 };
 
 function addImagePreviewToDay(day, filename, dataUrl) {
+    // Check if report is submitted - check both at creation time and get latest status
+    const isSubmitted = $("#saveDraftBtn").prop('disabled') && $("#saveDraftBtn").text() === 'Report Submitted';
+    
     const previewItem = $(`  
         <div class="image-preview-item" data-filename="${filename}">  
             <img src="${dataUrl}" alt="Preview">  
-            <button type="button" class="remove-image" data-filename="${filename}">  
-                <i class="fas fa-times"></i>  
-            </button>  
+            ${!isSubmitted ? `
+                <button type="button" class="remove-image" data-filename="${filename}">  
+                    <i class="fas fa-times"></i>  
+                </button>  
+            ` : ''}
         </div>  
     `);  
   
     $(`#imagePreview${capitalize(day)}`).append(previewItem);  
   
-    // Add remove functionality  
-    previewItem.find('.remove-image').click(function() {  
-        const filenameToRemove = $(this).data('filename');  
-        // Check if it's an existing image or new file  
-        if (existingImagesPerDay[day].includes(filenameToRemove)) {  
-            // Remove from existing images  
-            existingImagesPerDay[day] = existingImagesPerDay[day].filter(filename => filename !== filenameToRemove);  
-        } else {  
-            // Remove from selected files  
-            selectedFilesPerDay[day] = selectedFilesPerDay[day].filter(file => file.name !== filenameToRemove);  
-        }  
-        // Remove preview item  
-        $(this).closest('.image-preview-item').remove();  
-        updateImageCounters();  
-        // Update placeholder visibility  
-        const uploadPlaceholder = $(`#uploadPlaceholder${capitalize(day)}`);  
-        const imageCount = $(`#imagePreview${capitalize(day)} .image-preview-item`).length;  
-        if (imageCount > 0) {  
-            uploadPlaceholder.css('display', 'none');  
-        } else {  
-            uploadPlaceholder.css('display', 'block');  
-        }  
-    });  
+    // Add remove functionality only if report is not submitted
+    if (!isSubmitted) {
+        previewItem.find('.remove-image').click(function() {  
+            // Double-check submission status at time of click to prevent any edit attempts
+            const isCurrentlySubmitted = $("#saveDraftBtn").prop('disabled') && $("#saveDraftBtn").text() === 'Report Submitted';
+            if (isCurrentlySubmitted) {
+                // If the report is now submitted, remove the button entirely and prevent any changes
+                $(this).remove();
+                return;
+            }
+            
+            const filenameToRemove = $(this).data('filename');  
+            // Remove from appropriate array
+            if (existingImagesPerDay[day].includes(filenameToRemove)) {  
+                existingImagesPerDay[day] = existingImagesPerDay[day].filter(filename => filename !== filenameToRemove);  
+            } else {  
+                selectedFilesPerDay[day] = selectedFilesPerDay[day].filter(file => file.name !== filenameToRemove);  
+            }  
+            // Remove preview item  
+            $(this).closest('.image-preview-item').remove();  
+            updateImageCounters();  
+            // Update placeholder visibility  
+            const uploadPlaceholder = $(`#uploadPlaceholder${capitalize(day)}`);  
+            const imageCount = $(`#imagePreview${capitalize(day)} .image-preview-item`).length;  
+            uploadPlaceholder.css('display', imageCount > 0 ? 'none' : 'block');
+        });  
+    }
   
     // Update placeholder visibility after adding new image  
     const uploadPlaceholder = $(`#uploadPlaceholder${capitalize(day)}`);  
@@ -1298,6 +1667,9 @@ function addImagePreviewToDay(day, filename, dataUrl) {
 function updateImageCounters() {
     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
     let totalImages = 0;
+
+    // Check if report is submitted
+    const isSubmitted = $("#saveDraftBtn").prop('disabled') && $("#saveDraftBtn").text() === 'Report Submitted';
 
     days.forEach(day => {
         const dayImages = $(`#imagePreview${capitalize(day)} .image-preview-item`).length;
@@ -1316,9 +1688,12 @@ function updateImageCounters() {
         }
     });
 
-    // Update submit button state based on total image count
+    // Update submit button state based on total image count and submission status
     const submitBtn = $("#submitReportBtn");
-    if (totalImages >= 5) {
+    if (isSubmitted) {
+        submitBtn.prop('disabled', true);
+        submitBtn.attr('title', 'Report already submitted');
+    } else if (totalImages >= 5) {
         submitBtn.prop('disabled', false);
         submitBtn.attr('title', '');
     } else {
@@ -1348,12 +1723,14 @@ function displaySubmittedReports(reports) {
                     <span class="report-status-badge ${report.status}">${report.status}</span>
                 </div>
                 <div class="report-content-preview">
-                    ${report.content.substring(0, 150)}${report.content.length > 150 ? '...' : ''}
+                    ${typeof report.content === 'string' ?
+                        report.content.substring(0, 150) + (report.content.length > 150 ? '...' : '')
+                        : ''}
                 </div>
 ${report.images && report.images.length > 0 ? `
                 <div class="report-images-preview">
                     ${report.images.slice(0, 3).map(image => `
-                        <img src="uploads/${image.filename}" alt="Report image" class="report-image-thumb">
+                        <img src="uploads/${image.filename}" alt="Report image" class="report-image-thumb" onerror="this.onerror=null;this.src='icon/nobglogo.ico';">
                     `).join('')}
                     ${report.images.length > 3 ? `<span>+${report.images.length - 3} more</span>` : ''}
                 </div>
@@ -1371,22 +1748,63 @@ ${report.images && report.images.length > 0 ? `
 function updateReportStatus(report) {
     if (!report) {
         $("#reportStatus").html('<div class="report-status info">No report started for this week</div>');
+        $("#returnReasonContainer").empty();
         return;
     }
     
-    if (report.status === 'draft') {
+    let statusHtml = '';
+    let returnReasonHtml = '';
+    
+    if (report.status === 'draft' && report.approval_status === 'returned') {
+        // Report was returned by admin
+        statusHtml = '<div class="report-status warning">Report was returned for revision</div>';
+        returnReasonHtml = `
+            <div class="return-reason-notice">
+                <h4><i class="fas fa-exclamation-circle"></i> Return Reason:</h4>
+                <p>${report.return_reason || 'No reason provided'}</p>
+            </div>
+        `;
+    } else if (report.status === 'draft') {
         const lastSaved = new Date(report.updated_at);
         const formattedTime = lastSaved.toLocaleTimeString('en-PH', {
             hour: '2-digit', minute: '2-digit'
         });
-        $("#reportStatus").html(`<div class="report-status info">Draft last saved at ${formattedTime}</div>`);
+        statusHtml = `<div class="report-status info">Draft last saved at ${formattedTime}</div>`;
     } else if (report.status === 'submitted') {
-        const submittedDate = new Date(report.submitted_at);
+        const submittedDate = new Date(report.submitted_at || report.updated_at);
         const formattedDate = submittedDate.toLocaleDateString('en-PH', {
             year: 'numeric', month: 'long', day: 'numeric'
         });
-        $("#reportStatus").html(`<div class="report-status success">Report submitted on ${formattedDate}</div>`);
+        
+        let statusClass, statusText;
+        
+        // Show approval status for submitted reports
+        switch(report.approval_status) {
+            case 'pending':
+                statusClass = 'warning';
+                statusText = 'Pending Review';
+                break;
+            case 'approved':
+                statusClass = 'success';
+                statusText = 'Approved';
+                break;
+            case 'returned':
+                statusClass = 'warning';
+                statusText = 'Returned for Revision';
+                break;
+            default:
+                statusClass = 'info';
+                statusText = 'Submitted';
+        }
+        
+        statusHtml = `<div class="report-status ${statusClass}">
+            Report submitted on ${formattedDate}<br>
+            <strong>Status: ${statusText}</strong>
+        </div>`;
     }
+    
+    $("#reportStatus").html(statusHtml);
+    $("#returnReasonContainer").html(returnReasonHtml);
 }
 
 function setupImageUpload() {
@@ -1396,6 +1814,17 @@ function setupImageUpload() {
         const uploadPlaceholder = $(`#uploadPlaceholder${capitalize(day)}`);
         const fileInput = $(`#imageUpload${capitalize(day)}`);
         const browseButton = $(`#browseImagesBtn${capitalize(day)}`);
+
+        // Check if report is submitted
+        const isSubmitted = $("#saveDraftBtn").prop('disabled') && $("#saveDraftBtn").text() === 'Report Submitted';
+
+        // If report is submitted, disable all upload functionality and return early
+        if (isSubmitted) {
+            uploadPlaceholder.addClass('disabled').css('pointer-events', 'none');
+            fileInput.prop('disabled', true);
+            if (browseButton.length) browseButton.prop('disabled', true);
+            return;
+        }
 
         // Add a flag to prevent multiple rapid clicks
         let isFileDialogOpen = false;
@@ -1511,7 +1940,8 @@ function handleImageUploadForDay(files, day) {
             return;
         }
 
-        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        if (file.size > 5 * 1024 * 1024) // 5MB limit
+        {
             invalidFiles.push(`${file.name}: File size exceeds 5MB limit`);
             return;
         }
@@ -1564,19 +1994,23 @@ function saveReportDraft() {
     const studentId = $("#hiddenStudentId").val();
     const week = $("#reportWeek").val();
 
-    // Collect new weekly report fields
-    const challengesFaced = $("#challengesFaced").val().trim();
-    const lessonsLearned = $("#lessonsLearned").val().trim();
-    const goalsNextWeek = $("#goalsNextWeek").val().trim();
+    // Collect daily descriptions
+    const mondayDescription = $("#mondayDescription").val().trim();
+    const tuesdayDescription = $("#tuesdayDescription").val().trim();
+    const wednesdayDescription = $("#wednesdayDescription").val().trim();
+    const thursdayDescription = $("#thursdayDescription").val().trim();
+    const fridayDescription = $("#fridayDescription").val().trim();
 
     // Prepare FormData
     const formData = new FormData();
     formData.append('action', 'saveReportDraft');
     formData.append('studentId', studentId);
     formData.append('week', week);
-    formData.append('challengesFaced', challengesFaced);
-    formData.append('lessonsLearned', lessonsLearned);
-    formData.append('goalsNextWeek', goalsNextWeek);
+    formData.append('mondayDescription', mondayDescription);
+    formData.append('tuesdayDescription', tuesdayDescription);
+    formData.append('wednesdayDescription', wednesdayDescription);
+    formData.append('thursdayDescription', thursdayDescription);
+    formData.append('fridayDescription', fridayDescription);
 
     // Add image files for each day from selectedFilesPerDay
     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
@@ -1632,19 +2066,23 @@ function submitFinalReport() {
     const studentId = $("#hiddenStudentId").val();
     const week = $("#reportWeek").val();
 
-    // Collect new weekly report fields
-    const challengesFaced = $("#challengesFaced").val().trim();
-    const lessonsLearned = $("#lessonsLearned").val().trim();
-    const goalsNextWeek = $("#goalsNextWeek").val().trim();
+    // Collect daily descriptions
+    const mondayDescription = $("#mondayDescription").val().trim();
+    const tuesdayDescription = $("#tuesdayDescription").val().trim();
+    const wednesdayDescription = $("#wednesdayDescription").val().trim();
+    const thursdayDescription = $("#thursdayDescription").val().trim();
+    const fridayDescription = $("#fridayDescription").val().trim();
 
     if (confirm('Are you sure you want to submit this report? Once submitted, you cannot edit it.')) {
         const formData = new FormData();
         formData.append('action', 'submitFinalReport');
         formData.append('studentId', studentId);
         formData.append('week', week);
-        formData.append('challengesFaced', challengesFaced);
-        formData.append('lessonsLearned', lessonsLearned);
-        formData.append('goalsNextWeek', goalsNextWeek);
+        formData.append('mondayDescription', mondayDescription);
+        formData.append('tuesdayDescription', tuesdayDescription);
+        formData.append('wednesdayDescription', wednesdayDescription);
+        formData.append('thursdayDescription', thursdayDescription);
+        formData.append('fridayDescription', fridayDescription);
 
         // Add image files for each day from selectedFilesPerDay
         const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
@@ -1659,6 +2097,9 @@ function submitFinalReport() {
 
         // Show submitting state
         $("#submitReportBtn").text('Submitting...').prop('disabled', true);
+        
+        // Clear any existing return reason message
+        $('#returnReasonContainer').empty();
 
         $.ajax({
             url: "ajaxhandler/weeklyReportAjax.php",
@@ -1791,14 +2232,39 @@ function generateReportPreview() {
         }
     });
 
-    // Populate summary sections with student responses or placeholders
-    const challengesFaced = $("#challengesFaced").val().trim();
-    const lessonsLearned = $("#lessonsLearned").val().trim();
-    const goalsNextWeek = $("#goalsNextWeek").val().trim();
+    // Populate daily descriptions next to each day's images
+    days.forEach(day => {
+        const description = $(`#${day}Description`).val().trim();
+        $(`#draft${capitalize(day)}Description`).html(description ? description.replace(/\n/g, '<br>') : 'No description provided for this day');
+    });
 
-    $("#draftChallengesFaced").html(challengesFaced ? challengesFaced.replace(/\n/g, '<br>') : 'No challenges reported');
-    $("#draftLessonsLearned").html(lessonsLearned ? lessonsLearned.replace(/\n/g, '<br>') : 'No lessons reported');
-    $("#draftGoalsNextWeek").html(goalsNextWeek ? goalsNextWeek.replace(/\n/g, '<br>') : 'No goals reported');
+    // Update report status in preview
+    const report = getCurrentReport();
+    let statusClass = 'info';
+    let statusText = 'Draft';
+    
+    if (report && report.status === 'submitted') {
+        switch(report.approval_status) {
+            case 'pending':
+                statusClass = 'warning';
+                statusText = 'Pending Review';
+                break;
+            case 'approved':
+                statusClass = 'success';
+                statusText = 'Approved';
+                break;
+            case 'returned':
+                statusClass = 'warning';
+                statusText = 'Returned for Revision';
+                break;
+            default:
+                statusClass = 'info';
+                statusText = 'Submitted';
+        }
+    }
+    
+    // Update the status display in preview
+    $('#reportStatus').html(`<div class="report-status ${statusClass}">${statusText}</div>`);
 
     // Show the report draft preview
     $("#reportDraft").show();

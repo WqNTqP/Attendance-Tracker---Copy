@@ -150,25 +150,26 @@ class attendanceDetails
         }
 
         $rv = [];
-        $c = "SELECT 
-        rsd.INTERNS_ID, 
-        rsd.STUDENT_ID, 
-        rsd.NAME, 
-        ita.ON_DATE, 
-        ita.TIMEIN, 
+        $c = "SELECT
+        rsd.INTERNS_ID,
+        rsd.STUDENT_ID,
+        rsd.SURNAME,
+        rsd.NAME,
+        ita.ON_DATE,
+        ita.TIMEIN,
         ita.TIMEOUT
         FROM (
-            SELECT id.INTERNS_ID, id.STUDENT_ID, id.NAME, itd.SESSION_ID, itd.HTE_ID
+            SELECT id.INTERNS_ID, id.STUDENT_ID, id.SURNAME, id.NAME, itd.SESSION_ID, itd.HTE_ID
             FROM interns_details AS id
             JOIN intern_details AS itd ON itd.INTERNS_ID = id.INTERNS_ID
-            WHERE itd.SESSION_ID = :sessionid 
+            WHERE itd.SESSION_ID = :sessionid
             AND itd.HTE_ID = :hteid
         ) AS rsd
-        JOIN interns_attendance AS ita ON rsd.INTERNS_ID = ita.INTERNS_ID 
-                                        AND rsd.HTE_ID = ita.HTE_ID 
+        JOIN interns_attendance AS ita ON rsd.INTERNS_ID = ita.INTERNS_ID
+                                        AND rsd.HTE_ID = ita.HTE_ID
                                         AND ita.COORDINATOR_ID = :coordinatorid
         WHERE ita.ON_DATE = :ondate  -- Filter by selected ondate
-        AND ita.TIMEIN IS NOT NULL 
+        AND ita.TIMEIN IS NOT NULL
         AND ita.TIMEOUT IS NOT NULL";
         $s = $dbo->conn->prepare($c);
 
@@ -277,7 +278,7 @@ class attendanceDetails
         return $rv;
     }
 
-    public function addStudent($dbo, $student_id, $name, $age, $gender, $email, $contact_number, $coordinator_id, $hte_id, $session_id) {
+    public function addStudent($dbo, $student_id, $name, $surname, $age, $gender, $email, $contact_number, $coordinator_id, $hte_id, $session_id) {
         try {
             // Start transaction
             $dbo->conn->beginTransaction();
@@ -357,9 +358,10 @@ class attendanceDetails
                 }
             } else {
                 // Insert new student into interns_details
-                $stmt = $dbo->conn->prepare("INSERT INTO interns_details (STUDENT_ID, NAME, AGE, GENDER, EMAIL, CONTACT_NUMBER) VALUES (:student_id, :name, :age, :gender, :email, :contact_number)");
+                $stmt = $dbo->conn->prepare("INSERT INTO interns_details (STUDENT_ID, NAME, SURNAME, AGE, GENDER, EMAIL, CONTACT_NUMBER) VALUES (:student_id, :name, :surname, :age, :gender, :email, :contact_number)");
                 $stmt->bindParam(':student_id', $student_id, PDO::PARAM_INT);  // Binding the parameter
                 $stmt->bindParam(':name', $name, PDO::PARAM_STR);  // Binding the parameter
+                $stmt->bindParam(':surname', $surname, PDO::PARAM_STR);  // Binding the parameter
                 $stmt->bindParam(':age', $age, PDO::PARAM_INT);  // Binding the parameter
                 $stmt->bindParam(':gender', $gender, PDO::PARAM_STR);  // Binding the parameter
                 $stmt->bindParam(':email', $email, PDO::PARAM_STR);  // Binding the parameter
@@ -442,7 +444,7 @@ class attendanceDetails
 
     public function getCoordinatorDetails($dbo, $coordinator_id) {
         try {
-            $stmt = $dbo->conn->prepare("SELECT COORDINATOR_ID, NAME, EMAIL, CONTACT_NUMBER, DEPARTMENT 
+            $stmt = $dbo->conn->prepare("SELECT COORDINATOR_ID, NAME, EMAIL, CONTACT_NUMBER, DEPARTMENT, PROFILE 
                                          FROM coordinator 
                                          WHERE COORDINATOR_ID = ?");
             $stmt->execute([$coordinator_id]);
@@ -540,17 +542,6 @@ class attendanceDetails
         }
     }
 
-    public function updateCoordinatorProfilePicture($dbo, $coordinator_id, $profile_picture) {
-        try {
-            $stmt = $dbo->conn->prepare("UPDATE coordinator SET PROFILE_PICTURE = ? WHERE COORDINATOR_ID = ?");
-            $stmt->execute([$profile_picture, $coordinator_id]);
-            return $stmt->rowCount() > 0;
-        } catch (Exception $e) {
-            error_log("Error updating profile picture: " . $e->getMessage());
-            return false;
-        }
-    }
-
     public function updateCoordinatorDetails($dbo, $coordinator_id, $name, $email, $contact_number, $department) {
         try {
             $stmt = $dbo->conn->prepare("UPDATE coordinator SET NAME = ?, EMAIL = ?, CONTACT_NUMBER = ?, DEPARTMENT = ? WHERE COORDINATOR_ID = ?");
@@ -564,28 +555,141 @@ class attendanceDetails
 
     public function verifyCoordinatorPassword($dbo, $coordinator_id, $password) {
         try {
-            $stmt = $dbo->conn->prepare("SELECT PASSWORD FROM coordinator WHERE COORDINATOR_ID = ?");
+            if (!$dbo || !$dbo->conn) {
+                throw new Exception("Database connection not initialized");
+            }
+            
+            error_log("\n=== Password Verification Debug ===");
+            error_log("Coordinator ID: " . $coordinator_id);
+            error_log("Provided password length: " . strlen($password));
+            
+            // First, verify the coordinator exists and get their current password
+            $stmt = $dbo->conn->prepare("SELECT PASSWORD FROM coordinator WHERE COORDINATOR_ID = ? LIMIT 1");
+            if (!$stmt) {
+                throw new Exception("Failed to prepare statement");
+            }
+            
             $stmt->execute([$coordinator_id]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($result) {
-                return password_verify($password, $result['PASSWORD']);
+            
+            if (!$result) {
+                error_log("No coordinator found with ID: " . $coordinator_id);
+                return false;
             }
-            return false;
+            
+            if (!isset($result['PASSWORD'])) {
+                error_log("Password field not found in result");
+                return false;
+            }
+            
+            $storedPassword = $result['PASSWORD'];
+            error_log("Found stored password. Length: " . strlen($storedPassword));
+            
+            // Simple string comparison for plain text passwords
+            $matches = ($password === $storedPassword);
+            error_log("Password comparison result: " . ($matches ? "MATCH" : "NO MATCH"));
+            
+            return $matches;
+            
+        } catch (PDOException $e) {
+            error_log("Database error in verifyCoordinatorPassword: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            throw $e;
         } catch (Exception $e) {
-            error_log("Error verifying password: " . $e->getMessage());
-            return false;
+            error_log("Error in verifyCoordinatorPassword: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            throw $e;
+        }
+    }
+
+    public function updateCoordinatorProfilePicture($dbo, $coordinator_id, $filename) {
+        try {
+            if (!$dbo || !$dbo->conn) {
+                throw new Exception("Database connection not initialized");
+            }
+
+            error_log("Updating profile picture for coordinator: " . $coordinator_id);
+            error_log("New filename: " . $filename);
+
+            // First verify the coordinator exists
+            $checkStmt = $dbo->conn->prepare("SELECT COORDINATOR_ID FROM coordinator WHERE COORDINATOR_ID = ?");
+            $checkStmt->execute([$coordinator_id]);
+            
+            if (!$checkStmt->fetch()) {
+                error_log("Coordinator not found: " . $coordinator_id);
+                throw new Exception("Coordinator not found");
+            }
+
+            $stmt = $dbo->conn->prepare("UPDATE coordinator SET PROFILE = ? WHERE COORDINATOR_ID = ?");
+            if (!$stmt) {
+                error_log("Failed to prepare profile update statement");
+                throw new Exception("Failed to prepare profile update statement");
+            }
+
+            $stmt->execute([$filename, $coordinator_id]);
+            
+            if ($stmt->rowCount() > 0) {
+                error_log("Profile picture updated successfully in database");
+                return true;
+            } else {
+                error_log("No rows updated for coordinator profile picture");
+                return false;
+            }
+        } catch (PDOException $e) {
+            error_log("Database error updating profile picture: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            throw $e;
+        } catch (Exception $e) {
+            error_log("Error updating profile picture: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            throw $e;
         }
     }
 
     public function updateCoordinatorPassword($dbo, $coordinator_id, $new_password) {
         try {
-            $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+            if (!$dbo || !$dbo->conn) {
+                throw new Exception("Database connection not initialized");
+            }
+
+            // Log the update attempt
+            error_log("Attempting to update password for coordinator: " . $coordinator_id);
+            error_log("New password length: " . strlen($new_password));
+
+            // First verify the coordinator exists
+            $checkStmt = $dbo->conn->prepare("SELECT COORDINATOR_ID FROM coordinator WHERE COORDINATOR_ID = ?");
+            $checkStmt->execute([$coordinator_id]);
+            
+            if (!$checkStmt->fetch()) {
+                error_log("Coordinator not found: " . $coordinator_id);
+                throw new Exception("Coordinator not found");
+            }
+
+            // For development, store as plain text
             $stmt = $dbo->conn->prepare("UPDATE coordinator SET PASSWORD = ? WHERE COORDINATOR_ID = ?");
-            $stmt->execute([$hashed_password, $coordinator_id]);
-            return $stmt->rowCount() > 0;
+            
+            if (!$stmt) {
+                error_log("Failed to prepare update statement");
+                throw new Exception("Failed to prepare update statement");
+            }
+
+            $stmt->execute([$new_password, $coordinator_id]);
+            
+            if ($stmt->rowCount() > 0) {
+                error_log("Password successfully updated in database for coordinator: " . $coordinator_id);
+                return true;
+            } else {
+                error_log("No rows were updated for coordinator: " . $coordinator_id);
+                return false;
+            }
+        } catch (PDOException $e) {
+            error_log("Database error updating password: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            throw new Exception("Database error: " . $e->getMessage());
         } catch (Exception $e) {
             error_log("Error updating password: " . $e->getMessage());
-            return false;
+            error_log("Stack trace: " . $e->getTraceAsString());
+            throw $e;
         }
     }
 
@@ -595,6 +699,7 @@ class attendanceDetails
                 SELECT
                     id.STUDENT_ID,
                     id.NAME,
+                    id.SURNAME,
                     id.AGE,
                     id.GENDER,
                     id.EMAIL,
@@ -606,13 +711,92 @@ class attendanceDetails
                 JOIN internship_needs ins ON itd.HTE_ID = ins.HTE_ID AND ins.COORDINATOR_ID = :coordinator_id
                 JOIN host_training_establishment hte ON itd.HTE_ID = hte.HTE_ID
                 JOIN session_details s ON itd.SESSION_ID = s.ID
-                ORDER BY id.STUDENT_ID
+                    ORDER BY id.NAME ASC
             ");
             $stmt->execute([':coordinator_id' => $coordinator_id]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             error_log("Error fetching students under coordinator: " . $e->getMessage());
             return [];
+        }
+    }
+
+    public function getStudentsBySessionAndHTE($dbo, $sessionId, $hteId, $coordinatorId) {
+        try {
+            // Debug logging
+            error_log("getStudentsBySessionAndHTE called with sessionId: $sessionId, hteId: $hteId, coordinatorId: $coordinatorId");
+
+            $stmt = $dbo->conn->prepare("
+                SELECT
+                    id.INTERNS_ID,
+                    id.STUDENT_ID,
+                    id.NAME,
+                    id.SURNAME,
+                    id.AGE,
+                    id.GENDER,
+                    id.EMAIL,
+                    id.CONTACT_NUMBER
+                FROM interns_details id
+                JOIN intern_details itd ON id.INTERNS_ID = itd.INTERNS_ID
+                WHERE itd.SESSION_ID = :sessionId
+                AND itd.HTE_ID = :hteId
+                AND EXISTS (
+                    SELECT 1 FROM internship_needs
+                    WHERE HTE_ID = :hteId AND COORDINATOR_ID = :coordinatorId AND SESSION_ID = :sessionId
+                )
+                    ORDER BY id.NAME ASC
+            ");
+            $stmt->execute([
+                ':sessionId' => $sessionId,
+                ':hteId' => $hteId,
+                ':coordinatorId' => $coordinatorId
+            ]);
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("Query returned " . count($results) . " students");
+            return $results;
+        } catch (Exception $e) {
+            error_log("Error fetching students by session and HTE: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function deleteStudents($dbo, $studentIds) {
+        try {
+            $dbo->conn->beginTransaction();
+
+            $deletedCount = 0;
+            $errors = [];
+
+            foreach ($studentIds as $studentId) {
+                try {
+                    // First, delete related records in intern_details
+                    $stmt = $dbo->conn->prepare("DELETE FROM intern_details WHERE INTERNS_ID = :studentId");
+                    $stmt->execute([":studentId" => $studentId]);
+                    $deletedCount += $stmt->rowCount();
+
+                    // Then, delete the student from interns_details
+                    $stmt = $dbo->conn->prepare("DELETE FROM interns_details WHERE INTERNS_ID = :studentId");
+                    $stmt->execute([":studentId" => $studentId]);
+                    $deletedCount += $stmt->rowCount();
+
+                } catch (Exception $e) {
+                    $errors[] = "Error deleting student $studentId: " . $e->getMessage();
+                }
+            }
+
+            $dbo->conn->commit();
+
+            $message = "$deletedCount record(s) deleted successfully.";
+            if (!empty($errors)) {
+                $message .= " Errors: " . implode(", ", $errors);
+            }
+
+            return true;
+
+        } catch (Exception $e) {
+            $dbo->conn->rollBack();
+            error_log("Error deleting students: " . $e->getMessage());
+            return false;
         }
     }
 

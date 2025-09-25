@@ -31,6 +31,33 @@ if (empty($action)) {
 }
 
 switch ($action) {
+    case "getAllStudents":
+        $coordinatorId = $_POST['coordinatorId'] ?? null;
+        try {
+            if ($coordinatorId) {
+                $stmt = $dbo->conn->prepare("
+                    SELECT
+                        id.INTERNS_ID,
+                        id.STUDENT_ID,
+                        id.NAME,
+                        id.SURNAME
+                    FROM interns_details id
+                    JOIN intern_details itd ON id.INTERNS_ID = itd.INTERNS_ID
+                    JOIN internship_needs ins ON itd.HTE_ID = ins.HTE_ID AND ins.COORDINATOR_ID = ?
+                    ORDER BY id.SURNAME ASC, id.NAME ASC
+                ");
+                $stmt->execute([$coordinatorId]);
+            } else {
+                $stmt = $dbo->conn->prepare("SELECT STUDENT_ID, NAME, SURNAME FROM interns_details ORDER BY SURNAME, NAME");
+                $stmt->execute();
+            }
+            $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            sendResponse('success', $students, 'Student list retrieved successfully');
+        } catch (Exception $e) {
+            logError("Error retrieving student list: " . $e->getMessage());
+            sendResponse('error', null, 'Error retrieving student list');
+        }
+        break;
     case "getAdminDetails":
         $adminId = $_POST['adminId'] ?? null;
         if (!$adminId) {
