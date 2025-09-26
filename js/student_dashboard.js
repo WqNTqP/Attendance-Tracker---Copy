@@ -551,29 +551,31 @@ function loadRecentActivity() {
         type: "POST",
         dataType: "json",
         data: {
-            action: "getRecentActivity",
+            action: "getRecentReportStatus",
             studentId: studentId
         },
         success: function(response) {
-            if (response.status === "success") {
-                let html = '<div class="activity-list">';
-                response.data.forEach(activity => {
+            if (response.status === "success" && Array.isArray(response.data) && response.data.length > 0) {
+                let html = `<div class=\"weekly-report-table-wrapper\"><table class=\"weekly-report-table\"><thead><tr><th>Week</th><th>Status</th><th>Submitted</th><th>Approved</th></tr></thead><tbody>`;
+                response.data.forEach(report => {
+                    const approvedClass = report.approved_at ? '' : 'na';
                     html += `
-                        <div class="activity-item">
-                            <i class="fas fa-${activity.icon}"></i>
-                            <div class="activity-content">
-                                <p>${activity.description}</p>
-                                <small>${activity.time}</small>
-                            </div>
-                        </div>
+                        <tr class=\"weekly-report-row\">
+                            <td>${report.week_start} to ${report.week_end}</td>
+                            <td>${report.status} / ${report.approval_status}</td>
+                            <td>${report.created_at || 'N/A'}</td>
+                            <td class=\"weekly-report-approved ${approvedClass}\">${report.approved_at || 'N/A'}</td>
+                        </tr>
                     `;
                 });
-                html += '</div>';
+                html += '</tbody></table></div>';
                 $("#recentActivity").html(html);
+            } else {
+                $("#recentActivity").html('<p>No recent weekly report submissions found.</p>');
             }
         },
         error: function(xhr, status, error) {
-            console.error("Error loading recent activity:", error);
+            console.error("Error loading recent weekly report status:", error);
         }
     });
 }

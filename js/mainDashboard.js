@@ -74,6 +74,124 @@ function getSessionHTML(rv) {
     return x;
 }
 
+    // Dashboard button click handler (use getDashboardStats)
+    $(document).on("click", ".btnDashboardStudent", function() {
+        let studentId = $(this).data('studentid');
+        if (!studentId) {
+            alert("Student ID not found.");
+            return;
+        }
+        $.ajax({
+            url: "ajaxhandler/studentDashboardAjax.php",
+            type: "POST",
+            dataType: "json",
+            data: {
+                action: "getDashboardStats",
+                studentId: studentId
+            },
+            success: function(response) {
+                if (response.status === "success" && response.data) {
+                    let presentDays = response.data.presentDays || 0;
+                    let totalHours = response.data.totalHours || 0;
+                    let attendanceRate = response.data.attendanceRate || 0;
+                    showStudentDashboardModal({ presentDays, totalHours, attendanceRate }, studentId);
+                } else {
+                    alert("Could not fetch student dashboard info.");
+                }
+            },
+            error: function(xhr, status, error) {
+                alert("Error fetching student dashboard info: " + error);
+            }
+        });
+    });
+
+    // Modal for displaying student dashboard info (all stats)
+    function showStudentDashboardModal(stats) {
+        // Create modal if not exists
+        if ($("#studentDashboardModal").length === 0) {
+            $("body").append(`
+                <div id="studentDashboardModal" class="main-dashboard-modal-bg" style="display:none;">
+                    <div class="main-dashboard-modal-content">
+                        <div class="main-dashboard-modal-header">
+                            <h2 class="main-dashboard-modal-title">Student Stats</h2>
+                            <button class="main-dashboard-modal-close" id="closeStudentDashboardModal">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="main-dashboard-modal-body">
+                            <div id="studentDashboardModalContent"></div>
+                        </div>
+                    </div>
+                </div>
+            `);
+        }
+        let statsHtml = `
+            <div class="main-dashboard-modal-grid">
+                <div class="main-dashboard-stats-row">
+                    <div class='main-dashboard-card'>
+                        <h3>Present Count (This Week)</h3>
+                        <p>${stats.presentDays}</p>
+                    </div>
+                    <div class='main-dashboard-card'>
+                        <h3>Total Hours</h3>
+                        <p>${stats.totalHours}h</p>
+                    </div>
+                    <div class='main-dashboard-card'>
+                        <h3>Attendance Percentage</h3>
+                        <p>${stats.attendanceRate}%</p>
+                    </div>
+                </div>
+                <div class="main-dashboard-recent-activity-card">
+                    <h3>Recent Activity</h3>
+                    <div id="dashboardRecentActivityTable"></div>
+                </div>
+            </div>
+        `;
+        // Fetch and render recent weekly report status
+        return function(studentId) {
+            $.ajax({
+                url: "ajaxhandler/studentDashboardAjax.php",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    action: "getRecentReportStatus",
+                    studentId: studentId
+                },
+                success: function(response) {
+                    $("#studentDashboardModalContent").html(statsHtml);
+                    let tableHtml = "";
+                    if (response.status === "success" && Array.isArray(response.data) && response.data.length > 0) {
+                        tableHtml += `<div class=\"weekly-report-table-wrapper\"><table class=\"weekly-report-table\"><thead><tr><th>Week</th><th>Status</th><th>Submitted</th><th>Approved</th></tr></thead><tbody>`;
+                        response.data.forEach(report => {
+                            const approvedClass = report.approved_at ? '' : 'na';
+                            tableHtml += `
+                                <tr class=\"weekly-report-row\">
+                                    <td>${report.week_start} to ${report.week_end}</td>
+                                    <td>${report.status} / ${report.approval_status}</td>
+                                    <td>${report.created_at || 'N/A'}</td>
+                                    <td class=\"weekly-report-approved ${approvedClass}\">${report.approved_at || 'N/A'}</td>
+                                </tr>
+                            `;
+                        });
+                        tableHtml += '</tbody></table></div>';
+                    } else {
+                        tableHtml += '<p>No recent weekly report submissions found.</p>';
+                    }
+                    $("#dashboardRecentActivityTable").html(tableHtml);
+                },
+                error: function(xhr, status, error) {
+                    $("#studentDashboardModalContent").html(statsHtml);
+                    $("#dashboardRecentActivityTable").html('<p>Error loading recent weekly report status.</p>');
+                }
+            });
+            $("#studentDashboardModal").fadeIn();
+        }(arguments[1]);
+    }
+
+    $(document).on("click", "#closeStudentDashboardModal", function() {
+        $("#studentDashboardModal").fadeOut();
+    });
+
 function loadSeassions() {
     $.ajax({
         url: "ajaxhandler/attendanceAJAX.php",
@@ -1032,7 +1150,8 @@ function getStudentListHTML(studentList) {
 
             // Delete button in separate column
             x += `<div class="delete-area">`;
-            x += `<button class="btnProfileStudent" data-studentid="${cs['INTERNS_ID']}">Profile</button>`;
+            x += `<button class="btnProfileStudent student-action-btn" data-studentid="${cs['INTERNS_ID']}">Profile</button>`;
+            x += `<button class="btnDashboardStudent student-action-btn" data-studentid="${cs['INTERNS_ID']}">Stats</button>`;
             x += `</div>`;
 // Student Profile Modal (view-only)
 if ($("#studentProfileModal").length === 0) {

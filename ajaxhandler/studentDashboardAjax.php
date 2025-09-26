@@ -1,3 +1,4 @@
+
 <?php
 date_default_timezone_set('Asia/Manila');
 error_reporting(E_ALL);
@@ -575,6 +576,35 @@ switch ($action) {
         }
         break;
             
-            
+                case "getRecentReportStatus":
+        $studentId = $_POST['studentId'] ?? null;
+        if (!$studentId) {
+            sendResponse('error', null, 'Student ID is required');
+        }
+        try {
+            // Get recent weekly reports for this student, this month
+            $currentMonth = date('m');
+            $currentYear = date('Y');
+            $stmt = $dbo->conn->prepare("SELECT report_id, week_start, week_end, status, created_at, updated_at, approval_status, approved_at FROM weekly_reports WHERE interns_id = ? AND ((MONTH(created_at) = ? AND YEAR(created_at) = ?) OR (MONTH(approved_at) = ? AND YEAR(approved_at) = ?)) ORDER BY created_at DESC, approved_at DESC LIMIT 5");
+            $stmt->execute([$studentId, $currentMonth, $currentYear, $currentMonth, $currentYear]);
+            $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $result = [];
+            foreach ($reports as $report) {
+                $result[] = [
+                    'week_start' => $report['week_start'],
+                    'week_end' => $report['week_end'],
+                    'status' => $report['status'],
+                    'approval_status' => $report['approval_status'],
+                    'created_at' => $report['created_at'],
+                    'updated_at' => $report['updated_at'],
+                    'approved_at' => $report['approved_at']
+                ];
+            }
+            sendResponse('success', $result, 'Recent report status retrieved successfully');
+        } catch (Exception $e) {
+            logError("Error retrieving recent report status: " . $e->getMessage());
+            sendResponse('error', null, 'Error retrieving recent report status');
+        }
+        break;
 }
 ?>
