@@ -55,6 +55,15 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
     <!-- <link rel="stylesheet" href="css/attendance.css"> -->
     <link rel="icon" type="image/x-icon" href="icon/favicon.ico">
     <title>Student Dashboard - Attendance Tracker</title>
+        <style>
+            /* Make radio buttons larger in post-assessment tables */
+            .eval-table input[type="radio"] {
+                width: 28px;
+                height: 28px;
+                accent-color: #007bff;
+                margin: 0 6px;
+            }
+        </style>
 </head>
 <body>
     <input type="hidden" id="hiddenStudentId" value="<?php echo htmlspecialchars($student_id); ?>">
@@ -65,7 +74,7 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
         </button>
         <div class="sidebar-logo">
             <div class="logo" onclick="window.location.href='student_dashboard.php'">
-                <span>ATTENDANCE TRACKER</span>
+                <span>InternConnect</span>
             </div>
         </div>
         <div class="user-profile">
@@ -100,7 +109,7 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
         <div class="sidebar-header">
             <div class="logo" onclick="window.location.href='student_dashboard.php'">
                 <i class="fas fa-calendar-check"></i>
-                <span>ATTENDANCE TRACKER</span>
+                <span>InternConnect</span>
             </div>
         </div>
         
@@ -113,6 +122,10 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
                 <li class="sidebar-item" data-tab="attendance">
                     <i class="fas fa-clock"></i>
                     <span>Attendance</span>
+                </li>
+                <li class="sidebar-item" data-tab="evaluation">
+                    <i class="fas fa-clipboard-check"></i>
+                    <span>Evaluation</span>
                 </li>
                 <li class="sidebar-item" data-tab="history">
                     <i class="fas fa-history"></i>
@@ -271,6 +284,478 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
         </div>
     </div>
 
+
+    <!--Evaluation tab-->
+    <!-- Evaluation Tab Content -->
+    <div class="tab-content" id="evaluationTab">
+        <!-- Top navigation for Pre/Post Assessment (only in evaluation tab) -->
+        <div class="eval-topnav" style="display: flex; gap: 16px; margin-bottom: 24px;">
+            <button id="preAssessmentTabBtn" class="eval-tab-btn active" type="button">Pre-Assessment</button>
+            <button id="postAssessmentTabBtn" class="eval-tab-btn" type="button">Post-Assessment</button>
+        </div>
+        <!-- Pre-Assessment Form -->
+        <div class="assessment-tab" id="preAssessmentTab">
+            <form id="evaluationForm">
+                <div class="student-eval-unique-container">
+                    <div class="eval-card">
+                        <h2 class="student-eval-unique-title">Soft Skills</h2>
+                        <div id="softSkillQuestions">
+                            <!-- Soft skill questions will be loaded here dynamically -->
+                        </div>
+                    </div>
+                    <div class="eval-card">
+                        <h2 class="student-eval-unique-title">Communication Skills</h2>
+                        <div id="commSkillQuestions">
+                            <!-- Communication skill questions will be loaded here dynamically -->
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; margin-top: 32px;">
+                    <button type="submit" class="btn student-eval-unique-submit" id="submitAnswersBtn">Submit Answers</button>
+                </div>
+                <div id="evaluationFormMessage" style="margin-top: 24px;"></div>
+            </form>
+        </div>
+        <!-- Post-Assessment Form -->
+        <div class="assessment-tab" id="postAssessmentTab" style="display:none;">
+            <form id="postAssessmentForm">
+                <!-- Category toggle header above the table, centered (moved outside student-eval-unique-container) -->
+                <div class="category-toggle" style="width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 24px;">
+                    <div style="display: flex; align-items: center; gap: 24px;">
+                        <button type="button" id="prevCategoryBtn" class="btn btn-light category-nav-btn" style="font-size: 1.5em;">
+                            &#8592;
+                        </button>
+                        <span id="currentCategoryLabel" style="font-weight: bold; font-size: 1.2em;">System Development</span>
+                        <button type="button" id="nextCategoryBtn" class="btn btn-light category-nav-btn" style="font-size: 1.5em;">
+                            &#8594;
+                        </button>
+                    </div>
+                </div>
+                <div class="student-eval-unique-container">
+                    <!-- Category content below header -->
+                    <div id="categoryContent" style="width: 100%; display: flex; justify-content: center;">
+                        <!-- Category tables will be toggled here -->
+                        <div class="eval-card post-category" id="sysdevCategory">
+                            <h2 class="student-eval-unique-title">COMPETENCY ON SYSTEM DEVELOPMENT</h2>
+                            <table class="eval-table">
+                                <thead>
+                                    <tr>
+                                        <th>Question</th>
+                                        <th colspan="5">Rating (Likert Scale)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="text" name="sysdev_q1" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="sysdev_r1" value="5" required> 5</td>
+                                        <td><input type="radio" name="sysdev_r1" value="4"> 4</td>
+                                        <td><input type="radio" name="sysdev_r1" value="3"> 3</td>
+                                        <td><input type="radio" name="sysdev_r1" value="2"> 2</td>
+                                        <td><input type="radio" name="sysdev_r1" value="1"> 1</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" name="sysdev_q2" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="sysdev_r2" value="5" required> 5</td>
+                                        <td><input type="radio" name="sysdev_r2" value="4"> 4</td>
+                                        <td><input type="radio" name="sysdev_r2" value="3"> 3</td>
+                                        <td><input type="radio" name="sysdev_r2" value="2"> 2</td>
+                                        <td><input type="radio" name="sysdev_r2" value="1"> 1</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" name="sysdev_q3" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="sysdev_r3" value="5" required> 5</td>
+                                        <td><input type="radio" name="sysdev_r3" value="4"> 4</td>
+                                        <td><input type="radio" name="sysdev_r3" value="3"> 3</td>
+                                        <td><input type="radio" name="sysdev_r3" value="2"> 2</td>
+                                        <td><input type="radio" name="sysdev_r3" value="1"> 1</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" name="sysdev_q4" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="sysdev_r4" value="5" required> 5</td>
+                                        <td><input type="radio" name="sysdev_r4" value="4"> 4</td>
+                                        <td><input type="radio" name="sysdev_r4" value="3"> 3</td>
+                                        <td><input type="radio" name="sysdev_r4" value="2"> 2</td>
+                                        <td><input type="radio" name="sysdev_r4" value="1"> 1</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" name="sysdev_q5" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="sysdev_r5" value="5" required> 5</td>
+                                        <td><input type="radio" name="sysdev_r5" value="4"> 4</td>
+                                        <td><input type="radio" name="sysdev_r5" value="3"> 3</td>
+                                        <td><input type="radio" name="sysdev_r5" value="2"> 2</td>
+                                        <td><input type="radio" name="sysdev_r5" value="1"> 1</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <!-- Save Questions Button -->
+                            <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+                                <div id="postAssessmentFormMessage" style="margin-top: 24px; color: blue;"></div>
+                                <button type="button" id="saveQuestionsBtn" class="btn btn-warning">Save Questions</button>
+                            </div>
+                        </div>
+                        <div class="eval-card post-category" id="researchCategory" style="display:none;">
+                            <h2 class="student-eval-unique-title">COMPETENCY ON RESEARCH</h2>
+                            <table class="eval-table">
+                                <thead>
+                                    <tr>
+                                        <th>Question</th>
+                                        <th colspan="5">Rating (Likert Scale)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="text" name="research_q1" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="research_r1" value="5" required> 5</td>
+                                        <td><input type="radio" name="research_r1" value="4"> 4</td>
+                                        <td><input type="radio" name="research_r1" value="3"> 3</td>
+                                        <td><input type="radio" name="research_r1" value="2"> 2</td>
+                                        <td><input type="radio" name="research_r1" value="1"> 1</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" name="research_q2" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="research_r2" value="5" required> 5</td>
+                                        <td><input type="radio" name="research_r2" value="4"> 4</td>
+                                        <td><input type="radio" name="research_r2" value="3"> 3</td>
+                                        <td><input type="radio" name="research_r2" value="2"> 2</td>
+                                        <td><input type="radio" name="research_r2" value="1"> 1</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" name="research_q3" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="research_r3" value="5" required> 5</td>
+                                        <td><input type="radio" name="research_r3" value="4"> 4</td>
+                                        <td><input type="radio" name="research_r3" value="3"> 3</td>
+                                        <td><input type="radio" name="research_r3" value="2"> 2</td>
+                                        <td><input type="radio" name="research_r3" value="1"> 1</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" name="research_q4" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="research_r4" value="5" required> 5</td>
+                                        <td><input type="radio" name="research_r4" value="4"> 4</td>
+                                        <td><input type="radio" name="research_r4" value="3"> 3</td>
+                                        <td><input type="radio" name="research_r4" value="2"> 2</td>
+                                        <td><input type="radio" name="research_r4" value="1"> 1</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" name="research_q5" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="research_r5" value="5" required> 5</td>
+                                        <td><input type="radio" name="research_r5" value="4"> 4</td>
+                                        <td><input type="radio" name="research_r5" value="3"> 3</td>
+                                        <td><input type="radio" name="research_r5" value="2"> 2</td>
+                                        <td><input type="radio" name="research_r5" value="1"> 1</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="eval-card post-category" id="techsupCategory" style="display:none;">
+                            <h2 class="student-eval-unique-title">COMPETENCY ON TECHNICAL SUPPORT</h2>
+                            <table class="eval-table">
+                                <thead>
+                                    <tr>
+                                        <th>Question</th>
+                                        <th colspan="5">Rating (Likert Scale)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="text" name="techsup_q1" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="techsup_r1" value="5" required> 5</td>
+                                        <td><input type="radio" name="techsup_r1" value="4"> 4</td>
+                                        <td><input type="radio" name="techsup_r1" value="3"> 3</td>
+                                        <td><input type="radio" name="techsup_r1" value="2"> 2</td>
+                                        <td><input type="radio" name="techsup_r1" value="1"> 1</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" name="techsup_q2" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="techsup_r2" value="5" required> 5</td>
+                                        <td><input type="radio" name="techsup_r2" value="4"> 4</td>
+                                        <td><input type="radio" name="techsup_r2" value="3"> 3</td>
+                                        <td><input type="radio" name="techsup_r2" value="2"> 2</td>
+                                        <td><input type="radio" name="techsup_r2" value="1"> 1</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" name="techsup_q3" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="techsup_r3" value="5" required> 5</td>
+                                        <td><input type="radio" name="techsup_r3" value="4"> 4</td>
+                                        <td><input type="radio" name="techsup_r3" value="3"> 3</td>
+                                        <td><input type="radio" name="techsup_r3" value="2"> 2</td>
+                                        <td><input type="radio" name="techsup_r3" value="1"> 1</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" name="techsup_q4" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="techsup_r4" value="5" required> 5</td>
+                                        <td><input type="radio" name="techsup_r4" value="4"> 4</td>
+                                        <td><input type="radio" name="techsup_r4" value="3"> 3</td>
+                                        <td><input type="radio" name="techsup_r4" value="2"> 2</td>
+                                        <td><input type="radio" name="techsup_r4" value="1"> 1</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" name="techsup_q5" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="techsup_r5" value="5" required> 5</td>
+                                        <td><input type="radio" name="techsup_r5" value="4"> 4</td>
+                                        <td><input type="radio" name="techsup_r5" value="3"> 3</td>
+                                        <td><input type="radio" name="techsup_r5" value="2"> 2</td>
+                                        <td><input type="radio" name="techsup_r5" value="1"> 1</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="eval-card post-category" id="bizopCategory" style="display:none;">
+                            <h2 class="student-eval-unique-title">COMPETENCY ON BUSINESS OPERATION</h2>
+                            <table class="eval-table">
+                                <thead>
+                                    <tr>
+                                        <th>Question</th>
+                                        <th colspan="5">Rating (Likert Scale)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="text" name="bizop_q1" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="bizop_r1" value="5" required> 5</td>
+                                        <td><input type="radio" name="bizop_r1" value="4"> 4</td>
+                                        <td><input type="radio" name="bizop_r1" value="3"> 3</td>
+                                        <td><input type="radio" name="bizop_r1" value="2"> 2</td>
+                                        <td><input type="radio" name="bizop_r1" value="1"> 1</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" name="bizop_q2" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="bizop_r2" value="5" required> 5</td>
+                                        <td><input type="radio" name="bizop_r2" value="4"> 4</td>
+                                        <td><input type="radio" name="bizop_r2" value="3"> 3</td>
+                                        <td><input type="radio" name="bizop_r2" value="2"> 2</td>
+                                        <td><input type="radio" name="bizop_r2" value="1"> 1</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" name="bizop_q3" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="bizop_r3" value="5" required> 5</td>
+                                        <td><input type="radio" name="bizop_r3" value="4"> 4</td>
+                                        <td><input type="radio" name="bizop_r3" value="3"> 3</td>
+                                        <td><input type="radio" name="bizop_r3" value="2"> 2</td>
+                                        <td><input type="radio" name="bizop_r3" value="1"> 1</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" name="bizop_q4" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="bizop_r4" value="5" required> 5</td>
+                                        <td><input type="radio" name="bizop_r4" value="4"> 4</td>
+                                        <td><input type="radio" name="bizop_r4" value="3"> 3</td>
+                                        <td><input type="radio" name="bizop_r4" value="2"> 2</td>
+                                        <td><input type="radio" name="bizop_r4" value="1"> 1</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" name="bizop_q5" class="form-control" placeholder="Write your question here" required></td>
+                                        <td><input type="radio" name="bizop_r5" value="5" required> 5</td>
+                                        <td><input type="radio" name="bizop_r5" value="4"> 4</td>
+                                        <td><input type="radio" name="bizop_r5" value="3"> 3</td>
+                                        <td><input type="radio" name="bizop_r5" value="2"> 2</td>
+                                        <td><input type="radio" name="bizop_r5" value="1"> 1</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+    <div class="eval-card post-category" id="personalSkillsCategory" style="display: none;">
+        <h2 class="student-eval-unique-title">B. PERSONAL AND INTERPERSONAL SKILLS</h2>
+        <table class="eval-table" id="personalSkillsTable">
+            <thead>
+                <tr>
+                    <th>Question</th>
+                    <th colspan="5">Rating (Likert Scale)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- JS will populate questions and rating inputs here -->
+            </tbody>
+        </table>
+    </div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; margin-top: 32px;">
+                    <button type="submit" class="btn student-eval-unique-submit" id="submitPostAssessmentBtn">Submit Post-Assessment</button>
+                </div>
+                <div id="postAssessmentFormMessage" style="margin-top: 24px;"></div>
+            </form>
+        </div>
+    </div>
+        <!-- ...existing code... -->
+    </div>
+
+    <!-- Post-Assessment Form (only visible in evaluation tab) -->
+    <div class="tab-content assessment-tab" id="postAssessmentTab" style="display:none;">
+        <form id="postAssessmentForm">
+            <div class="student-eval-unique-container">
+                <!-- System Development Table -->
+                <div class="eval-card">
+                    <h2 class="student-eval-unique-title">System Development</h2>
+                    <table class="eval-table">
+                        <thead>
+                            <tr>
+                                <th>Question</th>
+                                <th>Rating (Likert Scale)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="text" name="sysdev_q1" class="form-control" placeholder="Write your question here" required></td>
+                                <td>
+                                    <select name="sysdev_r1" class="form-control" required>
+                                        <option value="">Select</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select>
+                                </td>
+                                <td><input type="radio" name="techsup_r1" value="5"> 5</td>
+                                <td><input type="radio" name="techsup_r1" value="4"> 4</td>
+                                <td><input type="radio" name="techsup_r1" value="3"> 3</td>
+                                <td><input type="radio" name="techsup_r1" value="2"> 2</td>
+                                <td><input type="radio" name="techsup_r1" value="1"> 1</td>
+                                        <option value="">Select</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select>
+                                </td>
+                                <td><input type="radio" name="techsup_r2" value="5"> 5</td>
+                                <td><input type="radio" name="techsup_r2" value="4"> 4</td>
+                                <td><input type="radio" name="techsup_r2" value="3"> 3</td>
+                                <td><input type="radio" name="techsup_r2" value="2"> 2</td>
+                                <td><input type="radio" name="techsup_r2" value="1"> 1</td>
+                <div class="eval-card">
+                    <h2 class="student-eval-unique-title">Research</h2>
+                    <table class="eval-table">
+                        <thead>
+                            <tr>
+                                <th>Question</th>
+                                <th>Rating (Likert Scale)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="text" name="research_q1" class="form-control" placeholder="Write your question here" required></td>
+                                <td>
+                                    <select name="research_r1" class="form-control" required>
+                                        <option value="">Select</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" name="research_q2" class="form-control" placeholder="Write your question here"></td>
+                                <td>
+                                    <select name="research_r2" class="form-control">
+                                        <option value="">Select</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Technical Support Table -->
+                <div class="eval-card">
+                    <h2 class="student-eval-unique-title">Technical Support</h2>
+                    <table class="eval-table">
+                        <thead>
+                            <tr>
+                                <th>Question</th>
+                                <th>Rating (Likert Scale)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="text" name="techsup_q1" class="form-control" placeholder="Write your question here" required></td>
+                                <td>
+                                    <select name="techsup_r1" class="form-control" required>
+                                        <option value="">Select</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" name="techsup_q2" class="form-control" placeholder="Write your question here"></td>
+                                <td>
+                                    <select name="techsup_r2" class="form-control">
+                                        <option value="">Select</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Business Operation Table -->
+                <div class="eval-card">
+                    <h2 class="student-eval-unique-title">Business Operation</h2>
+                    <table class="eval-table">
+                        <thead>
+                            <tr>
+                                <th>Question</th>
+                                <th>Rating (Likert Scale)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="text" name="bizop_q1" class="form-control" placeholder="Write your question here" required></td>
+                                <td>
+                                    <select name="bizop_r1" class="form-control" required>
+                                        <option value="">Select</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" name="bizop_q2" class="form-control" placeholder="Write your question here"></td>
+                                <td>
+                                    <select name="bizop_r2" class="form-control">
+                                        <option value="">Select</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 32px;">
+                <button type="submit" class="btn student-eval-unique-submit" id="submitPostAssessmentBtn">Submit Post-Assessment</button>
+            </div>
+            <div id="postAssessmentFormMessage" style="margin-top: 24px;"></div>
+        </form>
+    </div>
+
+
+
+
+
+
+
                 <!-- Attendance History Tab -->
                 <div class="tab-content" id="historyTab">
                     <div class="card">
@@ -317,96 +802,90 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
             <input type="hidden" id="reportWeek" value="<?php echo date('W'); ?>">
 <div id="reportContainer">
                 <div class="report-editor">
-    <div class="weekly-report-inputs">
-        <h4>Daily Activities Report</h4>
-    </div>
 
-    <div class="everyday-image">
-        <div class="day-report">
-            <div class="day-description">
-                <label for="mondayDescription">Monday Description:</label>
-                <textarea id="mondayDescription" name="mondayDescription" rows="4" placeholder="Describe your activities for Monday..."></textarea>
-            </div>
-            <label>Monday Images:</label>
-                <div class="image-upload-area" data-day="monday">
-                        <div class="upload-placeholder" id="uploadPlaceholderMonday" onclick="document.getElementById('imageUploadMonday').click();">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <p>Drag & drop images here or click to browse</p>
-                            <input type="file" id="imageUploadMonday" multiple accept="image/*" style="display: none;">
-                        </div>
-                    <!-- Removed Browse Images button as requested -->
-                    <div id="imagePreviewMonday" class="image-preview"></div>
-                </div>
-        </div>
+                    <div class="weekly-report-inputs" style="display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+                        <button id="prevDayBtn" type="button" class="btn btn-light" style="font-size: 1.2em;">&#8592;</button>
+                        <span id="currentDayLabel" style="font-weight: bold; font-size: 1.1em;"></span>
+                        <button id="nextDayBtn" type="button" class="btn btn-light" style="font-size: 1.2em;">&#8594;</button>
+                    </div>
 
-        <div class="day-report">
-            <div class="day-description">
-                <label for="tuesdayDescription">Tuesday Description:</label>
-                <textarea id="tuesdayDescription" name="tuesdayDescription" rows="4" placeholder="Describe your activities for Tuesday..."></textarea>
-            </div>
-            <label>Tuesday Images:</label>
-            <div class="image-upload-area" data-day="tuesday">
-                        <div class="upload-placeholder" id="uploadPlaceholderTuesday" onclick="document.getElementById('imageUploadTuesday').click();">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <p>Drag & drop images here or click to browse</p>
-                            <input type="file" id="imageUploadTuesday" multiple accept="image/*" style="display: none;">
+                    <div class="everyday-image">
+                        <div class="day-report" id="reportMonday">
+                            <div class="day-description">
+                                <label for="mondayDescription">Monday Description:</label>
+                                <textarea id="mondayDescription" name="mondayDescription" rows="4" placeholder="Describe your activities for Monday..."></textarea>
+                            </div>
+                            <label>Monday Images:</label>
+                            <div class="image-upload-area" data-day="monday">
+                                <div class="upload-placeholder" id="uploadPlaceholderMonday" onclick="document.getElementById('imageUploadMonday').click();">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Drag & drop images here or click to browse</p>
+                                    <input type="file" id="imageUploadMonday" multiple accept="image/*" style="display: none;">
+                                </div>
+                                <div id="imagePreviewMonday" class="image-preview"></div>
+                            </div>
                         </div>
-                <!-- Removed Browse Images button as requested -->
-                <div id="imagePreviewTuesday" class="image-preview"></div>
-            </div>
-        </div>
-
-        <div class="day-report">
-            <div class="day-description">
-                <label for="wednesdayDescription">Wednesday Description:</label>
-                <textarea id="wednesdayDescription" name="wednesdayDescription" rows="4" placeholder="Describe your activities for Wednesday..."></textarea>
-            </div>
-            <label>Wednesday Images:</label>
-            <div class="image-upload-area" data-day="wednesday">
-                        <div class="upload-placeholder" id="uploadPlaceholderWednesday" onclick="document.getElementById('imageUploadWednesday').click();">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <p>Drag & drop images here or click to browse</p>
-                            <input type="file" id="imageUploadWednesday" multiple accept="image/*" style="display: none;">
+                        <div class="day-report" id="reportTuesday">
+                            <div class="day-description">
+                                <label for="tuesdayDescription">Tuesday Description:</label>
+                                <textarea id="tuesdayDescription" name="tuesdayDescription" rows="4" placeholder="Describe your activities for Tuesday..."></textarea>
+                            </div>
+                            <label>Tuesday Images:</label>
+                            <div class="image-upload-area" data-day="tuesday">
+                                <div class="upload-placeholder" id="uploadPlaceholderTuesday" onclick="document.getElementById('imageUploadTuesday').click();">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Drag & drop images here or click to browse</p>
+                                    <input type="file" id="imageUploadTuesday" multiple accept="image/*" style="display: none;">
+                                </div>
+                                <div id="imagePreviewTuesday" class="image-preview"></div>
+                            </div>
                         </div>
-                <!-- Removed Browse Images button as requested -->
-                <div id="imagePreviewWednesday" class="image-preview"></div>
-            </div>
-        </div>
-
-        <div class="day-report">
-            <div class="day-description">
-                <label for="thursdayDescription">Thursday Description:</label>
-                <textarea id="thursdayDescription" name="thursdayDescription" rows="4" placeholder="Describe your activities for Thursday..."></textarea>
-            </div>
-            <label>Thursday Images:</label>
-            <div class="image-upload-area" data-day="thursday">
-                        <div class="upload-placeholder" id="uploadPlaceholderThursday" onclick="document.getElementById('imageUploadThursday').click();">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <p>Drag & drop images here or click to browse</p>
-                            <input type="file" id="imageUploadThursday" multiple accept="image/*" style="display: none;">
+                        <div class="day-report" id="reportWednesday">
+                            <div class="day-description">
+                                <label for="wednesdayDescription">Wednesday Description:</label>
+                                <textarea id="wednesdayDescription" name="wednesdayDescription" rows="4" placeholder="Describe your activities for Wednesday..."></textarea>
+                            </div>
+                            <label>Wednesday Images:</label>
+                            <div class="image-upload-area" data-day="wednesday">
+                                <div class="upload-placeholder" id="uploadPlaceholderWednesday" onclick="document.getElementById('imageUploadWednesday').click();">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Drag & drop images here or click to browse</p>
+                                    <input type="file" id="imageUploadWednesday" multiple accept="image/*" style="display: none;">
+                                </div>
+                                <div id="imagePreviewWednesday" class="image-preview"></div>
+                            </div>
                         </div>
-                <!-- Removed Browse Images button as requested -->
-                <div id="imagePreviewThursday" class="image-preview"></div>
-            </div>
-        </div>
-
-        <div class="day-report">
-            <div class="day-description">
-                <label for="fridayDescription">Friday Description:</label>
-                <textarea id="fridayDescription" name="fridayDescription" rows="4" placeholder="Describe your activities for Friday..."></textarea>
-            </div>
-            <label>Friday Images:</label>
-            <div class="image-upload-area" data-day="friday">
-                        <div class="upload-placeholder" id="uploadPlaceholderFriday" onclick="document.getElementById('imageUploadFriday').click();">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <p>Drag & drop images here or click to browse</p>
-                            <input type="file" id="imageUploadFriday" multiple accept="image/*" style="display: none;">
+                        <div class="day-report" id="reportThursday">
+                            <div class="day-description">
+                                <label for="thursdayDescription">Thursday Description:</label>
+                                <textarea id="thursdayDescription" name="thursdayDescription" rows="4" placeholder="Describe your activities for Thursday..."></textarea>
+                            </div>
+                            <label>Thursday Images:</label>
+                            <div class="image-upload-area" data-day="thursday">
+                                <div class="upload-placeholder" id="uploadPlaceholderThursday" onclick="document.getElementById('imageUploadThursday').click();">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Drag & drop images here or click to browse</p>
+                                    <input type="file" id="imageUploadThursday" multiple accept="image/*" style="display: none;">
+                                </div>
+                                <div id="imagePreviewThursday" class="image-preview"></div>
+                            </div>
                         </div>
-                <!-- Removed Browse Images button as requested -->
-                <div id="imagePreviewFriday" class="image-preview"></div>
-            </div>
-        </div>
-    </div>
+                        <div class="day-report" id="reportFriday">
+                            <div class="day-description">
+                                <label for="fridayDescription">Friday Description:</label>
+                                <textarea id="fridayDescription" name="fridayDescription" rows="4" placeholder="Describe your activities for Friday..."></textarea>
+                            </div>
+                            <label>Friday Images:</label>
+                            <div class="image-upload-area" data-day="friday">
+                                <div class="upload-placeholder" id="uploadPlaceholderFriday" onclick="document.getElementById('imageUploadFriday').click();">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Drag & drop images here or click to browse</p>
+                                    <input type="file" id="imageUploadFriday" multiple accept="image/*" style="display: none;">
+                                </div>
+                                <div id="imagePreviewFriday" class="image-preview"></div>
+                            </div>
+                        </div>
+                    </div>
                     
                     <div class="report-actions">
                         <!-- Removed Browse Images button as requested -->
@@ -547,6 +1026,36 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
 
     <script src="js/jquery.js"></script>
     <script src="js/student_dashboard.js"></script>
+
+        <script>
+        $(document).ready(function() {
+            // If ratings exist, disable the toggle button for this category
+            <?php
+            // Only output JS if ratings exist
+            if (isset($personalSkills) && count($personalSkills) > 0) {
+            ?>
+                $('#personalSkillsCategoryBtn').prop('disabled', true);
+            <?php } ?>
+        });
+        </script>
+
+        <script>
+            // Hide remove-image buttons if report status is approved or pending
+            $(document).ready(function() {
+                function updateRemoveImageButtons() {
+                    var statusText = $('#reportStatus').text().toLowerCase();
+                    if (statusText.includes('approved') || statusText.includes('pending')) {
+                        $('.remove-image').hide();
+                    } else {
+                        $('.remove-image').show();
+                    }
+                }
+                updateRemoveImageButtons();
+                // If status can change dynamically, observe changes
+                const observer = new MutationObserver(updateRemoveImageButtons);
+                observer.observe(document.getElementById('reportStatus'), { childList: true, subtree: true });
+            });
+        </script>
     <script>
         // Initialize dashboard
         $(document).ready(function() {
@@ -569,6 +1078,12 @@ $('.sidebar-item').click(function() {
     // Load attendance history if the history tab is selected
     if (tab === 'history') {
         loadAttendanceHistory();
+    }
+    // Load evaluation questions if the evaluation tab is selected
+    if (tab === 'evaluation') {
+        if (typeof loadStudentEvaluationQuestions === 'function') {
+            loadStudentEvaluationQuestions();
+        }
     }
 });
             

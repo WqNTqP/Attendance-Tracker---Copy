@@ -37,8 +37,8 @@ switch ($action) {
             if ($coordinatorId) {
                 $stmt = $dbo->conn->prepare("
                     SELECT
-                        id.INTERNS_ID,
                         id.STUDENT_ID,
+                        id.INTERNS_ID,
                         id.NAME,
                         id.SURNAME
                     FROM interns_details id
@@ -48,7 +48,7 @@ switch ($action) {
                 ");
                 $stmt->execute([$coordinatorId]);
             } else {
-                $stmt = $dbo->conn->prepare("SELECT STUDENT_ID, NAME, SURNAME FROM interns_details ORDER BY SURNAME, NAME");
+                $stmt = $dbo->conn->prepare("SELECT STUDENT_ID, INTERNS_ID, NAME, SURNAME FROM interns_details ORDER BY SURNAME, NAME");
                 $stmt->execute();
             }
             $students = $stmt->fetchAll(PDO::FETCH_ASSOC);

@@ -178,6 +178,8 @@ $(function () {
                }
                const weekNumber = getWeekNumber(new Date(window.currentWeekStart));
                loadWeeklyReports(studentId, weekNumber);
+        } else if (tabId === 'evaluationTab') {
+            $('#evaluationTabContent').show();
         } else if (tabId === 'contralTab') {
             $('#contralTabContent').show();
         }
@@ -897,6 +899,152 @@ function returnReport(reportId) {
 
 // Modal event handlers
 $(document).ready(function() {
+    // Evaluation tab: load questions and ratings for selected student
+    $(document).on('click', '.admin-eval-student', function() {
+        $('.admin-eval-student').removeClass('active').css({'background':'#fff','font-weight':'normal'});
+        $(this).addClass('active').css({'background':'#e0e7ff','font-weight':'bold'});
+        var studentId = $(this).data('student-id');
+        $.get('ajaxhandler/getStudentQuestionsAndRatingsAjax.php', {student_id: studentId}, function(data) {
+            var result = {};
+            try { result = JSON.parse(data); } catch(e) { result = {}; }
+            var $main = $('.admin-eval-main');
+            $main.empty();
+            var hasCategories = false;
+            $.each(result, function(category, catData) {
+                hasCategories = true;
+                var catTitle = 'COMPETENCY ON ' + category.toUpperCase();
+                var $catDiv = $('<div class="admin-eval-category" style="margin-bottom:32px;"></div>');
+                $catDiv.append('<h3 style="text-transform:uppercase;font-size:18px;margin-bottom:12px;color:#374151;letter-spacing:1px;">'+catTitle+'</h3>');
+                    var tableHeader = '<table class="admin-eval-table" style="width:100%;border-collapse:collapse;margin-bottom:12px;"><thead><tr>' +
+                        '<th style="border:1px solid #e5e7eb;padding:10px;background:#f3f4f6;font-weight:600;">Question</th>' +
+                        '<th class="self-rating-col" style="border:1px solid #e5e7eb;padding:10px;background:#f3f4f6;font-weight:600;width:100px;min-width:100px;max-width:100px;text-align:center;">Self-Rating</th>';
+                    for(var i=5;i>=1;i--) {
+                        tableHeader += '<th style="border:1px solid #e5e7eb;padding:0;background:#f3f4f6;font-weight:600;width:30px;text-align:center;">'+i+'</th>';
+                    }
+                    tableHeader += '</tr></thead><tbody></tbody></table>';
+                    var $table = $(tableHeader);
+                $.each(catData.questions, function(_, q) {
+                    var ratingObj = (catData.ratings && catData.ratings[q.id]) ? catData.ratings[q.id] : {};
+                    var selfRating = ratingObj.self_rating ? ratingObj.self_rating : '';
+                    var $row = $('<tr></tr>').attr('data-question-id', q.question_id);
+                    $row.append('<td style="border:1px solid #e5e7eb;padding:10px;">'+q.question_text+'</td>');
+                    $row.append('<td class="self-rating-col" style="border:1px solid #e5e7eb;padding:10px;width:100px;min-width:100px;max-width:100px;text-align:center;">'+selfRating+'</td>');
+                            for(var i=5;i>=1;i--) {
+                                var radioName = 'admin_rating_'+category+'_'+q.id;
+                            var supervisorRating = ratingObj.supervisor_rating ? ratingObj.supervisor_rating : '';
+                            var checked = (supervisorRating == i) ? 'checked' : '';
+                                $row.append('<td style="border:1px solid #e5e7eb;padding:0;width:30px;text-align:center;vertical-align:middle;">'+
+                                    '<input type="radio" name="'+radioName+'" value="'+i+'" style="margin:0;" '+checked+'>'+
+                                '</td>');
+                            }
+                        $table.find('tbody').append($row);
+                });
+                $catDiv.append($table);
+                $main.append($catDiv);
+            });
+                // Add comments/recommendations table after all competency tables
+                if(hasCategories) {
+                    // Find the first non-empty comment for this student
+                    var commentsText = '';
+                    outer: for (var category in result) {
+                        var catData = result[category];
+                        for (var i = 0; i < catData.questions.length; i++) {
+                            var q = catData.questions[i];
+                            var ratingObj = (catData.ratings && catData.ratings[q.id]) ? catData.ratings[q.id] : {};
+                            if (ratingObj.comment && ratingObj.comment.trim() !== '') {
+                                commentsText = ratingObj.comment;
+                                break outer;
+                            }
+                        }
+                    }
+                    var commentsTable = '<div class="admin-eval-comments-section" style="margin-top:32px;">'+
+                        '<h3 style="font-size:17px;color:#2563eb;margin-bottom:12px;">Comments / Recommendations</h3>'+
+                        '<table class="admin-eval-comments-table" style="width:100%;border-collapse:collapse;">'+
+                            '<thead><tr>'+
+                                '<th style="border:1px solid #e5e7eb;padding:10px;background:#f3f4f6;font-weight:600;width:200px;">Comment/Recommendation</th>'+
+                                '<th style="border:1px solid #e5e7eb;padding:10px;background:#f3f4f6;font-weight:600;width:120px;">Date</th>'+
+                            '</tr></thead>'+
+                            '<tbody>'+
+                                '<tr>'+
+                                    '<td colspan="2" style="border:1px solid #e5e7eb;padding:10px;text-align:left;">'+
+                                        '<textarea class="admin-eval-comment-input" name="comment" placeholder="Add a comment or recommendation..." style="width:100%;padding:8px 12px;border-radius:4px;border:1px solid #ccc;font-size:15px;min-height:60px;">'+commentsText+'</textarea>'+
+                                    '</td>'+
+                                '</tr>'+
+                            '</tbody>'+
+                        '</table>'+
+                    '</div>';
+                    $main.append(commentsTable);
+                }
+            if(hasCategories) {
+                $main.append('<button class="admin-eval-save-btn" style="background:#2563eb;color:#fff;border:none;border-radius:4px;padding:12px 32px;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 1px 4px rgba(37,99,235,0.08);transition:background 0.2s;">Save Evaluation</button>');
+            } else {
+                $main.append('<div style="padding:32px;text-align:center;color:#374151;">No questions or ratings found for this student.</div>');
+            }
+        });
+    });
+        // Save Evaluation button handler
+        $(document).on('click', '.admin-eval-save-btn', function() {
+            var $main = $('.admin-eval-main');
+            var studentId = $('.admin-eval-student.active').data('student-id');
+            if(!studentId) {
+                alert('No student selected.');
+                return;
+            }
+            // Collect ratings per category/question
+            var ratings = [];
+            $main.find('.admin-eval-category').each(function() {
+                var category = $(this).find('h3').text().replace('COMPETENCY ON ','').trim();
+                $(this).find('table.admin-eval-table tbody tr').each(function(idx) {
+                    var questionText = $(this).find('td').eq(0).text();
+                    var selfRating = $(this).find('td.self-rating-col').text();
+                    var adminRating = $(this).find('input[type=radio]:checked').val() || null;
+                    var questionId = $(this).attr('data-question-id');
+                    ratings.push({
+                        category: category,
+                        question_id: questionId,
+                        question_text: questionText,
+                        self_rating: selfRating,
+                        admin_rating: adminRating
+                    });
+                });
+            });
+            console.log('DEBUG: Ratings to send:', ratings);
+            // Get comment
+            var comment = $main.find('.admin-eval-comment-input').val();
+            // Send AJAX to save
+            $.ajax({
+                url: 'ajaxhandler/saveAdminEvaluationAjax.php',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    student_id: studentId,
+                    ratings: JSON.stringify(ratings),
+                    comment: comment
+                },
+                success: function(resp) {
+                    if(resp.status==='success') {
+                        alert('Evaluation saved successfully!');
+                    } else {
+                        alert('Error saving evaluation: '+resp.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert('AJAX error: '+error);
+                }
+            });
+        });
+    // Evaluation tab student search filter
+    $(document).on('input', '.admin-eval-search', function() {
+        var searchTerm = $(this).val().toLowerCase();
+        $('.admin-eval-student-list .admin-eval-student').each(function() {
+            var name = $(this).text().toLowerCase();
+            if (name.indexOf(searchTerm) !== -1 || searchTerm === '') {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
     const closeBtn = document.getElementById('closeReturnModal');
     const cancelBtn = document.getElementById('cancelReturn');
     const confirmBtn = document.getElementById('confirmReturn');

@@ -1,3 +1,331 @@
+/* Styles for the assessment navigation bar and tab buttons */
+.eval-topnav {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    align-items: center;
+}
+.eval-tab-btn {
+    background-color: #e3eafc;
+    color: #1976d2;
+    border: 2px solid #1976d2;
+    border-radius: 4px;
+    padding: 8px 20px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+    cursor: pointer;
+    outline: none;
+}
+.eval-tab-btn.active {
+    background-color: #1976d2;
+    color: #fff;
+    border-color: #1565c0;
+}
+.eval-tab-btn:disabled {
+    background-color: #bdbdbd;
+    color: #666;
+    border-color: #bdbdbd;
+    cursor: not-allowed;
+}
+
+/* Post-Assessment Table Styles */
+.eval-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto 24px auto;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.eval-table th, .eval-table td {
+    border: 1px solid #e0e0e0;
+    padding: 8px 4px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Make question column wider and rating columns narrower for Likert tables */
+.eval-table th:first-child,
+.eval-table td:first-child {
+    min-width: 260px;
+    width: 55%;
+    text-align: left;
+}
+.eval-table th:not(:first-child),
+.eval-table td:not(:first-child) {
+    min-width: 28px;
+    width: 9%;
+    text-align: center;
+    white-space: nowrap;
+    font-size: 0.98em;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.eval-table th {
+    background: #f5f7fa;
+    color: #333;
+    font-weight: 600;
+    font-size: 1em;
+}
+.eval-table input[type="text"] {
+    width: 95%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 1em;
+}
+.eval-table input[type="radio"] {
+    margin-right: 4px;
+    accent-color: #007bff;
+}
+.eval-table tr {
+    transition: background 0.2s;
+}
+.eval-table tr:hover {
+    background: #f0f8ff;
+}
+.evaluation-table {
+    min-width: 340px;
+}
+.evaluation-table .answer-row .answer-cell {
+    min-width: 180px;
+    max-width: 100%;
+    overflow-wrap: break-word;
+}
+@media (max-width: 600px) {
+    .evaluation-table {
+        font-size: 0.95rem;
+        min-width: 0;
+    }
+    .evaluation-table .answer-row .answer-cell,
+    .evaluation-table .question-row .question-cell {
+        min-width: 120px;
+        font-size: 0.95rem;
+        padding: 12px 8px;
+    }
+    .evaluation-table .rating-cell {
+        font-size: 1rem;
+        padding: 12px 0;
+    }
+}
+/* Evaluation Table Styles for Student View Mode */
+.evaluation-table-wrapper {
+    margin: 24px 0;
+    overflow-x: auto;
+}
+.evaluation-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    border-radius: 8px;
+    font-size: 1rem;
+    table-layout: fixed;
+    min-width: 340px;
+}
+.evaluation-table th, .evaluation-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+.evaluation-table th {
+    background: #f5f7fa;
+    font-weight: 600;
+    color: #2c3e50;
+}
+.evaluation-table tr:last-child td {
+    border-bottom: none;
+}
+.question-cell {
+    width: 40%;
+    min-width: 120px;
+    color: #34495e;
+    font-weight: 500;
+    white-space: pre-line;
+    word-break: break-word;
+}
+.answer-cell {
+    width: 40%;
+    min-width: 180px;
+    max-width: 100%;
+    color: #2d6a4f;
+    white-space: pre-line;
+    word-break: break-word;
+    overflow-x: auto;
+    vertical-align: top;
+}
+.rating-cell {
+    width: 12%;
+    min-width: 56px;
+    color: #0077b6;
+    font-weight: 600;
+    text-align: center;
+    vertical-align: top;
+}
+.evaluation-table .rating-cell:not(:empty) {
+    background: #eaf6fb;
+    border-radius: 4px;
+}
+@media (max-width: 900px) {
+        #evaluationTab .student-eval-unique-container {
+            flex-direction: column;
+            gap: 20px;
+            padding: 0;
+            align-items: stretch;
+        }
+        #evaluationTab .eval-card {
+            min-width: 0;
+            max-width: 100%;
+            width: 100%;
+            padding: 12px 8px;
+            box-sizing: border-box;
+            margin: 0;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+        #evaluationTab .student-eval-unique-title {
+            font-size: 1.3rem;
+        }
+        #evaluationTab .btn.student-eval-unique-submit {
+            width: 100%;
+            margin-top: 16px;
+            font-size: 1rem;
+            padding: 12px 0;
+        }
+        .evaluation-table {
+            font-size: 0.95rem;
+            min-width: 0;
+        }
+        .evaluation-table th, .evaluation-table td {
+            font-size: 0.95rem;
+            padding: 12px 8px;
+        }
+        .question-cell, .answer-cell {
+            min-width: 120px;
+        }
+        .rating-cell {
+            min-width: 80px;
+            font-size: 1rem;
+            padding: 12px 0;
+        }
+}
+@media (max-width: 900px) {
+    .student-eval-unique-container {
+        flex-direction: column;
+        gap: 20px;
+        padding: 0;
+        align-items: stretch;
+    }
+            .eval-card {
+                min-width: 0;
+                max-width: 100%;
+                width: 100%;
+                padding: 12px 8px;
+                box-sizing: border-box;
+                margin: 0;
+                overflow-wrap: break-word;
+                word-break: break-word;
+            }
+    .student-eval-unique-title {
+        font-size: 1.3rem;
+    }
+    .btn.student-eval-unique-submit {
+        width: 100%;
+        margin-top: 16px;
+        font-size: 1rem;
+        padding: 12px 0;
+    }
+}
+/* Evaluation Cards Layout */
+.student-eval-unique-container {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+    align-items: flex-start;
+}
+.eval-card {
+    flex: 1;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    padding: 32px 40px;
+    min-width: 420px;
+    width: auto;
+}
+.student-eval-unique-title {
+    text-align: center;
+}
+/* Evaluation Tab Unique Styles */
+.student-eval-unique-container {
+    width: auto;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    padding: 32px 40px;
+}
+.student-eval-unique-title {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 24px;
+    color: #3a3a3a;
+}
+.category-unique-card {
+    margin-bottom: 28px;
+    background: #f7f9fc;
+    border-radius: 10px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+    padding: 18px 24px;
+}
+.category-unique-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #4f6ef7;
+    margin-bottom: 12px;
+}
+.question-unique-block {
+    margin-bottom: 18px;
+    padding: 16px;
+    background: #f9f9fc;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+}
+.question-unique-label {
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #222;
+    display: block;
+}
+.question-unique-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #bdbdbd;
+    border-radius: 5px;
+    font-size: 1rem;
+    background: #f7f7f7;
+}
+.btn.student-eval-unique-submit {
+    background: #4f6ef7;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 32px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 18px;
+    box-shadow: 0 2px 8px rgba(79,110,247,0.08);
+    transition: background 0.2s;
+}
+.btn.student-eval-unique-submit:hover {
+    background: #3a53c5;
+}
+
+
+
 /* Weekly Report Table Scroll Wrapper */
 @media (max-width: 700px) {
             .weekly-report-table-wrapper {
@@ -1999,12 +2327,24 @@ textarea[id$="Description"]::-webkit-scrollbar-thumb:hover {
 }
 
 .image-preview-item img {
-    width: 100%;
-    height: 220px;
+    width: 60%;
+    max-width: 480px;
+    height: auto;
+    max-height: 420px;
+    aspect-ratio: 4/3;
     object-fit: cover;
     display: block;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    transition: box-shadow 0.2s, transform 0.2s;
+    margin:50px auto;
 }
-
+.image-preview-item img:hover {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    transform: scale(1.03);
+}
 .image-preview-item .remove-image {
     position: absolute;
     top: 0.25rem;

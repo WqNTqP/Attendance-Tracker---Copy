@@ -76,21 +76,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Process the file data and insert students
         while (($data = fgetcsv($handle)) !== FALSE) {
-            if (count($data) < 6) {
+            if (count($data) < 26) { // 6 personal + 20 course grades
                 error_log("Skipping row: insufficient columns " . print_r($data, true));
                 $skipped++;
                 continue;
             }
-        
+
             $student_id = $data[0];
             $name = $data[1];
-            $age = $data[2];
-            $gender = $data[3];
-            $email = $data[4];
-            $contact_number = $data[5];
-        
+            $surname = $data[2];
+            $age = $data[3];
+            $gender = $data[4];
+            // Convert gender to 'Male'/'Female' if needed
+            if (strtoupper($gender) === 'M') {
+                $gender = 'Male';
+            } elseif (strtoupper($gender) === 'F') {
+                $gender = 'Female';
+            }
+            $email = $data[5];
+            $contact_number = $data[6];
+
+            // Parse course grades
+            $course_columns = [
+                'CC 102', 'CC 103', 'PF 101', 'CC 104', 'IPT 101', 'IPT 102', 'CC 106', 'CC 105',
+                'IM 101', 'IM 102', 'HCI 101', 'HCI 102', 'WS 101', 'NET 101', 'NET 102',
+                'IAS 101', 'IAS 102', 'CAP 101', 'CAP 102', 'SP 101'
+            ];
+            $grades = [];
+            for ($i = 0; $i < count($course_columns); $i++) {
+                $grades[$course_columns[$i]] = $data[7 + $i] ?? null;
+            }
+
             // Add student and track the result
-            $result = $attendanceDetails->addStudent($dbo, $student_id, $name, $age, $gender, $email, $contact_number, $coordinator_id, $hte_id, $session_id);
+            $result = $attendanceDetails->addStudent($dbo, $student_id, $name, $surname, $age, $gender, $email, $contact_number, $coordinator_id, $hte_id, $session_id, $grades);
             if ($result) {
                 $inserted++;
             } else {

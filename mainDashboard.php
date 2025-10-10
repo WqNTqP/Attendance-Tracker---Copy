@@ -85,7 +85,7 @@ if (isset($_SESSION["current_user"]) && !isset($_SESSION["coordinator_user"])) {
     <div class="top-header">
         <button id="sidebarToggle" class="sidebar-toggle" aria-label="Toggle Sidebar">&#9776;</button>
         <div class="sidebar-logo" style="margin-left: 1rem; cursor: pointer;" onclick="window.location.href='mainDashboard.php';">
-            <h2 class="logo" style="cursor: pointer;">ATTENDANCE TRACKER</h2>
+            <h2 class="logo" style="cursor: pointer;">InternConnect</h2>
         </div>
     <div class="user-profile" id="userProfile">
             <span id="userName">
@@ -100,10 +100,12 @@ if (isset($_SESSION["current_user"]) && !isset($_SESSION["coordinator_user"])) {
 
         <div class="sidebar">
             <ul class="sidebar-menu">
-                <li class="sidebar-item active" id="attendanceTab" data-tab="attendance">Attendance</li>
-                <li class="sidebar-item" id="evaluationTab" data-tab="evaluation">Evaluation</li>
-                <li class="sidebar-item" id="controlTab" data-tab="control">Control</li>
-                <li class="sidebar-item" id="reportTab" data-tab="report">Report</li>
+                <li class="sidebar-item active" id="attendanceTab" data-tab="attendance"><i class="fas fa-calendar-check"></i> Attendance</li>
+                <li class="sidebar-item" id="evaluationTab" data-tab="evaluation"><i class="fas fa-clipboard-list"></i> Evaluation</li>
+                <li class="sidebar-item" id="controlTab" data-tab="control"><i class="fas fa-cogs"></i> Control</li>
+                <li class="sidebar-item" id="reportTab" data-tab="report"><i class="fas fa-file-alt"></i> Report</li>
+                <li class="sidebar-item" id="predictionTab" data-tab="prediction"><i class="fas fa-chart-line"></i> Prediction</li>
+                <li class="sidebar-item" id="postAnalysisTab" data-tab="postAnalysis"><i class="fas fa-chart-bar"></i> Post-Analysis</li>
             </ul>
         </div>
 
@@ -160,15 +162,121 @@ if (isset($_SESSION["current_user"]) && !isset($_SESSION["coordinator_user"])) {
         </div>
             <!-- Evaluation Tab Content -->
         <div id="evaluationContent" class="tab-content">
-            <div class="welcome-container">
-                <h1 class="welcome-title">Welcome to Evaluation</h1>
-                <p class="welcome-subtitle">Attendance Tracker System</p>
-                <p class="welcome-message">
-                    This is the new Evaluation interface. Here you can manage and evaluate various aspects of the attendance system.
-                    Explore the features and tools available to streamline your attendance evaluation process.
-                </p>
+            <div class="evaluation-top">
+                <div class="evaluation-tab-bar-img">
+                    <button class="evaluation-tab-img active" id="evalQuestionsTabBtn">All Evaluation Questions</button>
+                    <button class="evaluation-tab-img" id="rateTabBtn">Pre-Assessment</button>
+                    <button class="evaluation-tab-img" id="postAssessmentTabBtn">Post-Assessment</button>
+                    <button class="evaluation-tab-img" id="reviewTabBtn">Review</button>
+                    <button class="evaluation-tab-img" id="statsTabBtn">Stats</button>
+                </div>
+            </div>
+            <div class="evaluation-content-area">
+                <div class="evaluation-tab-panel">
+                    <div class="evaluation-tab-content-img">
+                        <div id="evalQuestionsTabContent" class="evaluation-inner-content active">
+                            <div class="all-questions-container">
+                                <ul id="allQuestionsList" class="question-list">
+                                    <!-- Questions will be loaded here dynamically as <li class='question-card'> ... </li> -->
+                                </ul>
+                            </div>
+                        </div>
+                        <div id="rateTabContent" class="evaluation-inner-content">
+                            <div class="preassessment-flex-container">
+                                <div class="preassessment-left-panel">
+                                    <div class="preassessment-search-bar">
+                                        <input type="text" id="rateStudentSearch" placeholder="Search student" style="padding: 0.5rem 1rem; font-size: 1rem; border-radius: 6px; border: 1px solid #e2e8f0; width: 100%;">
+                                    </div>
+                                    <div id="studentListPanel" class="preassessment-student-list">
+                                        <!-- Student list will be loaded here dynamically -->
+                                    </div>
+                                </div>
+                                <div class="preassessment-right-panel">
+                                    <div id="rateEvalList">
+                                        <!-- Evaluation cards/messages will be loaded here dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="postAssessmentTabContent" class="evaluation-inner-content" style="display:none;">
+                            <div class="postassessment-flex-container">
+                                <div class="postassessment-left-panel">
+                                    <div class="postassessment-search-bar">
+                                        <input type="text" id="postStudentSearch" placeholder="Search student" style="padding: 0.5rem 1rem; font-size: 1rem; border-radius: 6px; border: 1px solid #e2e8f0; width: 100%;">
+                                    </div>
+                                    <div id="postStudentListPanel" class="postassessment-student-list">
+                                        <!-- Student list will be loaded here dynamically -->
+                                    </div>
+                                </div>
+                                <div class="postassessment-right-panel">
+                                    <div id="postEvalList">
+                                        <!-- Post-assessment evaluation cards/messages will be loaded here dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="reviewTabContent" class="evaluation-inner-content">
+                            <div class="review-flex-container">
+                                <div class="review-left-panel">
+                                    <div class="review-search-bar">
+                                        <input type="text" id="reviewStudentSearch" placeholder="Search reviewed students..." style="padding: 0.5rem 1rem; font-size: 1rem; border-radius: 6px; border: 1px solid #e2e8f0; width: 100%;">
+                                    </div>
+                                    <div id="reviewStudentListPanel" class="review-student-list">
+                                        <!-- Rated student list will be loaded here dynamically -->
+                                    </div>
+                                </div>
+                                <div class="review-right-panel">
+                                    <div id="reviewedEvalList">
+                                        <!-- View-only evaluation cards/messages will be loaded here dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="statsTabContent" class="evaluation-inner-content">
+                            <div class="stats-eval-container">
+                                <h3>Evaluation Statistics</h3>
+                                <div id="statsSummary" style="margin-bottom:2rem;"></div>
+                                <div>
+                                    <canvas id="questionRatingsChart" style="max-width:700px;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- Prediction Tab Content -->
+        <div id="predictionContent" class="tab-content">
+            <div class="prediction-container">
+                <h2>Prediction</h2>
+                <button id="runPredictionBtn" class="btnReport">Run Prediction</button>
+                <div id="predictionSpinner" style="display:none; margin:1em 0; text-align:center;">
+                    <div class="spinner"></div>
+                    <span>Validating and predicting...</span>
+                </div>
+                <div class="prediction-table-wrapper">
+                    <table id="predictionTable" class="prediction-table">
+                        <thead>
+                            <tr>
+                                <th>STUDENT NAME</th>
+                                <th>HTE ASSIGNED</th>
+                                <th>STATUS</th>
+                                <th>Predicted Placement</th>
+                                <th>Analysis</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows will be populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+
+
 
         <!-- Control Tab Content -->
         <div id="controlContent" class="tab-content">
@@ -245,15 +353,101 @@ if (isset($_SESSION["current_user"]) && !isset($_SESSION["coordinator_user"])) {
                                     <label for="contactNumber">Contact Number:</label>
                                     <input type="tel" id="contactNumber" name="contactNumber" pattern="[0-9+\-\s()]{7,20}" required placeholder="Enter Contact Number">
                                 </div>
+
+                                <!-- Grade Inputs for Pre-Assessment -->
+                                <div class="form-group" style="grid-column: 1 / 3;">
+                                    <h4>Enter Grades for Pre-Assessment Subjects</h4>
+                                </div>
                                 <div class="form-group" style="grid-column: 1 / 2;">
+                                    <label for="cc102">CC 102:</label>
+                                    <input type="number" id="cc102" name="cc102" min="0" max="100" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 2 / 3;">
+                                    <label for="cc103">CC 103:</label>
+                                    <input type="number" id="cc103" name="cc103" min="0" max="100" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / 2;">
+                                    <label for="pf101">PF 101:</label>
+                                    <input type="number" id="pf101" name="pf101" min="0" max="100" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 2 / 3;">
+                                    <label for="cc104">CC 104:</label>
+                                    <input type="number" id="cc104" name="cc104" min="0" max="100" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / 2;">
+                                    <label for="ipt101">IPT 101:</label>
+                                    <input type="number" id="ipt101" name="ipt101" min="0" max="100" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 2 / 3;">
+                                    <label for="ipt102">IPT 102:</label>
+                                    <input type="number" id="ipt102" name="ipt102" min="0" max="100" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / 2;">
+                                    <label for="cc106">CC 106:</label>
+                                    <input type="number" id="cc106" name="cc106" min="0" max="100" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 2 / 3;">
+                                    <label for="cc105">CC 105:</label>
+                                    <input type="number" id="cc105" name="cc105" min="0" max="100" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / 2;">
+                                    <label for="im101">IM 101:</label>
+                                    <input type="number" id="im101" name="im101" min="0" max="100" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 2 / 3;">
+                                    <label for="im102">IM 102:</label>
+                                    <input type="number" id="im102" name="im102" min="0" max="100" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / 2;">
+                                    <label for="hci101">HCI 101:</label>
+                                    <input type="number" id="hci101" name="hci101" min="0" max="100" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 2 / 3;">
+                                    <label for="hci102">HCI 102:</label>
+                                    <input type="number" id="hci102" name="hci102" min="0" max="100" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / 2;">
+                                    <label for="ws101">WS 101:</label>
+                                    <input type="number" id="ws101" name="ws101" min="0" max="100" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 2 / 3;">
+                                    <label for="net101">NET 101:</label>
+                                    <input type="number" id="net101" name="net101" min="0" max="100" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / 2;">
+                                    <label for="net102">NET 102:</label>
+                                    <input type="number" id="net102" name="net102" min="0" max="100" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 2 / 3;">
+                                    <label for="ias101">IAS 101:</label>
+                                    <input type="number" id="ias101" name="ias101" min="0" max="100" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / 2;">
+                                    <label for="ias102">IAS 102:</label>
+                                    <input type="number" id="ias102" name="ias102" min="0" max="100" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 2 / 3;">
+                                    <label for="cap101">CAP 101:</label>
+                                    <input type="number" id="cap101" name="cap101" min="0" max="100" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / 2;">
+                                    <label for="cap102">CAP 102:</label>
+                                    <input type="number" id="cap102" name="cap102" min="0" max="100" required>
+                                </div>
+                                <div class="form-group" style="grid-column: 2 / 3;">
+                                    <label for="sp101">SP 101:</label>
+                                    <input type="number" id="sp101" name="sp101" min="0" max="100" required>
+                                </div>
+                                 <!-- Move SESSION and HTE dropdowns to the very bottom of the form -->
+                                <div class="form-group" style="grid-column: 1 / 3;">
                                     <label for="sessionSelectStudent">Assign to Session:</label>
-                                    <select id="sessionSelectStudent" name="sessionId">
+                                    <select id="sessionSelectStudent" name="sessionId" required style="width: 100%;">
                                         <option value="">Select Session</option>
                                     </select>
                                 </div>
-                                <div class="form-group" style="grid-column: 2 / 3;">
+                                <div class="form-group" style="grid-column: 1 / 3;">
                                     <label for="hteSelectStudent">Assign to HTE:</label>
-                                    <select id="hteSelectStudent" name="hteId">
+                                    <select id="hteSelectStudent" name="hteId" required style="width: 100%;">
                                         <option value="">Select HTE</option>
                                     </select>
                                 </div>
@@ -264,7 +458,7 @@ if (isset($_SESSION["current_user"]) && !isset($_SESSION["coordinator_user"])) {
                                         CSV format: student_id,name,surname,age,gender,email,contact_number
                                     </small>
                                     <br/>
-                                    <a href="sample_students.csv" download="sample_students.csv" style="font-size: 0.9em;">Download Sample CSV Format</a>
+                                    <a href="sample_students.csv" download style="font-size: 0.9em;">Download Sample CSV Format</a>
                                 </div>
                                 <div class="form-group" style="grid-column: 2 / 3; display: flex; flex-direction: column; justify-content: flex-end;">
                                     <div class="form-actions" style="display: flex; gap: 1rem;">
@@ -355,7 +549,7 @@ if (isset($_SESSION["current_user"]) && !isset($_SESSION["coordinator_user"])) {
                                 </div>
                                 <div class="form-group">
                                     <label>Students:</label>
-                                    <div id="deleteStudentList" style="max-height: 700px; overflow-y: auto; border: 1px solid #ccc; padding: 0.5rem;">
+                                    <div id="deleteStudentList" style="max-height: 490px; overflow-y: auto; border: 1px solid #ccc; padding: 0.5rem;">
                                         <!-- Student checkboxes will be loaded here -->
                                     </div>
                                 </div>
@@ -410,6 +604,80 @@ if (isset($_SESSION["current_user"]) && !isset($_SESSION["coordinator_user"])) {
                             </div>
                             <div class="form-actions">
                                 <button id="closeAllStudents" class="btn-cancel">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Post-Analysis Tab Content -->
+            <div id="postAnalysisContent" class="tab-content">
+                <div class="postanalysis-flex-container">
+                    <div class="postanalysis-left-panel">
+                        <div class="postanalysis-search-bar" style="margin-bottom: 1rem;">
+                            <input type="text" id="postAnalysisStudentSearch" placeholder="Search student" style="padding: 0.5rem 1rem; font-size: 1rem; border-radius: 6px; border: 1px solid #e2e8f0; width: 100%;">
+                        </div>
+                        <div id="postAnalysisStudentListPanel" class="postanalysis-student-list">
+                            <!-- Student list will be loaded here dynamically -->
+                        </div>
+                    </div>
+                    <div class="postanalysis-right-panel">
+                        <div id="postAnalysisEvalPanel">
+                            <h2>Post-Analysis</h2>
+                            <p class="welcome-subtitle">Insights and analysis after all evaluations and predictions.</p>
+                            <div id="postAnalysisContentArea">
+                                <div class="postanalysis-summary-card">
+                                    <h3>Predicted Placement</h3>
+                                    <div class="predicted-placement-badge">Systems Development</div>
+                                    <p class="prediction-reasoning">
+                                        <b>Reasoning:</b> Recommended for <b>Systems Development</b> due to strong performance in: <span class="subject-list">IPT 101: 92.0, CC 106: 91.0, PF 101: 90.0</span>.<br>
+                                        Both soft skill and communication skill ratings reinforce the suitability of this placement.
+                                    </p>
+                                </div>
+                                <div class="postanalysis-averages-table">
+                                    <h3>Post-Assessment Averages</h3>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Category</th>
+                                                <th>Supervisor Avg</th>
+                                                <th>Self Avg</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Systems Development</td>
+                                                <td>3.0</td>
+                                                <td>3.0</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Research</td>
+                                                <td>5.0</td>
+                                                <td>3.0</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Business Operations</td>
+                                                <td>3.0</td>
+                                                <td>3.0</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Technical Support</td>
+                                                <td>5.0</td>
+                                                <td>3.0</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="postanalysis-insights">
+                                    <h3>Analysis &amp; Recommendation</h3>
+                                    <ul>
+                                        <li><b>Strengths:</b> The student’s self-assessment and supervisor ratings are consistent, especially in Systems Development, supporting the original placement prediction.</li>
+                                        <li><b>Growth Areas:</b> Research supervisor average is high (5.0), but self-assessment is lower (3.0), suggesting the student may underestimate their research skills.</li>
+                                        <li><b>Final Recommendation:</b> The original placement in Systems Development is validated by both detailed and average post-assessment ratings. The student is also encouraged to consider research roles, given the high supervisor feedback.</li>
+                                    </ul>
+                                </div>
+                                <div style="margin-top:1em;">
+                                    <button class="btn-view-details" onclick="document.getElementById('postAssessmentTabBtn').click();">View Full Post-Assessment Details</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -506,6 +774,8 @@ if (isset($_SESSION["current_user"]) && !isset($_SESSION["coordinator_user"])) {
 
         // Hook into tab switching to load reports when Report tab is activated
         $(document).ready(function() {
+    // Guard variable for student form submission
+    let isSubmittingStudentForm = false;
             $('.sidebar-item').click(function() {
                 var tabName = $(this).data('tab');
                 if (tabName === 'report') {
@@ -610,12 +880,28 @@ if (isset($_SESSION["current_user"]) && !isset($_SESSION["coordinator_user"])) {
             // Enhanced Add Student Form Submission with CSV support
             $('#studentForm').submit(function(e) {
                 e.preventDefault();
+                if (isSubmittingStudentForm) {
+                    console.warn('[StudentForm] Submission blocked: already submitting.');
+                    return;
+                }
+                isSubmittingStudentForm = true;
 
                 let formData = new FormData(this);
                 let hasCsvFile = $('#csvFile').get(0).files.length > 0;
 
+                // Helper to log FormData contents
+                function logFormData(fd) {
+                    let out = {};
+                    for (let pair of fd.entries()) {
+                        out[pair[0]] = pair[1];
+                    }
+                    return out;
+                }
+
                 if (hasCsvFile) {
                     // Handle CSV upload
+                    console.log('[StudentForm] Sending CSV upload request to ajaxhandler/uploadCSV.php');
+                    console.log('[StudentForm] FormData:', logFormData(formData));
                     $.ajax({
                         url: "ajaxhandler/uploadCSV.php",
                         type: "POST",
@@ -624,6 +910,8 @@ if (isset($_SESSION["current_user"]) && !isset($_SESSION["coordinator_user"])) {
                         processData: false,
                         dataType: 'json',
                         success: function(response) {
+                            isSubmittingStudentForm = false;
+                            console.log('[StudentForm] Response from uploadCSV.php:', response);
                             if (response.success) {
                                 alert(response.message || "Students added successfully from CSV!");
                                 $('#studentFormContainer').slideUp();
@@ -633,7 +921,9 @@ if (isset($_SESSION["current_user"]) && !isset($_SESSION["coordinator_user"])) {
                             }
                         },
                         error: function(xhr, status, error) {
+                            isSubmittingStudentForm = false;
                             console.error("CSV upload error:", error);
+                            console.error('[StudentForm] Rejected by uploadCSV.php:', xhr.responseText);
                             alert("Error uploading CSV file. Please check the format and try again.");
                         }
                     });
@@ -647,6 +937,8 @@ if (isset($_SESSION["current_user"]) && !isset($_SESSION["coordinator_user"])) {
                     if (sessionId) formData.append('sessionId', sessionId);
                     if (hteId) formData.append('hteId', hteId);
 
+                    console.log('[StudentForm] Sending single student request to ajaxhandler/attendanceAJAX.php');
+                    console.log('[StudentForm] FormData:', logFormData(formData));
                     $.ajax({
                         url: "ajaxhandler/attendanceAJAX.php",
                         type: "POST",
@@ -655,6 +947,8 @@ if (isset($_SESSION["current_user"]) && !isset($_SESSION["coordinator_user"])) {
                         processData: false,
                         dataType: 'json',
                         success: function(response) {
+                            isSubmittingStudentForm = false;
+                            console.log('[StudentForm] Response from attendanceAJAX.php:', response);
                             if (response.success) {
                                 alert("Student added successfully!");
                                 $('#studentFormContainer').slideUp();
@@ -664,7 +958,9 @@ if (isset($_SESSION["current_user"]) && !isset($_SESSION["coordinator_user"])) {
                             }
                         },
                         error: function(xhr, status, error) {
+                            isSubmittingStudentForm = false;
                             console.error("Add student error:", error);
+                            console.error('[StudentForm] Rejected by attendanceAJAX.php:', xhr.responseText);
                             alert("Error adding student. Please check your input and try again.");
                         }
                     });
@@ -732,13 +1028,12 @@ if (isset($_SESSION["current_user"]) && !isset($_SESSION["coordinator_user"])) {
             // CSV file change handler
             $(document).on('change', '#csvFile', function() {
                 let hasFile = $(this).get(0).files.length > 0;
+                // Disable all except CSV, SESSION, and HTE dropdowns
                 $('#studentForm input[type="text"], #studentForm input[type="number"], #studentForm input[type="email"], #studentForm input[type="tel"], #studentForm select')
-                    .not('#csvFile')
+                    .not('#csvFile, #sessionSelectStudent, #hteSelectStudent')
                     .prop('disabled', hasFile);
-
-                if (hasFile) {
-                    $('#sessionSelectStudent, #hteSelectStudent').prop('disabled', false);
-                }
+                // Always keep SESSION and HTE enabled
+                $('#sessionSelectStudent, #hteSelectStudent').prop('disabled', false);
             });
 
             // Session change handler for student form

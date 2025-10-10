@@ -1,4 +1,494 @@
 // Function to manage shown notifications using sessionStorage
+// Day navigation logic for report editor
+$(document).ready(function() {
+    // Ratings persistence object
+    var postAssessmentRatings = {
+        sysdev: {}, research: {}, techsup: {}, bizop: {}, personal: {}
+    };
+
+    // Render Personal and Interpersonal Skills questions in the table
+    function renderPersonalSkillsTable() {
+        $.ajax({
+            url: 'ajaxhandler/getPersonalSkillsQuestionsAjax.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success && response.questions) {
+                    let tbody = '';
+                    response.questions.forEach(function(q, idx) {
+                        tbody += `<tr><td>${q.question_text}</td>
+                            <td><input type="radio" name="personal_r${idx+1}" value="5" data-question-id="${q.question_id}"> 5</td>
+                            <td><input type="radio" name="personal_r${idx+1}" value="4" data-question-id="${q.question_id}"> 4</td>
+                            <td><input type="radio" name="personal_r${idx+1}" value="3" data-question-id="${q.question_id}"> 3</td>
+                            <td><input type="radio" name="personal_r${idx+1}" value="2" data-question-id="${q.question_id}"> 2</td>
+                            <td><input type="radio" name="personal_r${idx+1}" value="1" data-question-id="${q.question_id}"> 1</td>
+                        </tr>`;
+                    });
+                    $('#personalSkillsTable tbody').html(tbody);
+                    // Fetch saved ratings and pre-select radio buttons
+                    $.ajax({
+                        url: 'ajaxhandler/getPostAssessmentAjax.php',
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(ratingResp) {
+                            if (ratingResp.success && Array.isArray(ratingResp.ratings)) {
+                                let personalRatings = ratingResp.ratings.filter(function(item) {
+                                    return item.category === 'Personal and Interpersonal Skills';
+                                });
+                                personalRatings.forEach(function(item) {
+                                    // Find the radio button with matching data-question-id and value
+                                    $(`input[data-question-id='${item.question_id}'][value='${item.self_rating}']`).prop('checked', true);
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    $('#personalSkillsTable tbody').html('<tr><td colspan="6">No personal/interpersonal skills questions found.</td></tr>');
+                }
+            },
+            error: function() {
+                $('#personalSkillsTable tbody').html('<tr><td colspan="6">Error loading personal/interpersonal skills questions.</td></tr>');
+            }
+        });
+    }
+
+    // Show Personal and Interpersonal Skills category panel and render table
+    $(document).on('click', '#personalSkillsCategoryBtn', function() {
+        $('.post-category').hide();
+        $('#personalSkillsCategory').show();
+        renderPersonalSkillsTable();
+        $('#currentCategoryLabel').text('Personal and Interpersonal Skills');
+    });
+
+    // Listen for rating changes and persist them
+    $(document).on('change', "input[type='radio'][name^='sysdev_r']", function() {
+        var name = $(this).attr('name');
+        var qnum = name.replace('sysdev_r', '');
+        postAssessmentRatings.sysdev[qnum] = $(this).val();
+    });
+    $(document).on('change', "input[type='radio'][name^='research_r']", function() {
+        var name = $(this).attr('name');
+        var qnum = name.replace('research_r', '');
+        postAssessmentRatings.research[qnum] = $(this).val();
+    });
+    $(document).on('change', "input[type='radio'][name^='techsup_r']", function() {
+        var name = $(this).attr('name');
+        var qnum = name.replace('techsup_r', '');
+        postAssessmentRatings.techsup[qnum] = $(this).val();
+    });
+    $(document).on('change', "input[type='radio'][name^='bizop_r']", function() {
+        var name = $(this).attr('name');
+        var qnum = name.replace('bizop_r', '');
+        postAssessmentRatings.bizop[qnum] = $(this).val();
+    });
+    $(document).on('change', "input[type='radio'][name^='personal_r']", function() {
+        var name = $(this).attr('name');
+        var qnum = name.replace('personal_r', '');
+        postAssessmentRatings.personal[qnum] = $(this).val();
+    });
+    // Load Personal and Interpersonal Skills questions and render table
+    function loadPersonalSkillsTable() {
+        $.ajax({
+            url: 'ajaxhandler/getPersonalSkillsQuestionsAjax.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success && response.questions) {
+                    let html = '<h4 class="post-eval-category-header">Personal and Interpersonal Skills</h4>';
+                    html += '<table class="table post-eval-table"><thead><tr><th>Question</th><th>Rating</th></tr></thead><tbody>';
+                    response.questions.forEach(function(q, idx) {
+                        html += `<tr><td>${q.question_text}</td><td>
+                            <select name="personal_rating_${q.question_id}" class="personal-rating-select">
+                                <option value="">Rate</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </td></tr>`;
+                    });
+                    html += '</tbody></table>';
+                    $('#personalSkillsTablePanel').html(html);
+                } else {
+                    $('#personalSkillsTablePanel').html('<div class="no-eval">No personal/interpersonal skills questions found.</div>');
+                }
+            },
+            error: function() {
+                $('#personalSkillsTablePanel').html('<div class="no-eval">Error loading personal/interpersonal skills questions.</div>');
+            }
+        });
+    }
+
+    // Call this function when the category is toggled/selected
+    $(document).on('click', '#personalSkillsCategoryBtn', function() {
+        loadPersonalSkillsTable();
+        // Hide other category panels, show only this one
+        $('.post-assessment-category-panel').hide();
+        $('#personalSkillsTablePanel').show();
+    });
+
+    // Optionally, load on page ready if you want
+    // loadPersonalSkillsTable();
+    // Check if post-assessment has already been submitted
+    $.ajax({
+        url: 'ajaxhandler/checkPostAssessmentSubmittedAjax.php',
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success && response.submitted) {
+                // Disable all inputs and buttons in the post-assessment form except category navigation
+                $('#postAssessmentForm :input').not('.category-nav-btn').prop('disabled', true);
+                $('#postAssessmentFormMessage').text('You have already submitted your post-assessment. Editing is disabled.').css('color', 'blue');
+                // Change submit button color to gray
+                $('#submitPostAssessmentBtn').css({
+                    'background-color': '#cccccc',
+                    'border-color': '#cccccc',
+                    'color': '#666666',
+                    'cursor': 'not-allowed'
+                });
+            }
+        }
+    });
+    // Save Questions button logic for post-assessment
+    $('#saveQuestionsBtn').on('click', function() {
+        const categories = [
+            { id: 'sysdevCategory', prefix: 'sysdev', label: 'System Development' },
+            { id: 'researchCategory', prefix: 'research', label: 'Research' },
+            { id: 'techsupCategory', prefix: 'techsup', label: 'Technical Support' },
+            { id: 'bizopCategory', prefix: 'bizop', label: 'Business Operation' },
+            { id: 'personalSkillsCategory', prefix: 'personal', label: 'Personal and Interpersonal Skills' }
+        ];
+    // Add navigation button for Personal and Interpersonal Skills
+    $('#postAssessmentCategoryNav').append('<button type="button" class="category-nav-btn" id="personalSkillsCategoryBtn">Personal and Interpersonal Skills</button>');
+
+    // Add panel container for Personal and Interpersonal Skills
+    $('#postAssessmentTabContent').append('<div id="personalSkillsTablePanel" class="post-assessment-category-panel" style="display:none"></div>');
+
+        let questions = [];
+        let missing = [];
+        let perCategoryCount = {};
+        categories.forEach(cat => {
+            if (cat.prefix === 'personal') return; // Skip personal/interpersonal for validation
+            perCategoryCount[cat.label] = 0;
+            for (let i = 1; i <= 5; i++) {
+                const qText = $(`input[name='${cat.prefix}_q${i}']`).val();
+                if (!qText) {
+                    missing.push(`${cat.label} Question ${i}`);
+                } else {
+                    questions.push({
+                        category: cat.label,
+                        question_text: qText,
+                        question_number: i
+                    });
+                    perCategoryCount[cat.label]++;
+                }
+            }
+        });
+        let notEnough = Object.keys(perCategoryCount).filter(cat => perCategoryCount[cat] < 5);
+        if (missing.length > 0 || notEnough.length > 0) {
+            let msg = '';
+            if (notEnough.length > 0) {
+                msg += 'You must fill out 5 questions for each category:<br>' + notEnough.join(', ') + '<br>';
+            }
+            if (missing.length > 0) {
+                msg += 'Missing:<br>' + missing.join('<br>');
+            }
+            $('#postAssessmentFormMessage').html(msg).css('color', 'orange');
+            return;
+        }
+        // Get student_id from the hidden field
+        const student_id = $('#hiddenStudentId').val();
+        $.ajax({
+            url: 'ajaxhandler/saveStudentQuestionsAjax.php',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ student_id, questions }),
+            success: function(response) {
+                if (response.success) {
+                    $('#postAssessmentFormMessage').text('Questions saved! You can edit them before submitting ratings.').css('color', 'green');
+                } else {
+                    $('#postAssessmentFormMessage').text('Error: ' + (response.error || 'Unknown error')).css('color', 'red');
+                }
+            },
+            error: function(xhr) {
+                let msg = 'Error saving questions.';
+                if (xhr.responseJSON && xhr.responseJSON.error) msg += ' ' + xhr.responseJSON.error;
+                $('#postAssessmentFormMessage').text(msg).css('color', 'red');
+            }
+        });
+    });
+    // Strict validation and AJAX for post-assessment form
+    $(document).off('submit', '#postAssessmentForm');
+    $(document).on('submit', '#postAssessmentForm', function(e) {
+        e.preventDefault();
+        const categories = [
+            { id: 'sysdevCategory', prefix: 'sysdev', label: 'System Development' },
+            { id: 'researchCategory', prefix: 'research', label: 'Research' },
+            { id: 'techsupCategory', prefix: 'techsup', label: 'Technical Support' },
+            { id: 'bizopCategory', prefix: 'bizop', label: 'Business Operation' },
+            { id: 'personalSkillsCategory', prefix: 'personal', label: 'Personal and Interpersonal Skills' }
+        ];
+        let questions = [];
+        let missing = [];
+        categories.forEach(cat => {
+            if (cat.prefix === 'personal') {
+                // Loop through all rows in the personal skills table
+                $('#personalSkillsTable tbody tr').each(function(idx, tr) {
+                    const qText = $(tr).find('td:first').text();
+                    const rVal = $(tr).find("input[type='radio']:checked").val();
+                    if (rVal) {
+                        questions.push({
+                            category: cat.label,
+                            question_text: qText,
+                            question_number: idx + 1,
+                            self_rating: rVal
+                        });
+                    }
+                    // If not filled, do nothing (skip missing error)
+                });
+            } else {
+                for (let i = 1; i <= 5; i++) {
+                    let rVal = $(`input[name='${cat.prefix}_r${i}']:checked`).val();
+                    // Require both question and rating for other categories
+                    let qText = $(`input[name='${cat.prefix}_q${i}']`).val();
+                    if (!qText || !rVal) {
+                        missing.push(`${cat.label} Question ${i}`);
+                    } else {
+                        questions.push({
+                            category: cat.label,
+                            question_text: qText,
+                            question_number: i,
+                            self_rating: rVal
+                        });
+                    }
+                }
+            }
+        });
+        if (missing.length > 0 || questions.length < 5) {
+            let msg = '';
+            if (questions.length < 5) {
+                msg += 'You must fill out and rate at least 5 questions.<br>';
+            }
+            if (missing.length > 0) {
+                msg += 'Missing:<br>' + missing.join('<br>');
+            }
+            $('#postAssessmentFormMessage').html(msg).css('color', 'red');
+            return;
+        }
+        $.ajax({
+            url: 'ajaxhandler/savePostAssessmentAjax.php',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ questions }),
+            success: function(response) {
+                if (response.success) {
+                    $('#postAssessmentFormMessage').text('Post-assessment saved successfully!').css('color', 'green');
+                    // Set radio buttons to saved ratings, including personal skills
+                    if (response.saved && Array.isArray(response.saved)) {
+                        response.saved.forEach(function(item, idx) {
+                            let prefix = '';
+                            if (item.category === 'System Development') prefix = 'sysdev';
+                            else if (item.category === 'Research') prefix = 'research';
+                            else if (item.category === 'Technical Support') prefix = 'techsup';
+                            else if (item.category === 'Business Operation') prefix = 'bizop';
+                            else if (item.category === 'Personal and Interpersonal Skills') prefix = 'personal';
+                            if (prefix) {
+                                let qnum = item.question_number || (idx % 2 + 1);
+                                $(`input[name='${prefix}_r${qnum}'][value='${item.self_rating}']`).prop('checked', true);
+                            }
+                        });
+                    }
+                } else {
+                    $('#postAssessmentFormMessage').text('Error: ' + (response.error || 'Unknown error')).css('color', 'red');
+                }
+            },
+            error: function(xhr) {
+                let msg = 'Error saving post-assessment.';
+                if (xhr.responseJSON && xhr.responseJSON.error) msg += ' ' + xhr.responseJSON.error;
+                $('#postAssessmentFormMessage').text(msg).css('color', 'red');
+            }
+        });
+    });
+    // Post-Assessment Category Toggle Logic
+    const postCategories = [
+        {
+            id: 'sysdevCategory',
+            label: 'System Development'
+        },
+        {
+            id: 'researchCategory',
+            label: 'Research'
+        },
+        {
+            id: 'techsupCategory',
+            label: 'Technical Support'
+        },
+        {
+            id: 'bizopCategory',
+            label: 'Business Operation'
+        },
+        {
+            id: 'personalSkillsCategory',
+            label: 'Personal and Interpersonal Skills'
+        }
+    ];
+    let currentCategoryIdx = 0;
+
+    function showPostCategory(idx) {
+        postCategories.forEach((cat, i) => {
+            $('#' + cat.id).css('display', i === idx ? 'block' : 'none');
+            // If personalSkillsCategory, render questions when shown
+            if (cat.id === 'personalSkillsCategory' && i === idx) {
+                renderPersonalSkillsTable();
+            }
+        });
+        $('#currentCategoryLabel').text(postCategories[idx].label);
+    }
+
+    // Initial display for post-assessment
+    if ($('#postAssessmentTab').is(':visible')) {
+        showPostCategory(currentCategoryIdx);
+    }
+    // Always initialize on tab switch
+    $('#postAssessmentTabBtn').on('click', function() {
+        currentCategoryIdx = 0;
+        showPostCategory(currentCategoryIdx);
+        // Load saved questions for editing
+        const student_id = $('#hiddenStudentId').val();
+        let questionIdMap = {
+            sysdev: {}, research: {}, techsup: {}, bizop: {}
+        };
+        $.ajax({
+            url: 'ajaxhandler/studentDashboardAjax.php',
+            type: 'POST',
+            dataType: 'json',
+            data: { action: 'getStudentQuestions', studentId: student_id },
+            success: function(response) {
+                if (response.status === 'success' && Array.isArray(response.data)) {
+                    response.data.forEach(function(q) {
+                        let prefix = '';
+                        if (q.category === 'System Development') prefix = 'sysdev';
+                        else if (q.category === 'Research') prefix = 'research';
+                        else if (q.category === 'Technical Support') prefix = 'techsup';
+                        else if (q.category === 'Business Operation') prefix = 'bizop';
+                        else if (q.category === 'Personal and Interpesona Skill') prefix = 'personal';
+                        if (prefix) {
+                            $(`input[name='${prefix}_q${q.question_number}']`).val(q.question_text);
+                            // Build map: question_id -> question_number
+                            questionIdMap[prefix][q.question_id] = q.question_number;
+                        }
+                    });
+                }
+                // After questions loaded, load ratings
+                $.ajax({
+                    url: 'ajaxhandler/getPostAssessmentAjax.php',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success && Array.isArray(response.ratings)) {
+                            response.ratings.forEach(function(item) {
+                                let prefix = '';
+                                if (item.category === 'System Development') prefix = 'sysdev';
+                                else if (item.category === 'Research') prefix = 'research';
+                                else if (item.category === 'Technical Support') prefix = 'techsup';
+                                else if (item.category === 'Business Operation') prefix = 'bizop';
+                                if (prefix) {
+                                    // Use questionIdMap to get question_number
+                                    let qnum = questionIdMap[prefix][item.question_id];
+                                    if (qnum) {
+                                        let radioName = `${prefix}_r${qnum}`;
+                                        $(`input[name='${radioName}'][value='${item.self_rating}']`).prop('checked', true);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    });
+
+    $('#prevCategoryBtn').on('click', function() {
+        currentCategoryIdx = (currentCategoryIdx - 1 + postCategories.length) % postCategories.length;
+        showPostCategory(currentCategoryIdx);
+    });
+    $('#nextCategoryBtn').on('click', function() {
+        currentCategoryIdx = (currentCategoryIdx + 1) % postCategories.length;
+        showPostCategory(currentCategoryIdx);
+    });
+    // Top navigation for assessment tabs
+    $('#preAssessmentTabBtn').on('click', function() {
+        $(this).addClass('active');
+        $('#postAssessmentTabBtn').removeClass('active');
+        $('#preAssessmentTab').show();
+        $('#postAssessmentTab').hide();
+    });
+    $('#postAssessmentTabBtn').on('click', function() {
+        $(this).addClass('active');
+        $('#preAssessmentTabBtn').removeClass('active');
+        $('#preAssessmentTab').hide();
+        $('#postAssessmentTab').show();
+    });
+
+    // Add custom question logic for post-assessment
+    $('#addCustomQuestionBtn').on('click', function() {
+        const qIndex = $('#customQuestionsContainer .custom-question').length + 1;
+        const questionHtml = `
+            <div class="custom-question" style="margin-bottom:16px;">
+                <label>Question ${qIndex}:</label>
+                <input type="text" name="customQuestion${qIndex}" class="form-control" placeholder="Enter your question..." required />
+                <label>Rate yourself (1-5):</label>
+                <select name="customRating${qIndex}" class="form-control" required>
+                    <option value="">Select rating</option>
+                    <option value="1">1 - Needs Improvement</option>
+                    <option value="2">2 - Fair</option>
+                    <option value="3">3 - Good</option>
+                    <option value="4">4 - Very Good</option>
+                    <option value="5">5 - Excellent</option>
+                </select>
+            </div>
+        `;
+        $('#customQuestionsContainer').append(questionHtml);
+    });
+
+    // Initialize with one question for post-assessment
+    if ($('#customQuestionsContainer').length) {
+        $('#addCustomQuestionBtn').trigger('click');
+    }
+    const days = [
+        { id: 'reportMonday', label: 'Monday' },
+        { id: 'reportTuesday', label: 'Tuesday' },
+        { id: 'reportWednesday', label: 'Wednesday' },
+        { id: 'reportThursday', label: 'Thursday' },
+        { id: 'reportFriday', label: 'Friday' }
+    ];
+
+    // Get today's day index (0=Monday, 4=Friday)
+    let todayIdx = (new Date().getDay() + 6) % 7; // JS: 0=Sunday, 1=Monday...
+    if (todayIdx > 4) todayIdx = 0; // If weekend, default to Monday
+    let currentIdx = todayIdx;
+
+    function showDay(idx) {
+        days.forEach((day, i) => {
+            $('#' + day.id).css('display', i === idx ? 'block' : 'none');
+        });
+        $('#currentDayLabel').text(days[idx].label);
+    }
+
+    // Initial display
+    showDay(currentIdx);
+
+    // Arrow navigation
+    $('#prevDayBtn').on('click', function() {
+        currentIdx = (currentIdx - 1 + days.length) % days.length;
+        showDay(currentIdx);
+    });
+    $('#nextDayBtn').on('click', function() {
+        currentIdx = (currentIdx + 1) % days.length;
+        showDay(currentIdx);
+    });
+});
 const notificationTracker = {
     getShown: function() {
         const shown = sessionStorage.getItem('shownNotifications');
@@ -237,6 +727,14 @@ $(function(e) {
         if (tab === 'report') {
             initializeReportSystem();
         }
+
+        // Always show pre-assessment by default when evaluation tab is opened
+        if (tab === 'evaluation') {
+            $('#preAssessmentTabBtn').addClass('active');
+            $('#postAssessmentTabBtn').removeClass('active');
+            $('#preAssessmentTab').show();
+            $('#postAssessmentTab').hide();
+        }
     });
 
     // Sidebar toggle
@@ -398,22 +896,12 @@ $(function(e) {
         // Add a default option
         monthFilter.append('<option value="">Select Month</option>');
 
-        const currentYear = new Date().getFullYear();
-
         // Always show all 12 months regardless of current date or database records
         for (let month = 1; month <= 12; month++) {
-            let monthValue, monthName;
-            if (year) {
-                // If year is selected, include year in value
-                monthValue = `${year}-${month.toString().padStart(2, '0')}`;
-                monthName = new Date(year, month - 1, 1).toLocaleString('default', { month: 'long' });
-                monthFilter.append(`<option value="${monthValue}">${monthName} ${year}</option>`);
-            } else {
-                // If no year selected, use month-only value
-                monthValue = `${month.toString().padStart(2, '0')}`;
-                monthName = new Date(currentYear, month - 1, 1).toLocaleString('default', { month: 'long' });
-                monthFilter.append(`<option value="${monthValue}">${monthName}</option>`);
-            }
+            // Use month-only value (1-12) regardless of year selection
+            const monthValue = month.toString();
+            const monthName = new Date(2000, month - 1, 1).toLocaleString('default', { month: 'long' });
+            monthFilter.append(`<option value="${monthValue}">${monthName}</option>`);
         }
 
         console.log("Month filter options after population:", monthFilter.html());
@@ -422,11 +910,8 @@ $(function(e) {
 
         // Set the current month as selected unconditionally to ensure dropdown shows current month
         if (window.currentMonth) {
-            const year = window.currentMonth.getFullYear();
             const month = window.currentMonth.getMonth() + 1; // 1-based
-            const monthValue = `${year}-${month.toString().padStart(2, '0')}`;
-            monthFilter.val(monthValue);
-            updateSelectedMonthLabel(window.currentMonth);
+            monthFilter.val(month.toString());
         }
     }
 
@@ -484,6 +969,110 @@ $(function(e) {
     if ($("#historyFilter").val() === 'all') {
         loadAvailableYears();
     }
+
+    // Load all active questions for student evaluation
+    function loadStudentEvaluationQuestions() {
+        const studentId = $('#hiddenStudentId').val();
+        // First, check if student has submitted answers
+        $.ajax({
+            url: 'ajaxhandler/studentEvaluationAjax.php',
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify({ action: 'getStudentAnswers', student_id: studentId }),
+            success: function(response) {
+                if (response.success && response.answers && response.answers.length > 0) {
+                    // Student has submitted answers, switch to view mode with table layout
+                    let softRows = '';
+                    let commRows = '';
+                    let ratingsMap = {};
+                    // Fetch ratings for these answers
+                    $.ajax({
+                        url: 'ajaxhandler/coordinatorRateStudentAnswersAjax.php',
+                        type: 'POST',
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ action: 'getReviewedStudents' }),
+                        success: function(ratingResp) {
+                            if (ratingResp.success && ratingResp.ratings) {
+                                ratingResp.ratings.forEach(function(r) {
+                                    // Map all ratings by student_evaluation_id only
+                                    ratingsMap[r.student_evaluation_id] = r.rating;
+                                });
+                            }
+                            // Render answers and ratings as per sketch
+                            function buildRows(answers) {
+                                let rows = '';
+                                answers.forEach(function(ans) {
+                                    let rating = ratingsMap[ans.student_evaluation_id];
+                                    let ratingDisplay = (typeof rating !== 'undefined') ? rating : 'Not rated';
+                                    rows += `
+                                        <tr class='question-row'>
+                                            <td colspan='2' class='question-cell'>${ans.question_text}</td>
+                                        </tr>
+                                        <tr class='header-row'>
+                                            <td class='answer-header'>Answer</td>
+                                            <td class='rating-header'>Rating</td>
+                                        </tr>
+                                        <tr class='answer-row'>
+                                            <td class='answer-cell'>${ans.answer}</td>
+                                            <td class='rating-cell'>${ratingDisplay}</td>
+                                        </tr>
+                                    `;
+                                });
+                                return rows;
+                            }
+                            let softAnswers = response.answers.filter(a => a.category.toLowerCase().includes('soft'));
+                            let commAnswers = response.answers.filter(a => a.category.toLowerCase().includes('comm'));
+                            let softTable = `<div class='evaluation-table-wrapper'><table class='evaluation-table'><tbody>${buildRows(softAnswers)}</tbody></table></div>`;
+                            let commTable = `<div class='evaluation-table-wrapper'><table class='evaluation-table'><tbody>${buildRows(commAnswers)}</tbody></table></div>`;
+                            $('#softSkillQuestions').html(softTable);
+                            $('#commSkillQuestions').html(commTable);
+                            // Hide submit button in view mode
+                            $('#submitEvaluationBtn, #submitAnswersBtn, #submitBtn, #submitAnswers').hide();
+                        },
+                        error: function() {
+                            $('#softSkillQuestions').html('<p>Error loading ratings.</p>');
+                            $('#commSkillQuestions').html('<p>Error loading ratings.</p>');
+                        }
+                    });
+                } else {
+                    // No answers submitted, show editable questions
+                    $.ajax({
+                        url: 'ajaxhandler/coordinatorEvaluationQuestionsAjax.php',
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(qResp) {
+                            let softHtml = '';
+                            let commHtml = '';
+                            if (qResp.success && qResp.questions) {
+                                qResp.questions.forEach(function(q) {
+                                    if (q.category.toLowerCase().includes('soft')) {
+                                        softHtml += `<div class='question-unique-block'><label class='question-unique-label'>${q.question_text}</label><textarea class='question-unique-input' name='question_${q.question_id}' rows='2' required></textarea></div>`;
+                                    } else if (q.category.toLowerCase().includes('comm')) {
+                                        commHtml += `<div class='question-unique-block'><label class='question-unique-label'>${q.question_text}</label><textarea class='question-unique-input' name='question_${q.question_id}' rows='2' required></textarea></div>`;
+                                    }
+                                });
+                            }
+                            $('#softSkillQuestions').html(softHtml || '<p>No soft skill questions found.</p>');
+                            $('#commSkillQuestions').html(commHtml || '<p>No communication skill questions found.</p>');
+                        },
+                        error: function() {
+                            $('#softSkillQuestions').html('<p>Error loading soft skill questions.</p>');
+                            $('#commSkillQuestions').html('<p>Error loading communication skill questions.</p>');
+                        }
+                    });
+                }
+            },
+            error: function() {
+                $('#softSkillQuestions').html('<p>Error loading evaluation answers.</p>');
+                $('#commSkillQuestions').html('<p>Error loading evaluation answers.</p>');
+            }
+        });
+    }
+
+    // Initial load for student evaluation tab
+    loadStudentEvaluationQuestions();
 });
 
 // Dashboard Statistics
@@ -2136,148 +2725,246 @@ function submitFinalReport() {
     }
 }
 
+// --- Student Evaluation: Load Active Questions and Submit Answers ---
 
-
-function loadAvailableYears() {
-    const yearFilter = $("#yearFilter");
-    yearFilter.empty(); // Clear existing options
-
-    // Add a default option
-    yearFilter.append('<option value="">Select Year</option>');
-
-    // Fetch the earliest year from the database
+function loadStudentEvaluationQuestions() {
     $.ajax({
-        url: "ajaxhandler/studentDashboardAjax.php",
-        type: "POST",
-        dataType: "json",
-        data: {
-            action: "getEarliestAttendanceYear"
-        },
+        url: 'ajaxhandler/studentEvaluationAjax.php',
+        type: 'GET',
+        dataType: 'json',
         success: function(response) {
-            if (response.status === "success") {
-                window.earliestAttendanceYear = parseInt(response.data.earliest_year);
-                const currentYear = new Date().getFullYear();
-
-                // Generate years from current year back to the earliest year
-                for (let year = currentYear; year >= window.earliestAttendanceYear; year--) {
-                    yearFilter.append(`<option value="${year}">${year}</option>`);
-                }
+            if (response.success && response.questions) {
+                let html = '';
+                response.questions.forEach(function(q) {
+                    html += `<div class="form-group">
+                        <label for="eval_q_${q.question_id}">${q.category}: ${q.question_text}</label>
+                        <textarea id="eval_q_${q.question_id}" name="question_${q.question_id}" rows="2" required></textarea>
+                    </div>`;
+                });
+                $('#evaluationQuestions').html(html);
             } else {
-                console.error("Error fetching earliest attendance year:", response.message);
-                // Fallback to current year only if API fails
-                const currentYear = new Date().getFullYear();
-                window.earliestAttendanceYear = currentYear;
-                yearFilter.append(`<option value="${currentYear}">${currentYear}</option>`);
+                $('#evaluationQuestions').html('<p>No evaluation questions available.</p>');
             }
         },
-        error: function(xhr, status, error) {
-            console.error("Error fetching earliest attendance year:", error);
-            // Fallback to current year only if AJAX fails
-            const currentYear = new Date().getFullYear();
-            window.earliestAttendanceYear = currentYear;
-            yearFilter.append(`<option value="${currentYear}">${currentYear}</option>`);
+        error: function() {
+            $('#evaluationQuestions').html('<p>Error loading evaluation questions.</p>');
         }
     });
 }
 
-function loadAvailableMonths(year) {
-    console.log("loadAvailableMonths called with year:", year);
-    const monthFilter = $("#monthFilter");
-    console.log("Month filter element:", monthFilter);
-    monthFilter.empty(); // Clear existing options
+$('#evaluationTab').on('click', function() {
+    // Removed duplicate call to loadStudentEvaluationQuestions; now only loads on page refresh
+});
 
-    // Add a default option
-    monthFilter.append('<option value="">Select Month</option>');
 
-    // Always show all 12 months regardless of current date or database records
-    for (let month = 1; month <= 12; month++) {
-        // Use month-only value (1-12) regardless of year selection
-        const monthValue = month.toString();
-        const monthName = new Date(2000, month - 1, 1).toLocaleString('default', { month: 'long' });
-        monthFilter.append(`<option value="${monthValue}">${monthName}</option>`);
-    }
-
-    console.log("Month filter options after population:", monthFilter.html());
-    // Make sure the filter is visible
-    monthFilter.show();
-
-    // Set the current month as selected unconditionally to ensure dropdown shows current month
-    if (window.currentMonth) {
-        const month = window.currentMonth.getMonth() + 1; // 1-based
-        monthFilter.val(month.toString());
-    }
-}
-
-function generateReportPreview() {
-    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
-
-    // Populate day sections with images saved in draft
-    days.forEach(day => {
-        const dayImagesContainer = $(`#draft${capitalize(day)}Images`);
-        const dayContent = $(`#draft${capitalize(day)}Content`);
-
-        // Clear existing images
-        dayImagesContainer.empty();
-
-        // Get images from preview area
-        const images = $(`#imagePreview${capitalize(day)} .image-preview-item img`);
-
-        if (images.length > 0) {
-            images.each(function() {
-                const imgSrc = $(this).attr('src');
-                const imgElement = $(`<img src="${imgSrc}" alt="Image for ${capitalize(day)}" class="preview-image">`);
-                dayImagesContainer.append(imgElement);
-            });
-            dayContent.text(''); // Clear "No activities reported" text if images exist
-        } else {
-            dayContent.text(`No activities reported for ${capitalize(day)}.`);
-        }
-    });
-
-    // Populate daily descriptions next to each day's images
-    days.forEach(day => {
-        const description = $(`#${day}Description`).val().trim();
-        $(`#draft${capitalize(day)}Description`).html(description ? description.replace(/\n/g, '<br>') : 'No description provided for this day');
-    });
-
-    // Update report status in preview
-    const report = getCurrentReport();
-    let statusClass = 'info';
-    let statusText = 'Draft';
-    
-    if (report && report.status === 'submitted') {
-        switch(report.approval_status) {
-            case 'pending':
-                statusClass = 'warning';
-                statusText = 'Pending Review';
-                break;
-            case 'approved':
-                statusClass = 'success';
-                statusText = 'Approved';
-                break;
-            case 'returned':
-                statusClass = 'warning';
-                statusText = 'Returned for Revision';
-                break;
-            default:
-                statusClass = 'info';
-                statusText = 'Submitted';
-        }
-    }
-    
-    // Update the status display in preview
-    $('#reportStatus').html(`<div class="report-status ${statusClass}">${statusText}</div>`);
-
-    // Show the report draft preview
-    $("#reportDraft").show();
-    // Hide the old draft preview container if visible
-    $("#draftPreview").hide();
-}
-
+// Optionally, load questions on page load if you want them visible immediately
 $(document).ready(function() {
-    $("#previewReportBtn").click(function() {
-        generateReportPreview();
+    // Modal for questions saved
+    function showQuestionsSavedModal() {
+        // Remove any existing modal
+        $('#questionsSavedModal').remove();
+        const modalHtml = `
+            <div id="questionsSavedModal" class="custom-modal" style="display:flex;align-items:center;justify-content:center;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);z-index:9999;">
+                <div style="background:#fff;padding:32px 24px;border-radius:8px;box-shadow:0 2px 16px rgba(0,0,0,0.2);text-align:center;max-width:350px;width:100%;">
+                    <h3 style="margin-bottom:16px;color:green;">Questions saved!</h3>
+                    <p style="margin-bottom:16px;">You can edit them before submitting ratings.</p>
+                    <button id="questionsSavedModalOkBtn" style="padding:8px 24px;background:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:16px;">OK</button>
+                </div>
+            </div>
+        `;
+        $('body').append(modalHtml);
+        $('#questionsSavedModalOkBtn').on('click', function() {
+            $('#questionsSavedModal').remove();
+        });
+    }
+    // Evaluation form submission validation
+    let evaluationSubmitted = false;
+    $('#evaluationForm').on('submit', function(e) {
+        e.preventDefault();
+        if (evaluationSubmitted) {
+            showRefreshModal();
+            return;
+        }
+        // Collect answers from the evaluation form (Soft/Comm Skills)
+        let answers = [];
+        let missing = [];
+        // Find all question textareas anywhere in the DOM
+        $('textarea[name^="question_"]').each(function() {
+            const questionIdMatch = $(this).attr('name').match(/^question_(\d+)$/);
+            if (questionIdMatch) {
+                const question_id = questionIdMatch[1];
+                const answer = $(this).val();
+                // Accept numeric answers like '1', only treat truly empty (null/empty string) as missing
+                if (answer === null || answer.trim() === '') {
+                    missing.push(question_id);
+                }
+                answers.push({ question_id, answer: answer });
+            }
+        });
+        // Debug: log answers array before submitting
+        console.log('Submitting answers:', answers);
+        if (missing.length > 0) {
+            $('#evaluationFormMessage').html('<span style="color:red;font-weight:bold;">Please answer all questions before submitting.</span>');
+            return;
+        }
+        let student_id = $('#hiddenStudentId').val();
+        if (!student_id && typeof window.studentId !== 'undefined') {
+            student_id = window.studentId;
+        }
+        if (!student_id) {
+            $('#evaluationFormMessage').html('<span style="color:red;font-weight:bold;">Student ID not found.</span>');
+            return;
+        }
+        // AJAX submit
+        $.ajax({
+            url: 'ajaxhandler/studentEvaluationAjax.php',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ student_id, answers }),
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    evaluationSubmitted = true;
+                    // Disable submit button
+                    $('#evaluationForm button[type="submit"], #submitEvaluationBtn, #submitAnswersBtn, #submitBtn, #submitAnswers').prop('disabled', true);
+                    // Show modal instructing to refresh the page
+                    showRefreshModal();
+                    $('#evaluationForm')[0].reset();
+                } else {
+                    $('#evaluationFormMessage').html('<span style="color:red;font-weight:bold;">' + (response.message || 'Failed to submit answers.') + '</span>');
+                }
+            },
+            error: function() {
+                $('#evaluationFormMessage').html('<span style="color:red;font-weight:bold;">Error submitting answers.</span>');
+            }
+        });
+// Modal instructing user to refresh the page after submission
+function showRefreshModal() {
+    $('#submissionModal').remove();
+    const modalHtml = `
+        <div id="submissionModal" class="custom-modal" style="display:flex;align-items:center;justify-content:center;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);z-index:9999;">
+            <div style="background:#fff;padding:32px 24px;border-radius:8px;box-shadow:0 2px 16px rgba(0,0,0,0.2);text-align:center;max-width:350px;width:100%;">
+                <h3 style="margin-bottom:16px;">Your Answers have been Submitted!</h3>
+                <p style="margin-bottom:16px;">Please refresh the page to see your submitted answers.</p>
+                <button id="submissionModalOkBtn" style="padding:8px 24px;background:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:16px;">OK</button>
+            </div>
+        </div>
+    `;
+    $('body').append(modalHtml);
+    $('#submissionModalOkBtn').on('click', function() {
+        $('#submissionModal').remove();
     });
+}
+
+// Function to reload answers and ratings in view mode
+function loadStudentEvaluationAnswersAndRatings() {
+    const studentId = $('#hiddenStudentId').val();
+    if (!studentId) return;
+    // Use POST to get student answers for view mode
+    $.ajax({
+        url: 'ajaxhandler/studentEvaluationAjax.php',
+        type: 'POST',
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify({ action: 'getStudentAnswers', student_id: studentId }),
+        success: function(response) {
+            if (response.success && response.answers && response.answers.length > 0) {
+                // Fetch coordinator ratings for these answers
+                let ratingsMap = {};
+                $.ajax({
+                    url: 'ajaxhandler/coordinatorRateStudentAnswersAjax.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ action: 'getReviewedStudents' }),
+                    success: function(ratingResp) {
+                        if (ratingResp.success && ratingResp.ratings) {
+                            ratingResp.ratings.forEach(function(r) {
+                                ratingsMap[r.student_evaluation_id] = r.rating;
+                            });
+                        }
+                        function buildRows(answers) {
+                            let rows = '';
+                            answers.forEach(function(ans) {
+                                let rating = ratingsMap[ans.student_evaluation_id];
+                                let ratingDisplay = (typeof rating !== 'undefined') ? rating : 'Not rated';
+                                rows += `
+                                    <tr class='question-row'>
+                                        <td colspan='2' class='question-cell'>${ans.question_text}</td>
+                                    </tr>
+                                    <tr class='header-row'>
+                                        <td class='answer-header'>Answer</td>
+                                        <td class='rating-header'>Rating</td>
+                                    </tr>
+                                    <tr class='answer-row'>
+                                        <td class='answer-cell'>${ans.answer}</td>
+                                        <td class='rating-cell'>${ratingDisplay}</td>
+                                    </tr>
+                                `;
+                            });
+                            return rows;
+                        }
+                        let softAnswers = response.answers.filter(a => a.category.toLowerCase().includes('soft'));
+                        let commAnswers = response.answers.filter(a => a.category.toLowerCase().includes('comm'));
+                        let softTable = `<div class='evaluation-table-wrapper'><table class='evaluation-table'><tbody>${buildRows(softAnswers)}</tbody></table></div>`;
+                        let commTable = `<div class='evaluation-table-wrapper'><table class='evaluation-table'><tbody>${buildRows(commAnswers)}</tbody></table></div>`;
+                        $('#softSkillQuestions').html(softTable);
+                        $('#commSkillQuestions').html(commTable);
+                        // Hide submit button in view mode
+                        $('#submitEvaluationBtn, #submitAnswersBtn, #submitBtn, #submitAnswers').hide();
+                    },
+                    error: function() {
+                        $('#softSkillQuestions').html('<p>Error loading ratings.</p>');
+                        $('#commSkillQuestions').html('<p>Error loading ratings.</p>');
+                    }
+                });
+            } else {
+                // No answers submitted, show editable questions (do not reload)
+            }
+        },
+        error: function() {
+            $('#softSkillQuestions').html('<p>Error loading ratings.</p>');
+            $('#commSkillQuestions').html('<p>Error loading ratings.</p>');
+        }
+    });
+}
+    });
+    // Load all active questions for student evaluation
+    function loadStudentEvaluationQuestions() {
+        $.ajax({
+            url: 'ajaxhandler/coordinatorEvaluationQuestionsAjax.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success && response.questions) {
+                    let html = '';
+                    let categories = {};
+                    response.questions.forEach(function(q) {
+                        if (q.status === 'active') {
+                            if (!categories[q.category]) categories[q.category] = [];
+                            categories[q.category].push(q);
+                        }
+                    });
+                    Object.keys(categories).forEach(function(category) {
+                        html += `<div class='category-card'><div class='category-title'>${category}</div><div class='category-questions'>`;
+                        categories[category].forEach(function(q) {
+                            html += `<div class='question-block'><label class='question-label'>${q.question_text}</label><textarea class='question-input' name='question_${q.question_id}' rows='2' required></textarea></div>`;
+                        });
+                        html += `</div></div>`;
+                    });
+                    $('#evaluationQuestions').html(html);
+                } else {
+                    $('#evaluationQuestions').html('<p>No active questions found.</p>');
+                }
+            },
+            error: function() {
+                $('#evaluationQuestions').html('<p>Error loading questions.</p>');
+            }
+        });
+    }
+
+    // Initial load for student evaluation tab
+    loadStudentEvaluationQuestions();
 });
 
 

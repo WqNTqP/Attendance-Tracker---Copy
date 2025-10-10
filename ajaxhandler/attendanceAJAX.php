@@ -212,17 +212,32 @@ function createPDFReport($list, $filename) {
             
         if ($action == "addStudent") {
             // Collect all necessary data from POST
-            $intern_id = $_POST['internId'] ?? null;
-            $student_id = $_POST['studentId'] ?? null;
-            $name = $_POST['name'] ?? null;
-            $surname = $_POST['surname'] ?? null;
-            $age = $_POST['age'] ?? null;
-            $gender = $_POST['gender'] ?? null;
-            $email = $_POST['email'] ?? null;
-            $contact_number = $_POST['contactNumber'] ?? null;
-            $coordinator_id = $_SESSION['current_user'] ?? null;
-            $hte_id = $_POST['hteId'] ?? null; // This line is now optional
-            $session_id = $_POST['sessionId'] ?? null; // This line is now optional
+                $intern_id = $_POST['internId'] ?? null;
+                $student_id = $_POST['studentId'] ?? null;
+                $name = $_POST['name'] ?? null;
+                $surname = $_POST['surname'] ?? null;
+                $age = $_POST['age'] ?? null;
+                $gender = $_POST['gender'] ?? null;
+                $email = $_POST['email'] ?? null;
+                $contact_number = $_POST['contactNumber'] ?? null;
+                $coordinator_id = $_SESSION['current_user'] ?? null;
+                $hte_id = $_POST['hteId'] ?? null; // This line is now optional
+                $session_id = $_POST['sessionId'] ?? null; // This line is now optional
+
+                // Collect grades for pre_assessment course columns only
+                $grades = [];
+                $course_columns = [
+                    'CC 102', 'CC 103', 'PF 101', 'CC 104', 'IPT 101', 'IPT 102', 'CC 106', 'CC 105',
+                    'IM 101', 'IM 102', 'HCI 101', 'HCI 102', 'WS 101', 'NET 101', 'NET 102',
+                    'IAS 101', 'IAS 102', 'CAP 101', 'CAP 102', 'SP 101'
+                ];
+                foreach ($course_columns as $course) {
+                    // Replace spaces for HTML form field names, e.g., CC_102
+                    $key = str_replace(' ', '_', $course) . '_grade';
+                    if (isset($_POST[$key])) {
+                        $grades[$course] = $_POST[$key];
+                    }
+                }
         
             // Add these lines for debugging
             error_log("Received POST data: " . print_r($_POST, true));
@@ -255,8 +270,8 @@ function createPDFReport($list, $filename) {
             error_log("session_id: " . $session_id);
     
             try {
-                // Call addStudent with the database instance
-                $new_intern_id = $ado->addStudent($dbo, $student_id, $name, $surname, $age, $gender, $email, $contact_number, $coordinator_id, $hte_id, $session_id);
+                // Call addStudent with the database instance, passing grades
+                $new_intern_id = $ado->addStudent($dbo, $student_id, $name, $surname, $age, $gender, $email, $contact_number, $coordinator_id, $hte_id, $session_id, $grades);
                 echo json_encode(['success' => true, 'message' => 'Student added successfully', 'new_intern_id' => $new_intern_id]);
             } catch (Exception $e) {
                 error_log("Exception caught: " . $e->getMessage());

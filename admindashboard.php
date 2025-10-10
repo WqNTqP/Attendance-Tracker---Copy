@@ -31,7 +31,7 @@ $adminName = $name ?? 'Admin';
         <div class="top-header">
             <button id="sidebarToggle" class="sidebar-toggle" aria-label="Toggle Sidebar">&#9776;</button>
             <div class="sidebar-logo" style="margin-left: 1rem; cursor: pointer;" onclick="window.location.href='admindashboard.php';">
-                <h2 class="logo" style="cursor: pointer;">ATTENDANCE TRACKER</h2>
+                <h2 class="logo" style="cursor: pointer;">InternConnect</h2>
             </div>
             <div class="user-profile" id="userProfile">
                 <span id="userName" data-admin-id="<?php echo htmlspecialchars($adminId); ?>"><?php echo htmlspecialchars($adminName); ?> &#x25BC;</span>
@@ -48,12 +48,39 @@ $adminName = $name ?? 'Admin';
                 <li class="sidebar-item" id="pendingTab"><i class="fas fa-user-check"></i> Attendance</li>
                 <li class="sidebar-item" id="historyTab"><i class="fas fa-history"></i> History</li>
                 <li class="sidebar-item" id="reportsTab"><i class="fas fa-file-alt"></i> Reports</li>
+                <li class="sidebar-item" id="evaluationTab"><i class="fas fa-star"></i> Evaluation</li>
                 <li class="sidebar-item" id="contralTab"><i class="fas fa-cogs"></i> Contral</li>
             </ul>
         </div>
 
         <div class="content-area">
             <h1>Welcome, <?php echo htmlspecialchars($name); ?></h1>
+
+
+
+
+    <!-- Evaluation Tab Content -->
+        <div id="evaluationTabContent" class="tab-content" style="display: none;">
+            <div class="admin-eval-container" style="display: flex; gap: 32px; padding: 24px 0;">
+                <div class="admin-eval-sidebar" style="width: 260px; background: #f7f7f7; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); padding: 16px; display: flex; flex-direction: column;">
+                    <input type="text" class="admin-eval-search" placeholder="Search students..." style="padding: 8px 12px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 16px; font-size: 16px;">
+                    <ul class="admin-eval-student-list" style="list-style: none; padding: 0; margin: 0; max-height: 600px; overflow-y: auto; border: 1px solid #e5e7eb; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+                        <?php if (!empty($allStudents)): ?>
+                            <?php foreach ($allStudents as $i => $student): ?>
+                                <li class="admin-eval-student<?php echo $i === 0 ? ' active' : ''; ?>" style="padding: 10px 14px; border-radius: 4px; margin-bottom: 6px; cursor: pointer; background: <?php echo $i === 0 ? '#e0e7ff' : '#fff'; ?>;<?php echo $i === 0 ? ' font-weight: bold;' : ''; ?>" data-student-id="<?php echo htmlspecialchars($student['STUDENT_ID']); ?>">
+                                    <?php echo htmlspecialchars($student['SURNAME'] . (isset($student['NAME']) ? ', ' . $student['NAME'] : '')); ?>
+                                </li>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <li class="admin-eval-student" style="padding: 10px 14px; border-radius: 4px; margin-bottom: 6px; cursor: pointer; background: #fff;">No students found.</li>
+                        <?php endif; ?>
+                    </ul>
+                </div>
+                <div class="admin-eval-main" style="flex: 1; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); padding: 24px;">
+                    <!-- Evaluation table and ratings will be loaded dynamically via JS -->
+                </div>
+            </div>
+        </div>
 
         
     <!-- Profile Modal -->
@@ -438,6 +465,8 @@ $adminName = $name ?? 'Admin';
                     </div>
                 </div>
             </div>
+
+
 
 
 

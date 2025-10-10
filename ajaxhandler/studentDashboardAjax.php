@@ -1,4 +1,3 @@
-
 <?php
 date_default_timezone_set('Asia/Manila');
 error_reporting(E_ALL);
@@ -34,6 +33,91 @@ if (empty($action)) {
 }
 
 switch ($action) {
+    case "getStudentsForReview":
+        try {
+            // Get all students who have at least one rated evaluation
+            $stmt = $dbo->conn->prepare("
+                SELECT DISTINCT i.INTERNS_ID as id, i.NAME, i.SURNAME
+                FROM interns_details i
+                JOIN student_evaluation se ON se.STUDENT_ID = i.STUDENT_ID
+                JOIN coordinator_evaluation ce ON ce.student_evaluation_id = se.id AND ce.STUDENT_ID = se.STUDENT_ID
+            ");
+            $stmt->execute();
+            $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $result = array();
+            foreach ($students as $student) {
+                $result[] = array(
+                    'id' => $student['id'],
+                    'name' => $student['NAME'] . ' ' . $student['SURNAME']
+                );
+            }
+            echo json_encode(array('success' => true, 'students' => $result));
+        } catch (Exception $e) {
+            echo json_encode(array('success' => false, 'students' => [], 'message' => 'Database error: ' . $e->getMessage()));
+        }
+        exit;
+    case "getPreassessmentEvaluation":
+        $internsId = isset($_POST['studentId']) ? $_POST['studentId'] : null;
+        if (!$internsId) {
+            echo json_encode(['success' => false, 'message' => 'No studentId provided']);
+            exit;
+        }
+        try {
+            // Map INTERNS_ID to STUDENT_ID
+            $stmtMap = $dbo->conn->prepare("SELECT STUDENT_ID FROM interns_details WHERE INTERNS_ID = ? LIMIT 1");
+            $stmtMap->execute([$internsId]);
+            $row = $stmtMap->fetch(PDO::FETCH_ASSOC);
+            if (!$row || !$row['STUDENT_ID']) {
+                echo json_encode(['success' => true, 'evaluations' => [], 'isRated' => false]);
+                exit;
+            }
+            $studentId = $row['STUDENT_ID'];
+
+            // Get all evaluation answers for this student
+            $stmt = $dbo->conn->prepare("SELECT se.id as id, se.id as student_evaluation_id, eq.question_text, se.answer FROM student_evaluation se JOIN evaluation_questions eq ON se.question_id = eq.question_id WHERE se.STUDENT_ID = ?");
+            $stmt->execute([$studentId]);
+            $evaluations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Check if all answers have been rated by coordinator
+            $isRated = false;
+            if (count($evaluations) > 0) {
+                $evalIds = array_column($evaluations, 'id');
+                $placeholders = implode(',', array_fill(0, count($evalIds), '?'));
+                $stmt2 = $dbo->conn->prepare("SELECT COUNT(*) as rated_count FROM coordinator_evaluation WHERE student_evaluation_id IN ($placeholders) AND STUDENT_ID = ?");
+                $stmt2->execute(array_merge($evalIds, [$studentId]));
+                $ratedCount = $stmt2->fetch(PDO::FETCH_ASSOC);
+                if ($ratedCount && intval($ratedCount['rated_count']) === count($evalIds)) {
+                    $isRated = true;
+                }
+            }
+
+            echo json_encode([
+                'success' => true,
+                'evaluations' => $evaluations,
+                'isRated' => $isRated
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+        }
+        exit;
+    case "getStudentsForPreassessment":
+        try {
+            $stmt = $dbo->conn->prepare("SELECT INTERNS_ID as id, STUDENT_ID, NAME, SURNAME FROM interns_details");
+            $stmt->execute();
+            $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $result = array();
+            foreach ($students as $student) {
+                $result[] = array(
+                    'id' => $student['id'],
+                    'STUDENT_ID' => $student['STUDENT_ID'],
+                    'name' => $student['NAME'] . ' ' . $student['SURNAME']
+                );
+            }
+            echo json_encode(array('success' => true, 'students' => $result));
+        } catch (Exception $e) {
+            echo json_encode(array('success' => false, 'students' => [], 'message' => 'Database error: ' . $e->getMessage()));
+        }
+        exit;
     case "getStudentProfile":
         $studentId = $_POST['studentId'] ?? null;
         if (!$studentId) {
@@ -68,6 +152,21 @@ switch ($action) {
         } catch (Exception $e) {
             logError("Error retrieving student profile: " . $e->getMessage());
             sendResponse('error', null, 'Error retrieving student profile');
+        }
+        break;
+    case "getStudentQuestions":
+        $studentId = $_POST['studentId'] ?? null;
+        if (!$studentId) {
+            sendResponse('error', null, 'Student ID is required');
+        }
+        try {
+            $stmt = $dbo->conn->prepare("SELECT id AS question_id, category, question_text, question_number FROM student_questions WHERE student_id = ? ORDER BY category, question_number");
+            $stmt->execute([$studentId]);
+            $questions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            sendResponse('success', $questions, 'Questions loaded');
+        } catch (Exception $e) {
+            logError("Error loading student questions: " . $e->getMessage());
+            sendResponse('error', null, 'Error loading questions');
         }
         break;
     case "getDashboardStats":
@@ -604,6 +703,24 @@ switch ($action) {
         } catch (Exception $e) {
             logError("Error retrieving recent report status: " . $e->getMessage());
             sendResponse('error', null, 'Error retrieving recent report status');
+        }
+        break;
+
+    case "getAllStudents":
+        try {
+            $stmt = $dbo->conn->prepare("SELECT INTERNS_ID as student_id, NAME, SURNAME FROM interns_details");
+            $stmt->execute();
+            $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $result = array();
+            foreach ($students as $student) {
+                $result[] = array(
+                    'student_id' => $student['student_id'],
+                    'name' => $student['NAME'] . ' ' . $student['SURNAME']
+                );
+            }
+            sendResponse('success', $result);
+        } catch (Exception $e) {
+            sendResponse('error', null, 'Database error: ' . $e->getMessage());
         }
         break;
 }

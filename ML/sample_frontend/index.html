@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OJT Placement Predictor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>OJT Placement Predictor</h1>
+        <form id="predictForm">
+            <div class="form-section">
+                <h2>Enter Student Grades</h2>
+                <div class="grid">
+                    <input type="number" name="CC 102" placeholder="CC 102" min="0" max="100" required>
+                    <input type="number" name="CC 103" placeholder="CC 103" min="0" max="100" required>
+                    <input type="number" name="PF 101" placeholder="PF 101" min="0" max="100" required>
+                    <input type="number" name="CC 104" placeholder="CC 104" min="0" max="100" required>
+                    <input type="number" name="IPT 101" placeholder="IPT 101" min="0" max="100" required>
+                    <input type="number" name="IPT 102" placeholder="IPT 102" min="0" max="100" required>
+                    <input type="number" name="CC 106" placeholder="CC 106" min="0" max="100" required>
+                    <input type="number" name="CC 105" placeholder="CC 105" min="0" max="100" required>
+                    <input type="number" name="IM 101" placeholder="IM 101" min="0" max="100" required>
+                    <input type="number" name="IM 102" placeholder="IM 102" min="0" max="100" required>
+                    <input type="number" name="HCI 101" placeholder="HCI 101" min="0" max="100" required>
+                    <input type="number" name="HCI 102" placeholder="HCI 102" min="0" max="100" required>
+                    <input type="number" name="WS 101" placeholder="WS 101" min="0" max="100" required>
+                    <input type="number" name="NET 101" placeholder="NET 101" min="0" max="100" required>
+                    <input type="number" name="NET 102" placeholder="NET 102" min="0" max="100" required>
+                    <input type="number" name="IAS 101" placeholder="IAS 101" min="0" max="100" required>
+                    <input type="number" name="IAS 102" placeholder="IAS 102" min="0" max="100" required>
+                    <input type="number" name="CAP 101" placeholder="CAP 101" min="0" max="100" required>
+                    <input type="number" name="CAP 102" placeholder="CAP 102" min="0" max="100" required>
+                    <input type="number" name="SP 101" placeholder="SP 101" min="0" max="100" required>
+                    <input type="number" step="0.01" name="Soft Skill" placeholder="Soft Skill (1-5)" min="1" max="5" required>
+                    <input type="number" step="0.01" name="Communication Skill" placeholder="Communication Skill (1-5)" min="1" max="5" required>
+                </div>
+            </div>
+            <button type="button" id="randomizeBtn">Randomize Grades</button>
+            <button type="submit">Predict OJT Placement</button>
+        </form>
+    <div id="counter" style="margin-bottom:10px;"></div>
+    <div id="result" class="result"></div>
+    </div>
+    <script src="script.js"></script>
+    <script>
+    let predictCount = 0;
+    document.getElementById('predictForm').addEventListener('submit', function(e) {
+        predictCount++;
+        document.getElementById('counter').innerHTML = `Prediction count: <b>${predictCount}</b>`;
+    });
+    </script>
+    <script>
+    document.getElementById('randomizeBtn').addEventListener('click', function() {
+        const form = document.getElementById('predictForm');
+        Array.from(form.elements).forEach(el => {
+            if (el.type === 'number') {
+                if (el.name === 'Soft Skill' || el.name === 'Communication Skill') {
+                    el.value = (Math.random() * (5 - 4) + 4).toFixed(2);
+                } else {
+                    el.value = Math.floor(Math.random() * (99 - 75 + 1)) + 75;
+                }
+            }
+        });
+    });
+    </script>
+</body>
+</html>

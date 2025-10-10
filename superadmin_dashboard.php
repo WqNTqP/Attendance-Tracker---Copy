@@ -32,7 +32,7 @@ $superadminName = $_SESSION['current_user_name'] ?? 'Super Admin';
         <div class="top-header">
             <button id="sidebarToggle" class="sidebar-toggle" aria-label="Toggle Sidebar">&#9776;</button>
             <div class="sidebar-logo" style="margin-left: 1rem; cursor: pointer;" onclick="window.location.href='superadmin_dashboard.php';">
-                <h2 class="logo" style="cursor: pointer;">ATTENDANCE TRACKER</h2>
+                <h2 class="logo" style="cursor: pointer;">InternConnect</h2>
             </div>
             <div class="user-profile" id="userProfile">
                 <span id="userName"><?php echo htmlspecialchars($superadminName); ?> &#x25BC;</span>

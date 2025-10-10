@@ -65,13 +65,13 @@ class attendanceDetails
 
     public function deleteStudent($dbo, $studentId) {
         try {
-            // First, delete related records in intern_details
-            $c = "DELETE FROM intern_details WHERE INTERNS_ID = :studentId";
+            // First, delete related records in intern_details using STUDENT_ID
+            $c = "DELETE FROM intern_details WHERE INTERNS_ID = (SELECT INTERNS_ID FROM interns_details WHERE STUDENT_ID = :studentId)";
             $s = $dbo->conn->prepare($c);
             $s->execute([":studentId" => $studentId]);
-    
-            // Then, delete the student from interns_details
-            $c = "DELETE FROM interns_details WHERE INTERNS_ID = :studentId";
+
+            // Then, delete the student from interns_details using STUDENT_ID
+            $c = "DELETE FROM interns_details WHERE STUDENT_ID = :studentId";
             $s = $dbo->conn->prepare($c);
             $s->execute([":studentId" => $studentId]);
             
@@ -278,7 +278,7 @@ class attendanceDetails
         return $rv;
     }
 
-    public function addStudent($dbo, $student_id, $name, $surname, $age, $gender, $email, $contact_number, $coordinator_id, $hte_id, $session_id) {
+    public function addStudent($dbo, $student_id, $name, $surname, $age, $gender, $email, $contact_number, $coordinator_id, $hte_id, $session_id, $grades = []) {
         try {
             // Start transaction
             $dbo->conn->beginTransaction();
@@ -384,16 +384,47 @@ class attendanceDetails
                 }
             }
     
+            // Insert grades into pre_assessment if provided
+            if (!empty($grades)) {
+                $stmt = $dbo->conn->prepare("INSERT INTO pre_assessment (STUDENT_ID, `CC 102`, `CC 103`, `PF 101`, `CC 104`, `IPT 101`, `IPT 102`, `CC 106`, `CC 105`, `IM 101`, `IM 102`, `HCI 101`, `HCI 102`, `WS 101`, `NET 101`, `NET 102`, `IAS 101`, `IAS 102`, `CAP 101`, `CAP 102`, `SP 101`) VALUES (:student_id, :CC_102, :CC_103, :PF_101, :CC_104, :IPT_101, :IPT_102, :CC_106, :CC_105, :IM_101, :IM_102, :HCI_101, :HCI_102, :WS_101, :NET_101, :NET_102, :IAS_101, :IAS_102, :CAP_101, :CAP_102, :SP_101)");
+                $params = [
+                    ':student_id' => $student_id,
+                    ':CC_102' => $grades['CC 102'] ?? null,
+                    ':CC_103' => $grades['CC 103'] ?? null,
+                    ':PF_101' => $grades['PF 101'] ?? null,
+                    ':CC_104' => $grades['CC 104'] ?? null,
+                    ':IPT_101' => $grades['IPT 101'] ?? null,
+                    ':IPT_102' => $grades['IPT 102'] ?? null,
+                    ':CC_106' => $grades['CC 106'] ?? null,
+                    ':CC_105' => $grades['CC 105'] ?? null,
+                    ':IM_101' => $grades['IM 101'] ?? null,
+                    ':IM_102' => $grades['IM 102'] ?? null,
+                    ':HCI_101' => $grades['HCI 101'] ?? null,
+                    ':HCI_102' => $grades['HCI 102'] ?? null,
+                    ':WS_101' => $grades['WS 101'] ?? null,
+                    ':NET_101' => $grades['NET 101'] ?? null,
+                    ':NET_102' => $grades['NET 102'] ?? null,
+                    ':IAS_101' => $grades['IAS 101'] ?? null,
+                    ':IAS_102' => $grades['IAS 102'] ?? null,
+                    ':CAP_101' => $grades['CAP 101'] ?? null,
+                    ':CAP_102' => $grades['CAP 102'] ?? null,
+                    ':SP_101' => $grades['SP 101'] ?? null
+                ];
+                if (!$stmt->execute($params)) {
+                    throw new Exception("Failed to insert grades into pre_assessment.");
+                }
+            }
+
             // Commit transaction if all operations succeed
             $dbo->conn->commit();
-    
+
             // Return the intern_id of the assigned student
             return $intern_id;
-    
+
         } catch (Exception $e) {
             // Rollback the transaction on any exception
             $dbo->conn->rollBack();
-    
+
             // Return a JSON response with the error message
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
             exit;
@@ -769,13 +800,13 @@ class attendanceDetails
 
             foreach ($studentIds as $studentId) {
                 try {
-                    // First, delete related records in intern_details
-                    $stmt = $dbo->conn->prepare("DELETE FROM intern_details WHERE INTERNS_ID = :studentId");
+                    // First, delete related records in intern_details using STUDENT_ID
+                    $stmt = $dbo->conn->prepare("DELETE FROM intern_details WHERE INTERNS_ID = (SELECT INTERNS_ID FROM interns_details WHERE STUDENT_ID = :studentId)");
                     $stmt->execute([":studentId" => $studentId]);
                     $deletedCount += $stmt->rowCount();
 
-                    // Then, delete the student from interns_details
-                    $stmt = $dbo->conn->prepare("DELETE FROM interns_details WHERE INTERNS_ID = :studentId");
+                    // Then, delete the student from interns_details using STUDENT_ID
+                    $stmt = $dbo->conn->prepare("DELETE FROM interns_details WHERE STUDENT_ID = :studentId");
                     $stmt->execute([":studentId" => $studentId]);
                     $deletedCount += $stmt->rowCount();
 
