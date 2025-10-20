@@ -575,7 +575,6 @@ error_log("Profile Picture: " . ($studentDetails['profile_picture'] ?? 'Not Foun
             </form>
         </div>
     </div>
-        <!-- ...existing code... -->
     </div>
 
     <!-- Post-Assessment Form (only visible in evaluation tab) -->

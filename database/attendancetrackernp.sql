@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 08, 2025 at 02:33 PM
+-- Generation Time: Oct 18, 2025 at 11:29 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,20 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `attendancetrackernp`
 --
-
--- --------------------------------------------------------
-
---
--- Table structure for table `assigned_questions`
---
-
-CREATE TABLE `assigned_questions` (
-  `id` int(11) NOT NULL,
-  `student_id` varchar(20) NOT NULL,
-  `question_id` int(11) NOT NULL,
-  `assigned_by` varchar(20) NOT NULL,
-  `assigned_at` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -59,10 +45,9 @@ CREATE TABLE `coordinator` (
 --
 
 INSERT INTO `coordinator` (`COORDINATOR_ID`, `NAME`, `EMAIL`, `CONTACT_NUMBER`, `DEPARTMENT`, `USERNAME`, `PASSWORD`, `ROLE`, `PROFILE`, `HTE_ID`) VALUES
-(123, 'ch', 'kim69@gmail.com', '09513762404', 'it', 'test', 'test', 'COORDINATOR', NULL, NULL),
-(59828992, 'charles', 'charles@hcdc.edu.ph', '09513762404', 'IT', 'charles', '123456', 'ADMIN', NULL, 2),
 (59828994, 'Kim Charles', 'shadowd6163@gmail.com', '09513762404', 'IT', 'shadow', '123456', 'ADMIN', '68db8cd8ec14c_59828994.jpg', 1),
 (59828996, 'KIM CHARLES', 'kimcharles.emping@hcdc.edu.ph', '09513762404', 'IT_DEPARTMENT', 'kimcharles', '123456', 'COORDINATOR', '68d37a0d05ca1_59828996.jpg', NULL),
+(59828997, 'Christine Gumia', 'christine.gumia@hcdc.edu.ph', '09513762404', 'IT', 'Christine', '123456', 'ADMIN', NULL, 30),
 (59828999, 'superadmin', 'superadmin@gmail.com', '09513762404', 'IT', 'super', 'admin', 'SUPERADMIN', NULL, NULL);
 
 -- --------------------------------------------------------
@@ -85,46 +70,46 @@ CREATE TABLE `coordinator_evaluation` (
 --
 
 INSERT INTO `coordinator_evaluation` (`id`, `student_evaluation_id`, `STUDENT_ID`, `coordinator_id`, `rating`, `timestamp`) VALUES
-(583, 444, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(584, 445, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(585, 446, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(586, 447, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(587, 448, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(588, 449, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(589, 450, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(590, 451, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(591, 452, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(592, 453, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(593, 454, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(594, 455, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(595, 456, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(596, 457, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(597, 458, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(598, 459, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(599, 460, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(600, 461, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(601, 462, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(602, 463, 59832315, '59828996', 5, '2025-10-06 21:51:28'),
-(623, 84, 12345, '59828996', 5, '2025-10-06 22:06:05'),
-(624, 85, 12345, '59828996', 5, '2025-10-06 22:06:05'),
-(625, 86, 12345, '59828996', 5, '2025-10-06 22:06:05'),
-(626, 87, 12345, '59828996', 5, '2025-10-06 22:06:05'),
-(627, 88, 12345, '59828996', 5, '2025-10-06 22:06:05'),
-(628, 89, 12345, '59828996', 5, '2025-10-06 22:06:05'),
-(629, 90, 12345, '59828996', 5, '2025-10-06 22:06:05'),
-(630, 91, 12345, '59828996', 5, '2025-10-06 22:06:05'),
-(631, 92, 12345, '59828996', 5, '2025-10-06 22:06:05'),
-(632, 93, 12345, '59828996', 5, '2025-10-06 22:06:05'),
-(633, 94, 12345, '59828996', 5, '2025-10-06 22:06:05'),
-(634, 95, 12345, '59828996', 5, '2025-10-06 22:06:05'),
-(635, 96, 12345, '59828996', 5, '2025-10-06 22:06:05'),
-(636, 97, 12345, '59828996', 5, '2025-10-06 22:06:05'),
-(637, 98, 12345, '59828996', 5, '2025-10-06 22:06:05'),
-(638, 99, 12345, '59828996', 5, '2025-10-06 22:06:05'),
-(639, 100, 12345, '59828996', 5, '2025-10-06 22:06:05'),
-(640, 101, 12345, '59828996', 5, '2025-10-06 22:06:05'),
-(641, 102, 12345, '59828996', 5, '2025-10-06 22:06:05'),
-(642, 103, 12345, '59828996', 5, '2025-10-06 22:06:05');
+(643, 404, 59828881, '59828996', 5, '2025-10-17 22:29:56'),
+(644, 405, 59828881, '59828996', 4, '2025-10-17 22:29:56'),
+(645, 406, 59828881, '59828996', 5, '2025-10-17 22:29:56'),
+(646, 407, 59828881, '59828996', 4, '2025-10-17 22:29:56'),
+(647, 408, 59828881, '59828996', 5, '2025-10-17 22:29:56'),
+(648, 409, 59828881, '59828996', 4, '2025-10-17 22:29:56'),
+(649, 410, 59828881, '59828996', 5, '2025-10-17 22:29:56'),
+(650, 411, 59828881, '59828996', 4, '2025-10-17 22:29:56'),
+(651, 412, 59828881, '59828996', 5, '2025-10-17 22:29:56'),
+(652, 413, 59828881, '59828996', 4, '2025-10-17 22:29:56'),
+(653, 414, 59828881, '59828996', 5, '2025-10-17 22:29:56'),
+(654, 415, 59828881, '59828996', 4, '2025-10-17 22:29:56'),
+(655, 416, 59828881, '59828996', 5, '2025-10-17 22:29:56'),
+(656, 417, 59828881, '59828996', 4, '2025-10-17 22:29:56'),
+(657, 418, 59828881, '59828996', 5, '2025-10-17 22:29:56'),
+(658, 419, 59828881, '59828996', 4, '2025-10-17 22:29:56'),
+(659, 420, 59828881, '59828996', 5, '2025-10-17 22:29:56'),
+(660, 421, 59828881, '59828996', 4, '2025-10-17 22:29:56'),
+(661, 422, 59828881, '59828996', 5, '2025-10-17 22:29:56'),
+(662, 423, 59828881, '59828996', 4, '2025-10-17 22:29:56'),
+(663, 464, 59829532, '59828996', 4, '2025-10-18 14:40:26'),
+(664, 465, 59829532, '59828996', 5, '2025-10-18 14:40:26'),
+(665, 466, 59829532, '59828996', 4, '2025-10-18 14:40:26'),
+(666, 467, 59829532, '59828996', 5, '2025-10-18 14:40:26'),
+(667, 468, 59829532, '59828996', 4, '2025-10-18 14:40:26'),
+(668, 469, 59829532, '59828996', 5, '2025-10-18 14:40:26'),
+(669, 470, 59829532, '59828996', 4, '2025-10-18 14:40:26'),
+(670, 471, 59829532, '59828996', 5, '2025-10-18 14:40:26'),
+(671, 472, 59829532, '59828996', 4, '2025-10-18 14:40:26'),
+(672, 473, 59829532, '59828996', 5, '2025-10-18 14:40:26'),
+(673, 474, 59829532, '59828996', 4, '2025-10-18 14:40:26'),
+(674, 475, 59829532, '59828996', 3, '2025-10-18 14:40:26'),
+(675, 476, 59829532, '59828996', 4, '2025-10-18 14:40:26'),
+(676, 477, 59829532, '59828996', 5, '2025-10-18 14:40:26'),
+(677, 478, 59829532, '59828996', 4, '2025-10-18 14:40:26'),
+(678, 479, 59829532, '59828996', 3, '2025-10-18 14:40:26'),
+(679, 480, 59829532, '59828996', 5, '2025-10-18 14:40:26'),
+(680, 481, 59829532, '59828996', 4, '2025-10-18 14:40:26'),
+(681, 482, 59829532, '59828996', 5, '2025-10-18 14:40:26'),
+(682, 483, 59829532, '59828996', 4, '2025-10-18 14:40:26');
 
 -- --------------------------------------------------------
 
@@ -175,42 +160,6 @@ INSERT INTO `evaluation_questions` (`question_id`, `category`, `question_text`, 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `holidays`
---
-
-CREATE TABLE `holidays` (
-  `id` int(11) NOT NULL,
-  `date` date NOT NULL,
-  `description` varchar(255) NOT NULL,
-  `type` enum('regular','special') NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `holidays`
---
-
-INSERT INTO `holidays` (`id`, `date`, `description`, `type`, `created_at`) VALUES
-(1, '2025-01-01', 'New Year\'s Day', 'regular', '2025-09-18 07:04:44'),
-(2, '2025-04-09', 'Maundy Thursday', 'regular', '2025-09-18 07:04:44'),
-(3, '2025-04-10', 'Good Friday', 'regular', '2025-09-18 07:04:44'),
-(4, '2025-05-01', 'Labor Day', 'regular', '2025-09-18 07:04:44'),
-(5, '2025-06-12', 'Independence Day', 'regular', '2025-09-18 07:04:44'),
-(6, '2025-08-30', 'National Heroes Day', 'regular', '2025-09-18 07:04:44'),
-(7, '2025-11-30', 'Bonifacio Day', 'regular', '2025-09-18 07:04:44'),
-(8, '2025-12-25', 'Christmas Day', 'regular', '2025-09-18 07:04:44'),
-(9, '2025-12-30', 'Rizal Day', 'regular', '2025-09-18 07:04:44'),
-(10, '2025-02-25', 'EDSA People Power Revolution Anniversary', 'special', '2025-09-18 07:04:44'),
-(11, '2025-04-11', 'Black Saturday', 'special', '2025-09-18 07:04:44'),
-(12, '2025-08-21', 'Ninoy Aquino Day', 'special', '2025-09-18 07:04:44'),
-(13, '2025-11-01', 'All Saints\' Day', 'special', '2025-09-18 07:04:44'),
-(14, '2025-11-02', 'All Souls\' Day', 'special', '2025-09-18 07:04:44'),
-(15, '2025-12-24', 'Christmas Eve', 'special', '2025-09-18 07:04:44'),
-(16, '2025-12-31', 'New Year\'s Eve', 'special', '2025-09-18 07:04:44');
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `host_training_establishment`
 --
 
@@ -229,11 +178,8 @@ CREATE TABLE `host_training_establishment` (
 --
 
 INSERT INTO `host_training_establishment` (`HTE_ID`, `NAME`, `INDUSTRY`, `ADDRESS`, `CONTACT_EMAIL`, `CONTACT_PERSON`, `CONTACT_NUMBER`) VALUES
-(1, 'McDo', 'CET', 'UNAHAN SA AGDAO', 'RASTAMAN@GMAIL.COM', 'RASTAMAN', '09513762404'),
-(2, 'jollibee', 'CET', 'UNAHAN SA AGDAO', 'RASTAMAN@GMAIL.COM', 'RASTAMAN', '09513762404'),
-(3, 'G-Mall', 'CET', 'UNAHAN SA AGDAO', 'RASTAMAN@GMAIL.COM', 'RASTAMAN', '09513762404'),
-(6, 'Victoria', 'Mall', 'Obrero', 'Victoria@gmail.com', 'rastaman', '09876543212'),
-(21, 'Kim Charles', 'Mall', 'veloso st.', 'SPH@gmail.com', 'Kim Charles', '09513762404');
+(1, 'JairoSoft', 'CET', 'UNAHAN SA AGDAO', 'RASTAMAN@GMAIL.COM', 'RASTAMAN', '09513762404'),
+(30, 'InfoSoft', 'IT', 'testing St.', 'testing@gmail.com', 'Mr.testing', '+63 951 375 2404');
 
 -- --------------------------------------------------------
 
@@ -253,9 +199,7 @@ CREATE TABLE `internship_needs` (
 
 INSERT INTO `internship_needs` (`HTE_ID`, `COORDINATOR_ID`, `SESSION_ID`) VALUES
 (1, 59828996, 1),
-(2, 59828996, 1),
-(3, 59828996, 2),
-(6, 59828996, 1);
+(30, 59828996, 1);
 
 -- --------------------------------------------------------
 
@@ -295,7 +239,7 @@ INSERT INTO `interns_attendance` (`COORDINATOR_ID`, `HTE_ID`, `ID`, `INTERNS_ID`
 (59828996, 1, 1, 190, '2025-09-04', '12:52:00', '12:52:00'),
 (59828996, 1, 1, 190, '2025-09-11', '14:03:00', '14:03:00'),
 (59828996, 1, 1, 190, '2025-09-15', '08:00:00', '15:26:00'),
-(59828996, 1, 1, 206, '2025-09-15', '15:25:00', '15:25:00');
+(59828996, 30, 1, 289, '2025-10-18', '08:00:00', '14:37:00');
 
 -- --------------------------------------------------------
 
@@ -322,52 +266,9 @@ CREATE TABLE `interns_details` (
 
 INSERT INTO `interns_details` (`INTERNS_ID`, `STUDENT_ID`, `NAME`, `SURNAME`, `AGE`, `GENDER`, `EMAIL`, `PASSWORD`, `CONTACT_NUMBER`, `profile_picture`) VALUES
 (190, 59828881, 'Kim Charles', 'Emping', 23, 'Male', 'shadowd6163@gmail.com', '123456', '09513762404', '68db79d64cdc5_190.jpg'),
-(206, 59829532, 'JAMES', 'Smith', 21, 'MALE', 'james@hcdc.edu.ph', '123456', '\'09876523322\'', '68db700345b4b_206.jpg'),
-(207, 59832315, 'Harold', 'Johnson', 22, 'MALE', 'Harold@hcdc.edu.ph', '123456', '\'09812654321\'', NULL),
-(208, 59823526, 'Adriane', 'Brown', 23, 'MALE', 'Adriane@hcdc.edu.ph', NULL, '\'09526543212\'', NULL),
-(209, 59829332, 'Urie', 'Garcia', 21, 'FEMALE', 'Urie@hcdc.edu,ph', NULL, '\'09476543212\'', NULL),
-(210, 59832925, 'Joy', 'Lopez', 22, 'FEMALE', 'Joy@hcdc.edu.ph', NULL, '\'09813252615\'', NULL),
-(211, 59823962, 'Emman', 'Miller', 22, 'MALE', 'Emman@hcdc.edu.ph', NULL, '\'09235157692\'', NULL),
-(212, 59832356, 'Bob', 'Wilson', 22, 'MALE', 'Bob@hcdc.edu.ph', NULL, '\'09273679179\'', NULL),
-(213, 59852427, 'Charles', 'Moore', 23, 'MALE', 'Charles@hcdc.edu.ph', NULL, '\'09283782367\'', NULL),
-(214, 59834987, 'Kristine', 'Taylor', 22, 'FEMALE', 'Kristine@hcdc.edu.ph', NULL, '\'09382658121\'', NULL),
-(215, 59829572, 'Robin', 'Anderson', 21, 'FEMALE', 'Robin@hcdc.edu.ph', NULL, '\'09237834612\'', NULL),
-(216, 59823572, 'Kanye', 'Thomas', 23, 'MALE', 'Kanye@hcdc.edu.ph', NULL, '\'09823261716\'', NULL),
-(217, 59823573, 'Sara', 'Jackson', 24, 'FEMALE', 'Sara@hcdc.edu.ph', NULL, '\'09823261717\'', NULL),
-(218, 59823574, 'Ernest', 'White', 23, 'MALE', 'Ernest@hcdc.edu.ph', NULL, '\'09823261718\'', NULL),
-(219, 59823575, 'Sophia', 'Harris', 21, 'FEMALE', 'Sophia@hdcc.edu.ph', NULL, '\'09823261719\'', NULL),
-(220, 59823576, 'Mary', 'Martin', 22, 'FEMALE', 'mary@hcdc.edu.ph', NULL, '\'09823261720\'', NULL),
-(221, 59823577, 'Lynn', 'Thompson', 23, 'FEMALE', 'Lynn@hcdc.edu.ph', NULL, '\'09823261721\'', NULL),
-(222, 59823578, 'Christian', 'Martinez', 22, 'MALE', 'christian@hcdc.edu.ph', NULL, '\'09823261722\'', NULL),
-(223, 59823579, 'John', 'Robinson', 23, 'MALE', 'John@hcdc.edu.ph', NULL, '\'09823261723\'', NULL),
-(224, 59823580, 'Steve', 'Emping', 22, 'MALE', 'steve@hcdc.edu.ph', NULL, '\'09823261724\'', NULL),
-(225, 59823581, 'Anita', 'Rodriguez', 21, 'FEMALE', 'anita@hcdc.edu.ph', NULL, '\'09823261725\'', NULL),
-(226, 59823582, 'Jake', 'Lewis', 23, 'MALE', 'Jake@hcdc.edu.ph', NULL, '\'09823261726\'', NULL),
-(227, 59823583, 'Joel', 'Lee', 23, 'MALE', 'Joel@hcdc.edu.ph', NULL, '\'09823261727\'', NULL),
-(228, 59823584, 'Jane', 'Walker', 22, 'FEMALE', 'jane@hcdc.edu.ph', NULL, '\'09823261728\'', NULL),
-(231, 59823587, 'Karl', 'Hall', 23, 'MALE', 'karl@hcdc.edu.ph', NULL, '\'09823261731\'', NULL),
-(232, 59823588, 'Nicole', 'Allen', 22, 'FEMALE', 'nicole@hcdc.edu.ph', NULL, '\'09823261732\'', NULL),
-(233, 59823589, 'Amy', 'Young', 21, 'FEMALE', 'Amy@hcdc.edu.ph', NULL, '\'09823261733\'', NULL),
-(234, 59823590, 'Justin', 'Hernandez', 24, 'MALE', 'Justin@hcdc.edu.ph', NULL, '\'09823261734\'', NULL),
-(235, 59823591, 'Stefan', 'King', 23, 'MALE', 'Stefan@hcdc.edu.ph', NULL, '\'09823261735\'', NULL),
-(236, 59823592, 'Paul', 'Wright', 25, 'MALE', 'Paul@hcdc.edu.ph', NULL, '\'09823261736\'', NULL),
-(237, 59823593, 'Hannah', 'Lopez', 23, 'FEMALE', 'Hannah@hcdc.edu.ph', NULL, '\'09823261737\'', NULL),
-(238, 59823594, 'Joyce', 'Hill', 21, 'FEMALE', 'joyce@hcdc.edu.ph', NULL, '\'09823261738\'', NULL),
-(239, 59823595, 'Mark', 'Scott', 22, 'MALE', 'mark@hdc.edu.ph', NULL, '\'09823261739\'', NULL),
-(240, 59823596, 'Kate', 'Green', 23, 'FEMALE', 'kate@hcdc.edu.ph', NULL, '\'09823261740\'', NULL),
-(241, 59823597, 'Jessica', 'Adams', 21, 'FEMALE', 'jessica@hcdc.edu.ph', NULL, '\'09823261741\'', NULL),
-(242, 59823598, 'Tristan', 'Baker', 22, 'MALE', 'tristan@hcdc.edu.ph', NULL, '\'09823261742\'', NULL),
-(243, 59823599, 'Emilie', 'Nelson', 21, 'FEMALE', 'emilie@hcdc.edu.ph', NULL, '\'09823261743\'', NULL),
-(244, 59823600, 'Nate', 'Carter', 23, 'MALE', 'nate@hcdc.edu.ph', NULL, '\'09823261744\'', NULL),
-(245, 59823601, 'Kimberly', 'Mitchell', 22, 'FEMALE', 'kimberly@hcdc.edu.ph', NULL, '\'09823261745\'', NULL),
-(246, 59823602, 'Austin', 'Perez', 22, 'MALE', 'Austin@hcdc.edu.ph', NULL, '\'09823261746\'', NULL),
-(247, 59823603, 'Prince', 'Roberts', 21, 'MALE', 'prince@hcdc.edu.ph', NULL, '\'09823261747\'', NULL),
-(252, 59823608, 'Kylie', 'Campbell', 24, 'FEMALE', 'Kylie@hcdc.edu.ph', NULL, '\'09823261752\'', NULL),
-(253, 59823609, 'Ken', 'Parker', 22, 'MALE', 'Ken@hcdc.edu.ph', NULL, '\'09823261753\'', NULL),
-(254, 59823610, 'Maya', 'Evans', 23, 'FEMALE', 'Maya@hcdc.edu.ph', NULL, '\'09823261754\'', NULL),
-(259, 598289964, 'Ako', 'Emping', 61, 'Male', 'kim69@gmail.com', '123456', '09513762404', NULL),
-(278, 12345, 'John', 'Doe', 21, 'Male', 'johndoe@email.com', NULL, '09123456789', NULL),
-(279, 67890, 'Jane', 'Smith', 22, 'Female', 'janesmith@email.com', NULL, '09987654321', NULL);
+(288, 59829536, 'Urien Adriane ', 'Suico', 23, 'male', 'urienadriane.suico@hcdc.edu.ph', NULL, '9284554063', NULL),
+(289, 59829532, 'James Harold', 'Roble', 21, 'male', 'jameharold.roble@hcdc.edu.ph', '123456', '9665375692', '68f334f1acaa2_289.jpg'),
+(290, 59829663, 'Christine ', 'Serdan', 21, 'female ', 'christine.serdan@hcdc.edu.ph', NULL, '9656328642', NULL);
 
 --
 -- Triggers `interns_details`
@@ -398,48 +299,9 @@ CREATE TABLE `intern_details` (
 
 INSERT INTO `intern_details` (`INTERNS_ID`, `SESSION_ID`, `HTE_ID`) VALUES
 (190, 1, 1),
-(206, 1, 1),
-(207, 1, 1),
-(208, 1, 1),
-(209, 1, 1),
-(210, 1, 1),
-(211, 1, 1),
-(212, 1, 1),
-(213, 1, 1),
-(214, 1, 1),
-(215, 1, 1),
-(217, 1, 1),
-(218, 1, 1),
-(219, 1, 1),
-(220, 1, 1),
-(221, 1, 1),
-(222, 1, 1),
-(223, 1, 1),
-(224, 1, 1),
-(225, 1, 1),
-(226, 1, 1),
-(227, 1, 1),
-(228, 1, 1),
-(231, 1, 1),
-(232, 1, 1),
-(233, 1, 1),
-(234, 1, 1),
-(235, 1, 1),
-(236, 1, 1),
-(237, 1, 1),
-(238, 1, 1),
-(239, 1, 1),
-(240, 1, 1),
-(241, 1, 1),
-(242, 1, 1),
-(243, 1, 1),
-(244, 1, 1),
-(245, 1, 1),
-(246, 1, 1),
-(247, 1, 1),
-(259, 2, 3),
-(278, 1, 2),
-(279, 1, 2);
+(288, 1, 30),
+(289, 1, 30),
+(290, 1, 30);
 
 -- --------------------------------------------------------
 
@@ -467,22 +329,10 @@ CREATE TABLE `notifications` (
 --
 
 INSERT INTO `notifications` (`notification_id`, `receiver_id`, `receiver_type`, `sender_id`, `sender_type`, `title`, `message`, `reference_id`, `reference_type`, `created_at`, `is_read`, `notification_type`) VALUES
-(23, 206, 'student', NULL, NULL, 'Report Returned', 'Your report has been returned for revision. Check report tab for details.', 7, 'report', '2025-09-19 08:05:27', 1, 'report_returned'),
-(24, 206, 'student', NULL, NULL, 'Report Returned', 'Your report has been returned for revision. Check report tab for details.', 7, 'report', '2025-09-19 08:10:09', 1, 'report_returned'),
-(25, 206, 'student', NULL, NULL, 'Report Returned', 'Your report has been returned for revision. Check report tab for details.', 7, 'report', '2025-09-19 08:25:21', 1, 'report_returned'),
-(26, 206, 'student', NULL, NULL, 'Report Returned', 'Your report has been returned for revision. Check report tab for details.', 7, 'report', '2025-09-19 08:39:09', 1, 'report_returned'),
-(27, 206, 'student', NULL, NULL, 'Report Returned', 'Your report has been returned for revision. Check report tab for details.', 7, 'report', '2025-09-19 08:44:03', 1, 'report_returned'),
-(28, 206, 'student', NULL, NULL, 'Report Returned', 'Your report has been returned for revision. Check report tab for details.', 7, 'report', '2025-09-19 08:50:52', 1, 'report_returned'),
-(29, 206, 'student', NULL, NULL, 'Report Returned', 'Your report has been returned for revision. Check report tab for details.', 7, 'report', '2025-09-19 09:00:41', 1, 'report_returned'),
-(30, 206, 'student', NULL, NULL, 'Report Returned', 'Your report has been returned for revision. Check report tab for details.', 8, 'report', '2025-09-22 08:22:47', 1, 'report_returned'),
 (31, 190, 'student', NULL, NULL, 'Report Returned', 'Your report has been returned for revision. Check report tab for details.', 9, 'report', '2025-09-22 10:27:57', 1, 'report_returned'),
-(32, 206, 'student', NULL, NULL, 'Report Returned', 'Your report has been returned for revision. Check report tab for details.', 8, 'report', '2025-09-22 10:31:54', 1, 'report_returned'),
-(33, 206, 'student', NULL, NULL, 'Report Returned', 'Your report has been returned for revision. Check report tab for details.', 8, 'report', '2025-09-22 10:37:07', 1, 'report_returned'),
-(34, 206, 'student', NULL, NULL, 'Report Returned', 'Your report has been returned for revision. Check report tab for details.', 8, 'report', '2025-09-22 10:50:45', 1, 'report_returned'),
-(35, 206, 'student', NULL, NULL, 'Report Returned', 'Your report has been returned for revision. Check report tab for details.', 8, 'report', '2025-09-22 10:57:12', 1, 'report_returned'),
-(36, 206, 'student', NULL, NULL, 'Report Returned', 'Your report has been returned for revision. Check report tab for details.', 10, 'report', '2025-09-30 05:56:42', 0, 'report_returned'),
-(37, 206, 'student', NULL, NULL, 'Report Returned', 'Your report has been returned for revision. Check report tab for details.', 10, 'report', '2025-09-30 06:37:06', 1, 'report_returned'),
-(38, 190, 'student', NULL, NULL, 'Report Returned', 'Your report has been returned for revision. Check report tab for details.', 11, 'report', '2025-09-30 07:58:36', 1, 'report_returned');
+(38, 190, 'student', NULL, NULL, 'Report Returned', 'Your report has been returned for revision. Check report tab for details.', 11, 'report', '2025-09-30 07:58:36', 1, 'report_returned'),
+(39, 289, 'student', NULL, NULL, 'Report Returned', 'Your report has been returned for revision. Check report tab for details.', 13, 'report', '2025-10-18 07:23:57', 1, 'report_returned'),
+(40, 289, 'student', NULL, NULL, 'Report Returned', 'Your report has been returned for revision. Check report tab for details.', 13, 'report', '2025-10-18 07:24:53', 1, 'report_returned');
 
 -- --------------------------------------------------------
 
@@ -522,7 +372,6 @@ CREATE TABLE `past_data` (
 --
 
 INSERT INTO `past_data` (`id_number`, `student_name`, `year_graduated`, `CC 102`, `CC 103`, `PF 101`, `CC 104`, `IPT 101`, `IPT 102`, `CC 106`, `CC 105`, `IM 101`, `IM 102`, `HCI 101`, `HCI 102`, `WS 101`, `NET 101`, `NET 102`, `IAS 101`, `IAS 102`, `CAP 101`, `CAP 102`, `SP 101`, `OJT Placement`) VALUES
-('id_number', 'student_name', 'year_graduated', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'OJT Placement'),
 ('35917022', 'CASILAN, NOEL', '20122013_2', 81, 80, 76, 94, 86, 76, 83, 75, 75, 80, 80, 80, 78, 78, 78, 79, 78, 84, 83, 86, 'Technical Support'),
 ('40372041', 'HIDALGO, EVER PETER', '20142015_2', 81, 75, 78, 96, 94, 75, 80, 75, 82, 93, 89, 77, 99, 81, 78, 91, 79, 79, 94, 88, 'Business Operations'),
 ('42484051', 'ESCAMILLAN, VICTOR', '20142015_2', 83, 85, 87, 88, 89, 78, 94, 78, 88, 78, 94, 80, 86, 80, 83, 82, 78, 88, 86, 87, 'Systems Development'),
@@ -859,9 +708,9 @@ INSERT INTO `past_data` (`id_number`, `student_name`, `year_graduated`, `CC 102`
 ('48478126', 'NAZARIO, EFPHRAIM', '20132014_2', 84, 88, 76, 78, 97, 77, 82, 78, 92, 92, 93, 82, 89, 87, 80, 94, 99, 82, 96, 77, 'Research'),
 ('48478136', 'JADA-ONG, JOANA MARIE', '20142015_2', 75, 86, 75, 87, 82, 79, 90, 78, 77, 81, 88, 76, 77, 90, 76, 76, 95, 84, 94, 95, 'Business Operations'),
 ('48478141', 'DUERO, PAMELA ROSE', '20142015_2', 81, 84, 77, 94, 92, 75, 91, 75, 75, 92, 79, 80, 93, 85, 75, 92, 79, 82, 85, 95, 'Business Operations'),
-('48478157', 'BOLIDO, MONIQUE CARRIZZA', '20142015_2', 75, 84, 82, 99, 82, 76, 87, 75, 78, 86, 87, 75, 96, 75, 86, 88, 77, 92, 89, 96, 'Systems Development');
+('48478157', 'BOLIDO, MONIQUE CARRIZZA', '20142015_2', 75, 84, 82, 99, 82, 76, 87, 75, 78, 86, 87, 75, 96, 75, 86, 88, 77, 92, 89, 96, 'Systems Development'),
+('48478162', 'GILOS, JEAN', '20142015_2', 77, 87, 75, 94, 99, 78, 85, 75, 75, 85, 89, 78, 98, 88, 75, 91, 98, 95, 78, 88, 'Systems Development');
 INSERT INTO `past_data` (`id_number`, `student_name`, `year_graduated`, `CC 102`, `CC 103`, `PF 101`, `CC 104`, `IPT 101`, `IPT 102`, `CC 106`, `CC 105`, `IM 101`, `IM 102`, `HCI 101`, `HCI 102`, `WS 101`, `NET 101`, `NET 102`, `IAS 101`, `IAS 102`, `CAP 101`, `CAP 102`, `SP 101`, `OJT Placement`) VALUES
-('48478162', 'GILOS, JEAN', '20142015_2', 77, 87, 75, 94, 99, 78, 85, 75, 75, 85, 89, 78, 98, 88, 75, 91, 98, 95, 78, 88, 'Systems Development'),
 ('48478217', 'FLORES, JESSICA MAUREEN', '20152016_2', 75, 78, 75, 78, 92, 75, 90, 77, 81, 99, 91, 77, 97, 79, 76, 86, 91, 84, 92, 94, 'Business Operations'),
 ('48478244', 'LEE, ANTHONY RHUNDELL', '20132014_2', 91, 98, 93, 79, 83, 86, 84, 86, 86, 75, 82, 83, 92, 92, 87, 97, 77, 96, 95, 78, 'Systems Development'),
 ('48478262', 'CASAN, JAMALIA', '20142015_2', 75, 78, 75, 85, 89, 78, 88, 75, 76, 79, 84, 76, 97, 75, 75, 91, 93, 89, 83, 92, 'Systems Development'),
@@ -1198,9 +1047,9 @@ INSERT INTO `past_data` (`id_number`, `student_name`, `year_graduated`, `CC 102`
 ('48496273', 'BEJEL, ALVIN KYLE', '20182019_2', 78, 87, 76, 83, 98, 76, 75, 76, 76, 88, 96, 85, 76, 86, 77, 76, 97, 90, 81, 95, 'Business Operations'),
 ('48496415', 'ANGCON, IAN ARVIN', '20182019_1', 75, 78, 75, 89, 99, 75, 80, 75, 76, 95, 97, 79, 95, 81, 79, 99, 96, 87, 94, 92, 'Research'),
 ('48496421', 'DIONIO, JUSTICE KARMELA ', '20182019_1', 79, 75, 75, 80, 81, 75, 79, 75, 79, 89, 96, 75, 77, 89, 75, 85, 95, 96, 81, 78, 'Technical Support'),
-('48496493', 'PARDILLO, JOHN CALVIN', '20172018_2', 79, 80, 75, 86, 87, 76, 82, 77, 87, 93, 99, 83, 94, 81, 85, 79, 92, 89, 90, 85, 'Research');
+('48496493', 'PARDILLO, JOHN CALVIN', '20172018_2', 79, 80, 75, 86, 87, 76, 82, 77, 87, 93, 99, 83, 94, 81, 85, 79, 92, 89, 90, 85, 'Research'),
+('48496504', 'ASTRONOMO, ARIANNE MAE', '20172018_2', 75, 75, 75, 90, 92, 75, 80, 75, 84, 79, 97, 75, 75, 80, 81, 92, 94, 77, 95, 78, 'Research');
 INSERT INTO `past_data` (`id_number`, `student_name`, `year_graduated`, `CC 102`, `CC 103`, `PF 101`, `CC 104`, `IPT 101`, `IPT 102`, `CC 106`, `CC 105`, `IM 101`, `IM 102`, `HCI 101`, `HCI 102`, `WS 101`, `NET 101`, `NET 102`, `IAS 101`, `IAS 102`, `CAP 101`, `CAP 102`, `SP 101`, `OJT Placement`) VALUES
-('48496504', 'ASTRONOMO, ARIANNE MAE', '20172018_2', 75, 75, 75, 90, 92, 75, 80, 75, 84, 79, 97, 75, 75, 80, 81, 92, 94, 77, 95, 78, 'Research'),
 ('48496509', 'DINAGAT, REYMON', '20172018_2', 83, 79, 85, 94, 84, 75, 83, 79, 83, 89, 90, 75, 77, 81, 84, 75, 91, 80, 92, 79, 'Research'),
 ('48496515', 'MABANGIS, LAILA FAITH', '20172018_2', 83, 81, 80, 86, 92, 75, 85, 77, 89, 75, 99, 79, 83, 84, 85, 75, 77, 87, 86, 95, 'Business Operations'),
 ('48496565', 'COLLANTES, KARL WINSTON', '20222023_2', 75, 77, 82, 93, 95, 78, 79, 71, 76, 98, 90, 94, 79, 94, 100, 62, 97, 84, 89, 99, 'Technical Support'),
@@ -1534,9 +1383,9 @@ INSERT INTO `past_data` (`id_number`, `student_name`, `year_graduated`, `CC 102`
 ('59825743', 'MELLA, JOHN SMILE', '20242025_2', 98, 95, 94, 95, 96, 98, 96, 90, 85, 95, 96, 97, 97, 90, 93, 96, 94, 88, 85, 96, 'Systems Development'),
 ('59825873', 'CAGATA, KRISTINE JOY ', '20242025_2', 88, 85, 90, 92, 96, 96, 93, 84, 83, 91, 93, 88, 95, 84, 77, 93, 93, 81, 80, 88, 'Systems Development'),
 ('59825877', 'Lorejo, Clarence James', '20242025_2', 86, 84, 91, 92, 93, 87, 94, 85, 77, 89, 88, 90, 87, 85, 81, 91, 94, 82, 78, 92, 'Systems Development'),
-('59825924', 'REQUILLO, EDGAR, JR. ', '20242025_2', 90, 79, 89, 96, 88, 95, 95, 81, 81, 91, 87, 92, 95, 87, 84, 94, 90, 88, 76, 94, 'Business Operations');
+('59825924', 'REQUILLO, EDGAR, JR. ', '20242025_2', 90, 79, 89, 96, 88, 95, 95, 81, 81, 91, 87, 92, 95, 87, 84, 94, 90, 88, 76, 94, 'Business Operations'),
+('59825950', 'Cuario, Christian Louise', '20242025_2', 94, 77, 90, 93, 95, 88, 94, 80, 75, 90, 88, 90, 92, 83, 83, 85, 83, 85, 76, 91, 'Systems Development');
 INSERT INTO `past_data` (`id_number`, `student_name`, `year_graduated`, `CC 102`, `CC 103`, `PF 101`, `CC 104`, `IPT 101`, `IPT 102`, `CC 106`, `CC 105`, `IM 101`, `IM 102`, `HCI 101`, `HCI 102`, `WS 101`, `NET 101`, `NET 102`, `IAS 101`, `IAS 102`, `CAP 101`, `CAP 102`, `SP 101`, `OJT Placement`) VALUES
-('59825950', 'Cuario, Christian Louise', '20242025_2', 94, 77, 90, 93, 95, 88, 94, 80, 75, 90, 88, 90, 92, 83, 83, 85, 83, 85, 76, 91, 'Systems Development'),
 ('59826015', 'PENDO, JOHN PAUL', '20242025_2', 92, 93, 95, 97, 94, 95, 94, 89, 85, 95, 92, 96, 97, 92, 86, 97, 91, 88, 85, 98, 'Business Operations'),
 ('59826017', 'PAR, MARK ANGELO ', '20242025_2', 90, 90, 87, 84, 93, 86, 93, 75, 76, 86, 87, 90, 93, 81, 85, 95, 94, 81, 75, 92, 'Systems Development'),
 ('59826096', 'SARUCAM, RENZ CARLJANSEN', '20242025_2', 87, 92, 91, 94, 91, 96, 93, 83, 77, 93, 90, 88, 95, 86, 89, 95, 94, 83, 75, 92, 'Technical Support'),
@@ -1605,9 +1454,8 @@ INSERT INTO `pending_attendance` (`ID`, `INTERNS_ID`, `HTE_ID`, `ON_DATE`, `TIME
 (51, 190, 1, '2025-08-29', '11:25:00', '11:25:00', 'approved', '2025-09-05 08:28:03', '2025-09-05 08:28:03'),
 (54, 190, 1, '2025-09-04', '12:52:00', '12:52:00', 'approved', '2025-09-05 08:28:03', '2025-09-05 08:28:03'),
 (62, 190, 1, '2025-09-11', '14:03:00', '14:03:00', 'approved', '2025-09-11 06:03:38', '2025-09-11 06:04:03'),
-(63, 206, 1, '2025-09-15', '15:25:00', '15:25:00', 'approved', '2025-09-15 07:25:09', '2025-09-15 07:25:44'),
 (64, 190, 1, '2025-09-15', '15:26:00', '15:26:00', 'approved', '2025-09-15 07:26:10', '2025-09-15 07:26:19'),
-(66, 190, 1, '2025-10-06', '02:48:00', NULL, 'pending', '2025-10-05 18:48:02', '2025-10-05 18:48:02');
+(67, 289, 30, '2025-10-18', '08:00:00', '14:37:00', 'approved', '2025-10-18 06:34:48', '2025-10-18 06:37:27');
 
 -- --------------------------------------------------------
 
@@ -1632,33 +1480,33 @@ CREATE TABLE `post_assessment` (
 --
 
 INSERT INTO `post_assessment` (`id`, `student_id`, `question_id`, `self_rating`, `category`, `supervisor_id`, `supervisor_rating`, `comment`, `created_at`) VALUES
-(808, 190, 1, 5, 'System Development', NULL, 5, 'test', '2025-10-07 07:52:06'),
-(809, 190, 2, 4, 'System Development', NULL, 4, 'test', '2025-10-07 07:52:06'),
-(810, 190, 57, 3, 'System Development', NULL, 3, 'test', '2025-10-07 07:52:06'),
-(811, 190, 58, 2, 'System Development', NULL, 2, 'test', '2025-10-07 07:52:06'),
-(812, 190, 59, 1, 'System Development', NULL, 1, 'test', '2025-10-07 07:52:06'),
-(813, 190, 3, 1, 'Research', NULL, 1, 'test', '2025-10-07 07:52:06'),
-(814, 190, 4, 2, 'Research', NULL, 2, 'test', '2025-10-07 07:52:06'),
-(815, 190, 60, 3, 'Research', NULL, 3, 'test', '2025-10-07 07:52:06'),
-(816, 190, 61, 4, 'Research', NULL, 4, 'test', '2025-10-07 07:52:06'),
-(817, 190, 62, 5, 'Research', NULL, 5, 'test', '2025-10-07 07:52:06'),
-(818, 190, 5, 5, 'Technical Support', NULL, 5, 'test', '2025-10-07 07:52:06'),
-(819, 190, 6, 4, 'Technical Support', NULL, 4, 'test', '2025-10-07 07:52:06'),
-(820, 190, 63, 3, 'Technical Support', NULL, 3, 'test', '2025-10-07 07:52:06'),
-(821, 190, 64, 2, 'Technical Support', NULL, 2, 'test', '2025-10-07 07:52:06'),
-(822, 190, 65, 1, 'Technical Support', NULL, 1, 'test', '2025-10-07 07:52:06'),
-(823, 190, 7, 1, 'Business Operation', NULL, 1, 'test', '2025-10-07 07:52:06'),
-(824, 190, 8, 2, 'Business Operation', NULL, 2, 'test', '2025-10-07 07:52:06'),
-(825, 190, 66, 3, 'Business Operation', NULL, 3, 'test', '2025-10-07 07:52:06'),
-(826, 190, 67, 4, 'Business Operation', NULL, 4, 'test', '2025-10-07 07:52:06'),
-(827, 190, 68, 5, 'Business Operation', NULL, 5, 'test', '2025-10-07 07:52:06'),
-(828, 190, 121, 5, 'Personal and Interpersonal Skills', NULL, 5, 'test', '2025-10-07 07:52:06'),
-(829, 190, 122, 4, 'Personal and Interpersonal Skills', NULL, 4, 'test', '2025-10-07 07:52:06'),
-(830, 190, 123, 3, 'Personal and Interpersonal Skills', NULL, 3, 'test', '2025-10-07 07:52:06'),
-(831, 190, 124, 2, 'Personal and Interpersonal Skills', NULL, 2, 'test', '2025-10-07 07:52:06'),
-(832, 190, 125, 1, 'Personal and Interpersonal Skills', NULL, 1, 'test', '2025-10-07 07:52:06'),
-(833, 190, 131, 2, 'Personal and Interpersonal Skills', NULL, 2, 'test', '2025-10-07 07:52:06'),
-(834, 190, 132, 3, 'Personal and Interpersonal Skills', NULL, 3, 'test', '2025-10-07 07:52:06'),
+(808, 190, 1, 5, 'System Development', NULL, 5, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(809, 190, 2, 4, 'System Development', NULL, 4, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(810, 190, 57, 3, 'System Development', NULL, 3, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(811, 190, 58, 2, 'System Development', NULL, 4, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(812, 190, 59, 1, 'System Development', NULL, 5, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(813, 190, 3, 1, 'Research', NULL, 5, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(814, 190, 4, 2, 'Research', NULL, 4, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(815, 190, 60, 3, 'Research', NULL, 5, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(816, 190, 61, 4, 'Research', NULL, 4, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(817, 190, 62, 5, 'Research', NULL, 5, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(818, 190, 5, 5, 'Technical Support', NULL, 5, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(819, 190, 6, 4, 'Technical Support', NULL, 4, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(820, 190, 63, 3, 'Technical Support', NULL, 4, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(821, 190, 64, 2, 'Technical Support', NULL, 4, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(822, 190, 65, 1, 'Technical Support', NULL, 5, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(823, 190, 7, 1, 'Business Operation', NULL, 5, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(824, 190, 8, 2, 'Business Operation', NULL, 4, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(825, 190, 66, 3, 'Business Operation', NULL, 5, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(826, 190, 67, 4, 'Business Operation', NULL, 4, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(827, 190, 68, 5, 'Business Operation', NULL, 5, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(828, 190, 121, 5, 'Personal and Interpersonal Skills', NULL, 5, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(829, 190, 122, 4, 'Personal and Interpersonal Skills', NULL, 4, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(830, 190, 123, 3, 'Personal and Interpersonal Skills', NULL, 3, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(831, 190, 124, 2, 'Personal and Interpersonal Skills', NULL, 2, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(832, 190, 125, 1, 'Personal and Interpersonal Skills', NULL, 1, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(833, 190, 131, 2, 'Personal and Interpersonal Skills', NULL, 2, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
+(834, 190, 132, 3, 'Personal and Interpersonal Skills', NULL, 3, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd', '2025-10-07 07:52:06'),
 (835, 278, 81, 5, 'System Development', NULL, 1, 'charles', '2025-10-07 09:49:16'),
 (836, 278, 82, 4, 'System Development', NULL, 2, 'charles', '2025-10-07 09:49:16'),
 (837, 278, 83, 3, 'System Development', NULL, 3, 'charles', '2025-10-07 09:49:16'),
@@ -1712,7 +1560,33 @@ INSERT INTO `post_assessment` (`id`, `student_id`, `question_id`, `self_rating`,
 (885, 207, 138, 2, 'Personal and Interpersonal Skills', NULL, 2, '', '2025-10-07 09:50:05'),
 (886, 207, 139, 1, 'Personal and Interpersonal Skills', NULL, 1, '', '2025-10-07 09:50:05'),
 (887, 207, 140, 2, 'Personal and Interpersonal Skills', NULL, 2, '', '2025-10-07 09:50:05'),
-(888, 207, 141, 3, 'Personal and Interpersonal Skills', NULL, 3, '', '2025-10-07 09:50:05');
+(888, 207, 141, 3, 'Personal and Interpersonal Skills', NULL, 3, '', '2025-10-07 09:50:05'),
+(889, 289, 142, 5, 'System Development', NULL, 4, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(890, 289, 143, 4, 'System Development', NULL, 4, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(891, 289, 144, 5, 'System Development', NULL, 4, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(892, 289, 145, 4, 'System Development', NULL, 5, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(893, 289, 146, 4, 'System Development', NULL, 4, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(894, 289, 147, 5, 'Research', NULL, 4, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(895, 289, 148, 4, 'Research', NULL, 5, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(896, 289, 149, 5, 'Research', NULL, 5, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(897, 289, 150, 5, 'Research', NULL, 5, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(898, 289, 151, 4, 'Research', NULL, 4, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(899, 289, 152, 4, 'Technical Support', NULL, 4, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(900, 289, 153, 5, 'Technical Support', NULL, 5, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(901, 289, 154, 4, 'Technical Support', NULL, 4, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(902, 289, 155, 5, 'Technical Support', NULL, 5, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(903, 289, 156, 5, 'Technical Support', NULL, 4, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(904, 289, 157, 5, 'Business Operation', NULL, 5, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(905, 289, 158, 4, 'Business Operation', NULL, 4, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(906, 289, 159, 5, 'Business Operation', NULL, 5, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(907, 289, 160, 4, 'Business Operation', NULL, 5, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(908, 289, 161, 4, 'Business Operation', NULL, 5, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(909, 289, 162, 5, 'Personal and Interpersonal Skills', NULL, 4, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(910, 289, 163, 4, 'Personal and Interpersonal Skills', NULL, 5, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(911, 289, 164, 5, 'Personal and Interpersonal Skills', NULL, 4, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(912, 289, 165, 4, 'Personal and Interpersonal Skills', NULL, 5, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(913, 289, 166, 3, 'Personal and Interpersonal Skills', NULL, 5, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14'),
+(914, 289, 167, 4, 'Personal and Interpersonal Skills', NULL, 5, 'Keep Up the Good Work!!!', '2025-10-18 07:29:14');
 
 -- --------------------------------------------------------
 
@@ -1764,8 +1638,10 @@ CREATE TABLE `pre_assessment` (
 --
 
 INSERT INTO `pre_assessment` (`id`, `STUDENT_ID`, `CC 102`, `CC 103`, `PF 101`, `CC 104`, `IPT 101`, `IPT 102`, `CC 106`, `CC 105`, `IM 101`, `IM 102`, `HCI 101`, `HCI 102`, `WS 101`, `NET 101`, `NET 102`, `IAS 101`, `IAS 102`, `CAP 101`, `CAP 102`, `SP 101`, `soft_skill`, `communication_skill`, `ojt_placement`, `prediction_reasoning`, `prediction_probabilities`, `post_systems_development_avg`, `post_research_avg`, `post_business_operations_avg`, `post_technical_support_avg`, `self_systems_development_avg`, `self_research_avg`, `self_business_operations_avg`, `self_technical_support_avg`, `supervisor_comment`) VALUES
-(15, 12345, 85, 88, 90, 87, 92, 89, 91, 86, 90, 88, 87, 85, 90, 92, 88, 91, 89, 90, 87, 90, 5, 5, 'Systems Development', 'Recommended for Systems Development due to strong performance in: IPT 101: 92.0, CC 106: 91.0, PF 101: 90.0 (average: 88.64).\n\nBoth soft skill and communication skill ratings reinforce the suitability of this placement.', '{\"Business Operations\":15,\"OJT Placement\":7,\"Research\":18,\"Systems Development\":60}', 3, 4.2, 3, 5, 3, 3, 3, 3, 'charles'),
-(16, 67890, 90, 92, 88, 91, 87, 90, 89, 92, 91, 90, 88, 89, 92, 91, 90, 88, 89, 92, 91, 92, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+(24, 59828881, 92, 91, 92, 92, 83, 96, 89, 83, 85, 93, 87, 91, 96, 86, 79, 91, 89, 83, 85, 94, 4.5, 4.5, 'Business Operations', 'Recommended for Business Operations due to strong performance in: SP 101: 94, IM 102: 93, IM 101: 85.\n\nBoth soft skill and communication skill ratings reinforce the suitability of this placement.', '{\"Business Operations\":43,\"Research\":2,\"Systems Development\":41,\"Technical Support\":14}', 4.2, 4.6, 4.6, 4.4, 3, 3, 3, 3, 'testaywfdakyuwdalkwdaljwdajlkwdakjwgduwd'),
+(28, 59829536, 89, 91, 92, 89, 78, 92, 85, 81, 81, 85, 87, 86, 95, 91, 81, 87, 88, 81, 85, 94, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(29, 59829532, 84, 89, 89, 93, 83, 93, 91, 84, 83, 92, 86, 87, 90, 92, 84, 90, 77, 81, 85, 93, 4.5, 4.1, 'Technical Support', 'Recommended for Technical Support due to strong performance in: NET 101: 92, IAS 101: 90, NET 102: 84.\n\nAdditionally, the student\'s high soft skill rating further strengthens this recommendation.', '{\"Business Operations\":31,\"Research\":6,\"Systems Development\":20,\"Technical Support\":43}', 4.2, 4.6, 4.8, 4.4, 4.4, 4.6, 4.4, 4.6, 'Keep Up the Good Work!!!'),
+(30, 59829663, 90, 89, 87, 90, 85, 92, 90, 81, 80, 92, 93, 91, 93, 93, 80, 92, 89, 81, 85, 94, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1791,32 +1667,21 @@ INSERT INTO `report_images` (`image_id`, `report_id`, `image_filename`, `day_of_
 (158, 6, '68c7ac4c3651b_1757916236_wednesday.jpg', 'wednesday', '2025-09-15 06:16:07'),
 (159, 6, '68c7ac4c3690b_1757916236_thursday.jpg', 'thursday', '2025-09-15 06:16:07'),
 (160, 6, '68c7ac4c36d50_1757916236_friday.jpg', 'friday', '2025-09-15 06:16:07'),
-(324, 7, '68cbba545488f_1758181972_monday.jpg', 'monday', '2025-09-19 09:00:31'),
-(325, 7, '68cbba81e9fb8_1758182017_tuesday.jpg', 'tuesday', '2025-09-19 09:00:31'),
-(326, 7, '68cbba81ea3dd_1758182017_wednesday.jpg', 'wednesday', '2025-09-19 09:00:31'),
-(327, 7, '68cbba81ea848_1758182017_thursday.jpg', 'thursday', '2025-09-19 09:00:31'),
-(328, 7, '68cbba81eadc1_1758182017_friday.jpg', 'friday', '2025-09-19 09:00:31'),
-(374, 8, '68d0cda71635c_1758514599_monday.jpg', 'monday', '2025-09-22 10:57:49'),
-(375, 8, '68d12baa0c60b_1758538666_tuesday.jpg', 'tuesday', '2025-09-22 10:57:49'),
-(376, 8, '68d0cda717d6e_1758514599_wednesday.jpg', 'wednesday', '2025-09-22 10:57:49'),
-(377, 8, '68d0cda7186c1_1758514599_thursday.jpg', 'thursday', '2025-09-22 10:57:49'),
-(378, 8, '68d0cda718e2f_1758514599_friday.jpg', 'friday', '2025-09-22 10:57:49'),
 (379, 9, '68d12491891b6_1758536849_monday.jpg', 'monday', '2025-09-23 07:19:11'),
 (380, 9, '68d12491898df_1758536849_tuesday.jpg', 'tuesday', '2025-09-23 07:19:11'),
 (381, 9, '68d124918a183_1758536849_wednesday.jpg', 'wednesday', '2025-09-23 07:19:11'),
 (382, 9, '68d124918a9fe_1758536849_thursday.jpg', 'thursday', '2025-09-23 07:19:11'),
 (383, 9, '68d124918b130_1758536849_friday.jpg', 'friday', '2025-09-23 07:19:11'),
-(403, 10, '68db79fd77ac1_1759214077_monday.png', 'monday', '2025-09-30 06:37:32'),
-(404, 10, '68db70f9ebd6f_1759211769_tuesday.jpg', 'tuesday', '2025-09-30 06:37:32'),
-(405, 10, '68db70f9ec960_1759211769_wednesday.jpg', 'wednesday', '2025-09-30 06:37:32'),
-(406, 10, '68db70f9ed57c_1759211769_thursday.jpg', 'thursday', '2025-09-30 06:37:32'),
-(407, 10, '68db70f9ee21f_1759211769_friday.jpg', 'friday', '2025-09-30 06:37:32'),
 (417, 11, '68db770dee958_1759213325_monday.jpg', 'monday', '2025-09-30 07:59:00'),
 (418, 11, '68db8d4b3c55d_1759219019_tuesday.jpg', 'tuesday', '2025-09-30 07:59:00'),
 (419, 11, '68db8d9923951_1759219097_wednesday.jpg', 'wednesday', '2025-09-30 07:59:00'),
 (420, 11, '68db8d9923f6f_1759219097_thursday.jpg', 'thursday', '2025-09-30 07:59:00'),
 (421, 11, '68db8d99245b5_1759219097_friday.jpg', 'friday', '2025-09-30 07:59:00'),
-(422, 12, '68db91e4e82df_1759220196_monday.jpg', 'monday', '2025-09-30 08:16:36');
+(439, 13, '68f339de3c6fc_1760770526_monday.jpg', 'monday', '2025-10-18 07:25:57'),
+(440, 13, '68f339de3d068_1760770526_tuesday.jpeg', 'tuesday', '2025-10-18 07:25:57'),
+(441, 13, '68f339de3d81e_1760770526_wednesday.jpg', 'wednesday', '2025-10-18 07:25:57'),
+(442, 13, '68f339de3e279_1760770526_thursday.jpg', 'thursday', '2025-10-18 07:25:57'),
+(443, 13, '68f3410513764_1760772357_friday.jpg', 'friday', '2025-10-18 07:25:57');
 
 -- --------------------------------------------------------
 
@@ -1835,8 +1700,7 @@ CREATE TABLE `session_details` (
 --
 
 INSERT INTO `session_details` (`ID`, `YEAR`, `TERM`) VALUES
-(1, 2024, 'FIRST SEMESTER'),
-(2, 2024, 'SECOND SEMESTER');
+(1, 2024, 'FIRST SEMESTER');
 
 -- --------------------------------------------------------
 
@@ -1892,7 +1756,61 @@ INSERT INTO `student_deletion_log` (`log_id`, `intern_id`, `student_id`, `name`,
 (32, 274, '12345', 'John', '2025-10-03 15:00:15', NULL),
 (33, 275, '67890', 'Jane', '2025-10-03 15:00:15', NULL),
 (34, 276, '12345', 'John', '2025-10-03 15:06:39', NULL),
-(35, 277, '67890', 'Jane', '2025-10-03 15:06:39', NULL);
+(35, 277, '67890', 'Jane', '2025-10-03 15:06:39', NULL),
+(36, 259, '598289964', 'Ako', '2025-10-10 00:46:41', NULL),
+(37, 209, '59829332', 'Urie', '2025-10-10 00:54:46', NULL),
+(38, 208, '59823526', 'Adriane', '2025-10-10 00:59:10', NULL),
+(39, 233, '59823589', 'Amy', '2025-10-10 00:59:10', NULL),
+(40, 225, '59823581', 'Anita', '2025-10-10 00:59:10', NULL),
+(41, 246, '59823602', 'Austin', '2025-10-10 00:59:10', NULL),
+(42, 212, '59832356', 'Bob', '2025-10-10 00:59:10', NULL),
+(43, 213, '59852427', 'Charles', '2025-10-10 00:59:10', NULL),
+(44, 222, '59823578', 'Christian', '2025-10-10 00:59:10', NULL),
+(45, 243, '59823599', 'Emilie', '2025-10-10 00:59:10', NULL),
+(46, 211, '59823962', 'Emman', '2025-10-10 00:59:10', NULL),
+(47, 218, '59823574', 'Ernest', '2025-10-10 00:59:10', NULL),
+(48, 237, '59823593', 'Hannah', '2025-10-10 00:59:10', NULL),
+(49, 226, '59823582', 'Jake', '2025-10-10 00:59:10', NULL),
+(50, 228, '59823584', 'Jane', '2025-10-10 00:59:10', NULL),
+(51, 241, '59823597', 'Jessica', '2025-10-10 00:59:10', NULL),
+(52, 227, '59823583', 'Joel', '2025-10-10 00:59:10', NULL),
+(53, 223, '59823579', 'John', '2025-10-10 00:59:10', NULL),
+(54, 210, '59832925', 'Joy', '2025-10-10 00:59:10', NULL),
+(55, 238, '59823594', 'Joyce', '2025-10-10 00:59:10', NULL),
+(56, 234, '59823590', 'Justin', '2025-10-10 00:59:10', NULL),
+(57, 231, '59823587', 'Karl', '2025-10-10 00:59:10', NULL),
+(58, 240, '59823596', 'Kate', '2025-10-10 00:59:10', NULL),
+(59, 245, '59823601', 'Kimberly', '2025-10-10 00:59:10', NULL),
+(60, 214, '59834987', 'Kristine', '2025-10-10 00:59:10', NULL),
+(61, 221, '59823577', 'Lynn', '2025-10-10 00:59:10', NULL),
+(62, 239, '59823595', 'Mark', '2025-10-10 00:59:10', NULL),
+(63, 220, '59823576', 'Mary', '2025-10-10 00:59:10', NULL),
+(64, 244, '59823600', 'Nate', '2025-10-10 00:59:10', NULL),
+(65, 232, '59823588', 'Nicole', '2025-10-10 00:59:10', NULL),
+(66, 236, '59823592', 'Paul', '2025-10-10 00:59:10', NULL),
+(67, 247, '59823603', 'Prince', '2025-10-10 00:59:10', NULL),
+(68, 215, '59829572', 'Robin', '2025-10-10 00:59:10', NULL),
+(69, 217, '59823573', 'Sara', '2025-10-10 00:59:10', NULL),
+(70, 219, '59823575', 'Sophia', '2025-10-10 00:59:10', NULL),
+(71, 235, '59823591', 'Stefan', '2025-10-10 00:59:10', NULL),
+(72, 224, '59823580', 'Steve', '2025-10-10 00:59:10', NULL),
+(73, 242, '59823598', 'Tristan', '2025-10-10 00:59:10', NULL),
+(74, 216, '59823572', 'Kanye', '2025-10-17 21:16:53', NULL),
+(75, 252, '59823608', 'Kylie', '2025-10-17 21:16:53', NULL),
+(76, 253, '59823609', 'Ken', '2025-10-17 21:16:53', NULL),
+(77, 254, '59823610', 'Maya', '2025-10-17 21:16:53', NULL),
+(78, 279, '67890', 'Jane', '2025-10-17 21:33:39', NULL),
+(79, 206, '59829532', 'JAMES', '2025-10-17 21:46:15', NULL),
+(80, 207, '59832315', 'Harold', '2025-10-17 21:46:15', NULL),
+(81, 278, '12345', 'John', '2025-10-17 21:46:15', NULL),
+(82, 280, '59829536', 'Urien Adriane ', '2025-10-17 21:46:27', NULL),
+(83, 281, '59829663', 'Christine ', '2025-10-17 21:46:27', NULL),
+(84, 284, '59829663', 'Christine ', '2025-10-18 12:58:16', NULL),
+(85, 283, '59829532', 'James Harold', '2025-10-18 12:58:16', NULL),
+(86, 282, '59829536', 'Urien Adriane ', '2025-10-18 12:58:16', NULL),
+(87, 287, '59829663', 'Christine ', '2025-10-18 14:28:30', NULL),
+(88, 286, '59829532', 'James Harold', '2025-10-18 14:28:30', NULL),
+(89, 285, '59829536', 'Urien Adriane ', '2025-10-18 14:28:30', NULL);
 
 -- --------------------------------------------------------
 
@@ -1913,26 +1831,6 @@ CREATE TABLE `student_evaluation` (
 --
 
 INSERT INTO `student_evaluation` (`id`, `STUDENT_ID`, `question_id`, `answer`, `timestamp`) VALUES
-(84, 12345, 1, '1', '2025-10-03 16:32:39'),
-(85, 12345, 2, '2', '2025-10-03 16:32:39'),
-(86, 12345, 3, '3', '2025-10-03 16:32:39'),
-(87, 12345, 4, '4', '2025-10-03 16:32:39'),
-(88, 12345, 5, '5', '2025-10-03 16:32:39'),
-(89, 12345, 6, '6', '2025-10-03 16:32:39'),
-(90, 12345, 7, '7', '2025-10-03 16:32:39'),
-(91, 12345, 8, '8', '2025-10-03 16:32:39'),
-(92, 12345, 9, '9', '2025-10-03 16:32:39'),
-(93, 12345, 10, '0', '2025-10-03 16:32:39'),
-(94, 12345, 11, '1', '2025-10-03 16:32:39'),
-(95, 12345, 12, '2', '2025-10-03 16:32:39'),
-(96, 12345, 13, '3', '2025-10-03 16:32:39'),
-(97, 12345, 14, '4', '2025-10-03 16:32:39'),
-(98, 12345, 15, '5', '2025-10-03 16:32:39'),
-(99, 12345, 16, '6', '2025-10-03 16:32:39'),
-(100, 12345, 17, '7', '2025-10-03 16:32:39'),
-(101, 12345, 18, '8', '2025-10-03 16:32:39'),
-(102, 12345, 19, '9', '2025-10-03 16:32:39'),
-(103, 12345, 20, '0', '2025-10-03 16:32:39'),
 (404, 59828881, 1, '1', '2025-10-03 21:46:28'),
 (405, 59828881, 2, '1', '2025-10-03 21:46:28'),
 (406, 59828881, 3, '1', '2025-10-03 21:46:28'),
@@ -1953,46 +1851,26 @@ INSERT INTO `student_evaluation` (`id`, `STUDENT_ID`, `question_id`, `answer`, `
 (421, 59828881, 18, '1', '2025-10-03 21:46:28'),
 (422, 59828881, 19, '1', '2025-10-03 21:46:28'),
 (423, 59828881, 20, '1', '2025-10-03 21:46:28'),
-(424, 59829532, 1, '1', '2025-10-06 18:38:16'),
-(425, 59829532, 2, '1', '2025-10-06 18:38:16'),
-(426, 59829532, 3, '1', '2025-10-06 18:38:16'),
-(427, 59829532, 4, '1', '2025-10-06 18:38:16'),
-(428, 59829532, 5, '1', '2025-10-06 18:38:16'),
-(429, 59829532, 6, '1', '2025-10-06 18:38:16'),
-(430, 59829532, 7, '1', '2025-10-06 18:38:16'),
-(431, 59829532, 8, '1', '2025-10-06 18:38:16'),
-(432, 59829532, 9, '1', '2025-10-06 18:38:16'),
-(433, 59829532, 10, '1', '2025-10-06 18:38:16'),
-(434, 59829532, 11, '1', '2025-10-06 18:38:16'),
-(435, 59829532, 12, '1', '2025-10-06 18:38:16'),
-(436, 59829532, 13, '1', '2025-10-06 18:38:16'),
-(437, 59829532, 14, '1', '2025-10-06 18:38:16'),
-(438, 59829532, 15, '1', '2025-10-06 18:38:16'),
-(439, 59829532, 16, '1', '2025-10-06 18:38:16'),
-(440, 59829532, 17, '1', '2025-10-06 18:38:16'),
-(441, 59829532, 18, '1', '2025-10-06 18:38:16'),
-(442, 59829532, 19, '1', '2025-10-06 18:38:16'),
-(443, 59829532, 20, '1', '2025-10-06 18:38:16'),
-(444, 59832315, 1, 'Welcome back, Harold!', '2025-10-06 18:58:31'),
-(445, 59832315, 2, 'Welcome back, Harold!', '2025-10-06 18:58:31'),
-(446, 59832315, 3, 'Welcome back, Harold!', '2025-10-06 18:58:31'),
-(447, 59832315, 4, 'Welcome back, Harold!', '2025-10-06 18:58:31'),
-(448, 59832315, 5, 'Welcome back, Harold!', '2025-10-06 18:58:31'),
-(449, 59832315, 6, 'Welcome back, Harold!', '2025-10-06 18:58:31'),
-(450, 59832315, 7, 'Welcome back, Harold!', '2025-10-06 18:58:31'),
-(451, 59832315, 8, 'Welcome back, Harold!', '2025-10-06 18:58:31'),
-(452, 59832315, 9, 'Welcome back, Harold!', '2025-10-06 18:58:31'),
-(453, 59832315, 10, 'Welcome back, Harold!', '2025-10-06 18:58:31'),
-(454, 59832315, 11, 'Welcome back, Harold!', '2025-10-06 18:58:31'),
-(455, 59832315, 12, 'Welcome back, Harold!', '2025-10-06 18:58:31'),
-(456, 59832315, 13, 'Welcome back, Harold!', '2025-10-06 18:58:31'),
-(457, 59832315, 14, 'Welcome back, Harold!', '2025-10-06 18:58:31'),
-(458, 59832315, 15, 'Welcome back, Harold!', '2025-10-06 18:58:31'),
-(459, 59832315, 16, 'Welcome back, Harold!', '2025-10-06 18:58:31'),
-(460, 59832315, 17, 'Welcome back, Harold!', '2025-10-06 18:58:31'),
-(461, 59832315, 18, 'Welcome back, Harold!', '2025-10-06 18:58:31'),
-(462, 59832315, 19, 'Welcome back, Harold!', '2025-10-06 18:58:31'),
-(463, 59832315, 20, 'Welcome back, Harold!', '2025-10-06 18:58:31');
+(464, 59829532, 1, 'answer', '2025-10-18 14:39:28'),
+(465, 59829532, 2, 'answer', '2025-10-18 14:39:28'),
+(466, 59829532, 3, 'answer', '2025-10-18 14:39:28'),
+(467, 59829532, 4, 'answer', '2025-10-18 14:39:28'),
+(468, 59829532, 5, 'answer', '2025-10-18 14:39:28'),
+(469, 59829532, 6, 'answer', '2025-10-18 14:39:28'),
+(470, 59829532, 7, 'answer', '2025-10-18 14:39:28'),
+(471, 59829532, 8, 'answer', '2025-10-18 14:39:28'),
+(472, 59829532, 9, 'answer', '2025-10-18 14:39:28'),
+(473, 59829532, 10, 'answer', '2025-10-18 14:39:28'),
+(474, 59829532, 11, 'answer', '2025-10-18 14:39:28'),
+(475, 59829532, 12, 'answer', '2025-10-18 14:39:28'),
+(476, 59829532, 13, 'answer', '2025-10-18 14:39:28'),
+(477, 59829532, 14, 'answer', '2025-10-18 14:39:28'),
+(478, 59829532, 15, 'answer', '2025-10-18 14:39:28'),
+(479, 59829532, 16, 'answer', '2025-10-18 14:39:28'),
+(480, 59829532, 17, 'answer', '2025-10-18 14:39:28'),
+(481, 59829532, 18, 'answer', '2025-10-18 14:39:28'),
+(482, 59829532, 19, 'answer', '2025-10-18 14:39:28'),
+(483, 59829532, 20, 'answer', '2025-10-18 14:39:28');
 
 -- --------------------------------------------------------
 
@@ -2114,7 +1992,33 @@ INSERT INTO `student_questions` (`id`, `student_id`, `category`, `question_text`
 (138, 207, 'Personal and Interpersonal Skills', 'Demonstrated adequate knowledge of work done.', 4, '2025-10-07 09:50:05'),
 (139, 207, 'Personal and Interpersonal Skills', 'Demonstrated promptness and active attendance.', 5, '2025-10-07 09:50:05'),
 (140, 207, 'Personal and Interpersonal Skills', 'Demonstrated skills in inter-personal relations.', 6, '2025-10-07 09:50:05'),
-(141, 207, 'Personal and Interpersonal Skills', 'Demonstrated overall performance proficiency.', 7, '2025-10-07 09:50:05');
+(141, 207, 'Personal and Interpersonal Skills', 'Demonstrated overall performance proficiency.', 7, '2025-10-07 09:50:05'),
+(142, 289, 'System Development', 'System Development', 1, '2025-10-18 07:29:07'),
+(143, 289, 'System Development', 'System Development', 2, '2025-10-18 07:29:07'),
+(144, 289, 'System Development', 'System Development', 3, '2025-10-18 07:29:07'),
+(145, 289, 'System Development', 'System Development', 4, '2025-10-18 07:29:07'),
+(146, 289, 'System Development', 'System Development', 5, '2025-10-18 07:29:07'),
+(147, 289, 'Research', 'Research', 1, '2025-10-18 07:29:07'),
+(148, 289, 'Research', 'Research', 2, '2025-10-18 07:29:07'),
+(149, 289, 'Research', 'Research', 3, '2025-10-18 07:29:07'),
+(150, 289, 'Research', 'Research', 4, '2025-10-18 07:29:07'),
+(151, 289, 'Research', 'Research', 5, '2025-10-18 07:29:07'),
+(152, 289, 'Technical Support', 'Technical Support', 1, '2025-10-18 07:29:07'),
+(153, 289, 'Technical Support', 'Technical Support', 2, '2025-10-18 07:29:07'),
+(154, 289, 'Technical Support', 'Technical Support', 3, '2025-10-18 07:29:07'),
+(155, 289, 'Technical Support', 'Technical Support', 4, '2025-10-18 07:29:07'),
+(156, 289, 'Technical Support', 'Technical Support', 5, '2025-10-18 07:29:07'),
+(157, 289, 'Business Operation', 'Business Operation', 1, '2025-10-18 07:29:07'),
+(158, 289, 'Business Operation', 'Business Operation', 2, '2025-10-18 07:29:07'),
+(159, 289, 'Business Operation', 'Business Operation', 3, '2025-10-18 07:29:07'),
+(160, 289, 'Business Operation', 'Business Operation', 4, '2025-10-18 07:29:07'),
+(161, 289, 'Business Operation', 'Business Operation', 5, '2025-10-18 07:29:07'),
+(162, 289, 'Personal and Interpersonal Skills', 'Demonstrated the ability to integrate theories learned in school and the practical work in your company.', 1, '2025-10-18 07:29:14'),
+(163, 289, 'Personal and Interpersonal Skills', 'Demonstrated evidence of growth as a result of his apprenticeship.', 2, '2025-10-18 07:29:14'),
+(164, 289, 'Personal and Interpersonal Skills', 'Demonstrated assertiveness and cleverness to new endeavors in the course of his/her training.', 3, '2025-10-18 07:29:14'),
+(165, 289, 'Personal and Interpersonal Skills', 'Demonstrated adequate knowledge of work done.', 4, '2025-10-18 07:29:14'),
+(166, 289, 'Personal and Interpersonal Skills', 'Demonstrated skills in inter-personal relations.', 6, '2025-10-18 07:29:14'),
+(167, 289, 'Personal and Interpersonal Skills', 'Demonstrated overall performance proficiency.', 7, '2025-10-18 07:29:14');
 
 -- --------------------------------------------------------
 
@@ -2149,22 +2053,13 @@ CREATE TABLE `weekly_reports` (
 
 INSERT INTO `weekly_reports` (`report_id`, `interns_id`, `week_start`, `week_end`, `report_content`, `status`, `created_at`, `updated_at`, `monday_description`, `tuesday_description`, `wednesday_description`, `thursday_description`, `friday_description`, `approval_status`, `approved_at`, `approved_by`, `return_reason`, `notification_sent`) VALUES
 (6, 190, '2025-09-15', '2025-09-21', '[]', 'submitted', '2025-09-15 06:03:56', '2025-10-05 18:04:39', 'Monday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nMonday Description:\r\nvMonday Description:', 'Tuesday Description:', 'Wednesday Description:', 'Thursday Description:', 'Friday Description:', 'pending', NULL, NULL, NULL, 0),
-(7, 206, '2025-09-15', '2025-09-21', '[]', 'submitted', '2025-09-15 08:14:24', '2025-09-22 10:05:46', 'dawdawd', 'awda', 'asg', 'fgfgd', 'dfgtqeta', 'approved', NULL, NULL, 'adawdawd', 0),
-(8, 206, '2025-09-22', '2025-09-28', '[]', 'submitted', '2025-09-22 04:16:39', '2025-09-22 10:57:58', 'awe', 'awe', 'awe', 'aew', 'awe', 'approved', '2025-09-22 18:57:58', 59828994, 'aweaweawe', 0),
 (9, 190, '2025-09-22', '2025-09-28', '[]', 'submitted', '2025-09-22 10:27:29', '2025-09-25 02:51:07', 'aweaweawe', 'aweawe', 'aweawrtasd', 'fasfasf', 'ehwerhsdf', 'approved', '2025-09-25 10:51:07', 59828994, 'awr', 0),
-(10, 206, '2025-09-29', '2025-10-05', '[]', 'submitted', '2025-09-30 05:56:09', '2025-09-30 06:37:42', 'tung', 'tung', 'Tung', 'Tung', 'Sahur', 'approved', '2025-09-30 14:37:42', 59828994, 'SEGSEGSEGS', 0),
 (11, 190, '2025-09-29', '2025-10-05', '[]', 'submitted', '2025-09-30 06:22:05', '2025-09-30 07:59:05', 'HTHCG', 'adawdawdawdawdawd', 'wadawdaw', 'dawdawd', 'aggag', 'approved', '2025-09-30 15:59:05', 59828994, 'awdawdawd', 0),
-(12, 207, '2025-09-29', '2025-10-05', '[]', 'draft', '2025-09-30 08:16:36', '2025-09-30 08:16:36', 'waeaweawergdrgdg', '', '', '', '', NULL, NULL, NULL, NULL, 0);
+(13, 289, '2025-10-13', '2025-10-19', '[]', 'submitted', '2025-10-18 06:53:26', '2025-10-18 07:26:09', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'approved', '2025-10-18 15:26:09', 59828997, 'change friday photo', 0);
 
 --
 -- Indexes for dumped tables
 --
-
---
--- Indexes for table `assigned_questions`
---
-ALTER TABLE `assigned_questions`
-  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `coordinator`
@@ -2186,13 +2081,6 @@ ALTER TABLE `coordinator_evaluation`
 --
 ALTER TABLE `evaluation_questions`
   ADD PRIMARY KEY (`question_id`);
-
---
--- Indexes for table `holidays`
---
-ALTER TABLE `holidays`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_date` (`date`);
 
 --
 -- Indexes for table `host_training_establishment`
@@ -2238,16 +2126,16 @@ ALTER TABLE `intern_details`
 --
 ALTER TABLE `notifications`
   ADD PRIMARY KEY (`notification_id`),
-  ADD KEY `student_id` (`receiver_id`),
-  ADD KEY `reference_id` (`reference_id`);
+  ADD KEY `reference_id` (`reference_id`),
+  ADD KEY `notifications_ibfk_1` (`receiver_id`);
 
 --
 -- Indexes for table `pending_attendance`
 --
 ALTER TABLE `pending_attendance`
   ADD PRIMARY KEY (`ID`),
-  ADD KEY `intern_id` (`INTERNS_ID`),
-  ADD KEY `hte_id` (`HTE_ID`);
+  ADD KEY `hte_id` (`HTE_ID`),
+  ADD KEY `pending_attendance_ibfk_1` (`INTERNS_ID`);
 
 --
 -- Indexes for table `post_assessment`
@@ -2261,7 +2149,7 @@ ALTER TABLE `post_assessment`
 --
 ALTER TABLE `pre_assessment`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_preassess_student` (`STUDENT_ID`);
+  ADD KEY `pre_assessment_ibfk_1` (`STUDENT_ID`);
 
 --
 -- Indexes for table `report_images`
@@ -2308,12 +2196,6 @@ ALTER TABLE `weekly_reports`
 --
 
 --
--- AUTO_INCREMENT for table `assigned_questions`
---
-ALTER TABLE `assigned_questions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `coordinator`
 --
 ALTER TABLE `coordinator`
@@ -2323,7 +2205,7 @@ ALTER TABLE `coordinator`
 -- AUTO_INCREMENT for table `coordinator_evaluation`
 --
 ALTER TABLE `coordinator_evaluation`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=643;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=683;
 
 --
 -- AUTO_INCREMENT for table `evaluation_questions`
@@ -2332,52 +2214,46 @@ ALTER TABLE `evaluation_questions`
   MODIFY `question_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
--- AUTO_INCREMENT for table `holidays`
---
-ALTER TABLE `holidays`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
-
---
 -- AUTO_INCREMENT for table `host_training_establishment`
 --
 ALTER TABLE `host_training_establishment`
-  MODIFY `HTE_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `HTE_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `interns_details`
 --
 ALTER TABLE `interns_details`
-  MODIFY `INTERNS_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=280;
+  MODIFY `INTERNS_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=291;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT for table `pending_attendance`
 --
 ALTER TABLE `pending_attendance`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
 
 --
 -- AUTO_INCREMENT for table `post_assessment`
 --
 ALTER TABLE `post_assessment`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=889;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=915;
 
 --
 -- AUTO_INCREMENT for table `pre_assessment`
 --
 ALTER TABLE `pre_assessment`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `report_images`
 --
 ALTER TABLE `report_images`
-  MODIFY `image_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=423;
+  MODIFY `image_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=444;
 
 --
 -- AUTO_INCREMENT for table `session_details`
@@ -2389,25 +2265,25 @@ ALTER TABLE `session_details`
 -- AUTO_INCREMENT for table `student_deletion_log`
 --
 ALTER TABLE `student_deletion_log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
 
 --
 -- AUTO_INCREMENT for table `student_evaluation`
 --
 ALTER TABLE `student_evaluation`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=464;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=484;
 
 --
 -- AUTO_INCREMENT for table `student_questions`
 --
 ALTER TABLE `student_questions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=142;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=168;
 
 --
 -- AUTO_INCREMENT for table `weekly_reports`
 --
 ALTER TABLE `weekly_reports`
-  MODIFY `report_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `report_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- Constraints for dumped tables
@@ -2423,7 +2299,7 @@ ALTER TABLE `coordinator`
 -- Constraints for table `coordinator_evaluation`
 --
 ALTER TABLE `coordinator_evaluation`
-  ADD CONSTRAINT `fk_coordinator_eval_student` FOREIGN KEY (`STUDENT_ID`) REFERENCES `interns_details` (`STUDENT_ID`),
+  ADD CONSTRAINT `fk_coordinator_eval_student` FOREIGN KEY (`STUDENT_ID`) REFERENCES `interns_details` (`STUDENT_ID`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_student_evaluation` FOREIGN KEY (`student_evaluation_id`) REFERENCES `student_evaluation` (`id`);
 
 --
@@ -2455,7 +2331,7 @@ ALTER TABLE `intern_details`
 -- Constraints for table `notifications`
 --
 ALTER TABLE `notifications`
-  ADD CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`receiver_id`) REFERENCES `interns_details` (`INTERNS_ID`),
+  ADD CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`receiver_id`) REFERENCES `interns_details` (`INTERNS_ID`) ON DELETE CASCADE,
   ADD CONSTRAINT `notifications_ibfk_2` FOREIGN KEY (`reference_id`) REFERENCES `weekly_reports` (`report_id`),
   ADD CONSTRAINT `notifications_ibfk_3` FOREIGN KEY (`reference_id`) REFERENCES `weekly_reports` (`report_id`) ON DELETE SET NULL;
 
@@ -2463,7 +2339,7 @@ ALTER TABLE `notifications`
 -- Constraints for table `pending_attendance`
 --
 ALTER TABLE `pending_attendance`
-  ADD CONSTRAINT `pending_attendance_ibfk_1` FOREIGN KEY (`INTERNS_ID`) REFERENCES `interns_details` (`INTERNS_ID`),
+  ADD CONSTRAINT `pending_attendance_ibfk_1` FOREIGN KEY (`INTERNS_ID`) REFERENCES `interns_details` (`INTERNS_ID`) ON DELETE CASCADE,
   ADD CONSTRAINT `pending_attendance_ibfk_2` FOREIGN KEY (`hte_id`) REFERENCES `host_training_establishment` (`HTE_ID`);
 
 --
@@ -2478,7 +2354,7 @@ ALTER TABLE `post_assessment`
 --
 ALTER TABLE `pre_assessment`
   ADD CONSTRAINT `fk_preassess_student` FOREIGN KEY (`STUDENT_ID`) REFERENCES `interns_details` (`STUDENT_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `pre_assessment_ibfk_1` FOREIGN KEY (`STUDENT_ID`) REFERENCES `interns_details` (`STUDENT_ID`);
+  ADD CONSTRAINT `pre_assessment_ibfk_1` FOREIGN KEY (`STUDENT_ID`) REFERENCES `interns_details` (`STUDENT_ID`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `report_images`
@@ -2490,7 +2366,7 @@ ALTER TABLE `report_images`
 -- Constraints for table `student_evaluation`
 --
 ALTER TABLE `student_evaluation`
-  ADD CONSTRAINT `fk_student_eval_student` FOREIGN KEY (`STUDENT_ID`) REFERENCES `interns_details` (`STUDENT_ID`);
+  ADD CONSTRAINT `fk_student_eval_student` FOREIGN KEY (`STUDENT_ID`) REFERENCES `interns_details` (`STUDENT_ID`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `weekly_reports`

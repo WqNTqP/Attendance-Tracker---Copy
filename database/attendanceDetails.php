@@ -65,18 +65,59 @@ class attendanceDetails
 
     public function deleteStudent($dbo, $studentId) {
         try {
-            // First, delete related records in intern_details using STUDENT_ID
-            $c = "DELETE FROM intern_details WHERE INTERNS_ID = (SELECT INTERNS_ID FROM interns_details WHERE STUDENT_ID = :studentId)";
-            $s = $dbo->conn->prepare($c);
-            $s->execute([":studentId" => $studentId]);
+            // Start transaction
+            $dbo->conn->beginTransaction();
+            
+            // Get INTERNS_ID first as we'll need it for related deletions
+            $stmt = $dbo->conn->prepare("SELECT INTERNS_ID FROM interns_details WHERE STUDENT_ID = :studentId");
+            $stmt->execute([":studentId" => $studentId]);
+            $internId = $stmt->fetchColumn();
+            
+            if (!$internId) {
+                throw new PDOException("Student not found");
+            }
 
-            // Then, delete the student from interns_details using STUDENT_ID
-            $c = "DELETE FROM interns_details WHERE STUDENT_ID = :studentId";
-            $s = $dbo->conn->prepare($c);
-            $s->execute([":studentId" => $studentId]);
+            // Delete from notifications where student is receiver
+            $stmt = $dbo->conn->prepare("DELETE FROM notifications WHERE receiver_id = :internId");
+            $stmt->execute([":internId" => $internId]);
+            
+            // Delete from notifications where student is sender (if exists)
+            $stmt = $dbo->conn->prepare("DELETE FROM notifications WHERE sender_id = :internId");
+            $stmt->execute([":internId" => $internId]);
+
+            // Delete from student_evaluation
+            $stmt = $dbo->conn->prepare("DELETE FROM student_evaluation WHERE STUDENT_ID = :studentId");
+            $stmt->execute([":studentId" => $studentId]);
+            
+            // Delete from interns_attendance
+            $stmt = $dbo->conn->prepare("DELETE FROM interns_attendance WHERE INTERNS_ID = :internId");
+            $stmt->execute([":internId" => $internId]);
+            
+            // Delete from pending_attendance
+            $stmt = $dbo->conn->prepare("DELETE FROM pending_attendance WHERE INTERNS_ID = :internId");
+            $stmt->execute([":internId" => $internId]);
+            
+            // Delete from student_questions
+            $stmt = $dbo->conn->prepare("DELETE FROM student_questions WHERE student_id = :internId");
+            $stmt->execute([":internId" => $internId]);
+            
+            // Delete from intern_details
+            $stmt = $dbo->conn->prepare("DELETE FROM intern_details WHERE INTERNS_ID = :internId");
+            $stmt->execute([":internId" => $internId]);
+            
+            // Finally, delete from interns_details
+            $stmt = $dbo->conn->prepare("DELETE FROM interns_details WHERE STUDENT_ID = :studentId");
+            $stmt->execute([":studentId" => $studentId]);
+            
+            // Commit transaction
+            $dbo->conn->commit();
             
             return ["success" => true, "message" => "Student deleted successfully."];
         } catch (PDOException $e) {
+            // Rollback transaction on error
+            if ($dbo->conn->inTransaction()) {
+                $dbo->conn->rollBack();
+            }
             return ["success" => false, "message" => "Error deleting student: " . $e->getMessage()];
         }
     }

@@ -64,9 +64,8 @@ def predict():
     # Sort by grade descending
     subject_grades_sorted = sorted(subject_grades, key=lambda x: x[1], reverse=True)
     top_subjects = subject_grades_sorted[:3]
-    avg_grade = round(sum([g for _, g in subject_grades]) / len(subject_grades), 2) if subject_grades else 0
     if top_subjects:
-        feature_analysis = ', '.join([f"{name}: {value}" for name, value in top_subjects])
+        feature_analysis = ', '.join([f"{name}: {round(value)}" for name, value in top_subjects])
         reasoning = f"Recommended for {pred_label} due to strong performance in: {feature_analysis}."
     else:
         reasoning = f"Recommended for {pred_label}."

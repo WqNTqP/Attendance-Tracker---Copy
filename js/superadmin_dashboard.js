@@ -1,32 +1,191 @@
 $(document).ready(function() {
+    // Add ready class to html to show content only when everything is initialized
+    document.documentElement.classList.add('ready');
+    
+    // User dropdown functionality
+    const userProfile = $('.user-profile');
+    const userDropdown = $('.user-dropdown');
+    
+    // Toggle dropdown when clicking the user profile
+    userProfile.on('click', function(e) {
+        e.stopPropagation();
+        userDropdown.toggleClass('show');
+    });
+    
+    // Close dropdown when clicking outside
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.user-dropdown').length) {
+            userDropdown.removeClass('show');
+        }
+    });
+    
+    // Prevent dropdown from closing when clicking inside it
+    userDropdown.on('click', function(e) {
+        e.stopPropagation();
+    });
+
+    // Handle logout button click
+    $('#logoutBtn').on('click', function(e) {
+        e.preventDefault();
+        window.location.href = 'ajaxhandler/superadminLogout.php';
+    });
+    
+    // Sidebar functionality
+    const sidebarToggle = $('.sidebar-toggle');
+    const sidebar = $('.sidebar');
+    const contentArea = $('.content-area');
+    
+    // Function to close sidebar
+    function closeSidebar() {
+        sidebar.addClass('closed');
+        contentArea.addClass('full-width');
+        localStorage.setItem('sidebarClosed', 'true');
+    }
+    
+    // Function to open sidebar
+    function openSidebar() {
+        sidebar.removeClass('closed');
+        contentArea.removeClass('full-width');
+        localStorage.setItem('sidebarClosed', 'false');
+    }
+    
+    // Toggle sidebar when button is clicked
+    sidebarToggle.on('click', function(e) {
+        e.stopPropagation(); // Prevent click from bubbling to document
+        if (sidebar.hasClass('closed')) {
+            openSidebar();
+        } else {
+            closeSidebar();
+        }
+    });
+    
+    // Close sidebar when clicking outside
+    $(document).on('click', function(e) {
+        // If sidebar is open and click is not on sidebar or toggle button
+        if (!sidebar.hasClass('closed') && 
+            !$(e.target).closest('.sidebar').length && 
+            !$(e.target).closest('.sidebar-toggle').length) {
+            closeSidebar();
+        }
+    });
+    
+    // Prevent clicks inside sidebar from closing it
+    sidebar.on('click', function(e) {
+        e.stopPropagation();
+    });
+    
+    // Check localStorage for saved state and initialize sidebar
+    const sidebarClosed = localStorage.getItem('sidebarClosed');
+    // If there's no stored state, close the sidebar by default
+    if (sidebarClosed === null) {
+        sidebar.addClass('closed');
+        contentArea.addClass('full-width');
+        localStorage.setItem('sidebarClosed', 'true');
+    } else if (sidebarClosed === 'true') {
+        // If it was previously closed, keep it closed
+        sidebar.addClass('closed');
+        contentArea.addClass('full-width');
+    }
+
     // Show the modal when the "Add New Coordinator/Admin" button is clicked
     $('#btnAddCoordinator').on('click', function() {
-        $('#addCoordinatorModal').show(); // Display the modal
+        $('#addCoordinatorModal').show();
+        fetchHTEOptions(); // Fetch HTE options when opening the modal
     });
+
+    // Handle role selection change
+    $('#role').on('change', function() {
+        const selectedRole = $(this).val();
+        
+        // Hide both containers initially
+        $('#hteDropdownContainer').hide();
+        $('#superadminWarning').hide();
+        
+        if (selectedRole === 'ADMIN') {
+            $('#hteDropdownContainer').show();
+        } else if (selectedRole === 'SUPERADMIN') {
+            // Show warning for superadmin creation
+            if (!confirm('Creating a new Superadmin will grant them full system access. Are you sure you want to proceed?')) {
+                $(this).val(''); // Reset selection if not confirmed
+                return;
+            }
+        }
+    });
+
+    // Fetch HTE options for the dropdown
+    function fetchHTEOptions() {
+        $.ajax({
+            url: "ajaxhandler/addCoordinatorAjax.php",
+            type: "POST",
+            dataType: "json",
+            data: { action: "getHTEs" },
+            success: function(response) {
+                if (response.success) {
+                    const hteSelect = $("#hteSelect");
+                    hteSelect.empty();
+                    hteSelect.append('<option value="">Select HTE</option>');
+                    response.htes.forEach(hte => {
+                        hteSelect.append(`<option value="${hte.HTE_ID}">${hte.NAME}</option>`);
+                    });
+                } else {
+                    console.error("Error fetching HTEs:", response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching HTEs:", error);
+            }
+        });
+    }
 
     // Handle form submission for adding a coordinator/admin
     $('#addCoordinatorForm').on('submit', function(event) {
-        event.preventDefault(); // Prevent the default form submission
+        event.preventDefault();
 
-        const formData = $(this).serialize(); // Serialize form data
+        // Validate the form
+        const role = $('#role').val();
+        if (role === 'ADMIN' && !$('#hteSelect').val()) {
+            alert('Please select an HTE for the admin.');
+            return;
+        }
+
+        const formData = $(this).serialize();
 
         $.ajax({
             type: 'POST',
-            url: 'ajaxhandler/addCoordinatorAjax.php', // Call the existing addCoordinatorAjax.php
+            url: 'ajaxhandler/addCoordinatorAjax.php',
             data: formData,
-            dataType: "json", // Expect JSON response
+            dataType: "json",
             success: function(response) {
                 if (response.success) {
-                    alert(response.message); // Show success message
-                    location.reload(); // Reload the page to see the updated list
+                    alert(response.message);
+                    $('#addCoordinatorModal').hide();
+                    $('#addCoordinatorForm')[0].reset();
+                    location.reload();
                 } else {
-                    alert("Error: " + response.message); // Show error message
+                    alert("Error: " + response.message);
                 }
             },
-            error: function() {
-                alert('Error adding coordinator. Please try again.'); // Show error message
+            error: function(xhr, status, error) {
+                console.error("Error details:", xhr.responseText);
+                alert('Error adding coordinator. Please try again.');
             }
         });
+    });
+
+    // Close modal functionality
+    $('#closeModal').on('click', function() {
+        $('#addCoordinatorModal').hide();
+        $('#addCoordinatorForm')[0].reset();
+        $('#hteDropdownContainer').hide();
+    });
+
+    // Close modal when clicking outside
+    $(window).on('click', function(event) {
+        if (event.target === document.getElementById('addCoordinatorModal')) {
+            $('#addCoordinatorModal').hide();
+            $('#addCoordinatorForm')[0].reset();
+            $('#hteDropdownContainer').hide();
+        }
     });
 
     // Handle deletion of a coordinator

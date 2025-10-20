@@ -74,12 +74,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // If role is ADMIN, set the HTE_ID
+            // Check if user is authorized to create SUPERADMIN
+            if ($role === 'SUPERADMIN') {
+                if (!isset($_SESSION['current_user_role']) || $_SESSION['current_user_role'] !== 'SUPERADMIN') {
+                    echo json_encode(['success' => false, 'message' => 'Only existing Superadmins can create new Superadmins.']);
+                    exit;
+                }
+            }
+
             if ($role === 'ADMIN' && $hteId) {
-                // Insert new coordinator with HTE_ID
+                // Insert new admin with HTE_ID
                 $stmt = $conn->prepare("INSERT INTO coordinator (COORDINATOR_ID, NAME, EMAIL, CONTACT_NUMBER, DEPARTMENT, USERNAME, PASSWORD, ROLE, HTE_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 $stmt->execute([$coordinatorId, $name, $email, $contactNumber, $department, $username, $password, $role, $hteId]);
             } else {
-                // Insert new coordinator without HTE_ID for COORDINATOR role
+                // Insert new coordinator/superadmin without HTE_ID
                 $stmt = $conn->prepare("INSERT INTO coordinator (COORDINATOR_ID, NAME, EMAIL, CONTACT_NUMBER, DEPARTMENT, USERNAME, PASSWORD, ROLE) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                 $stmt->execute([$coordinatorId, $name, $email, $contactNumber, $department, $username, $password, $role]);
             }

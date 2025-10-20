@@ -1,7 +1,13 @@
 <?php 
 session_start();
-unset($_SESSION["current_user_role"]);
-unset($_SESSION["current_user_name"]);
-header("location:../index.php");
+// Destroy all session data
+$_SESSION = array();
+if (isset($_COOKIE[session_name()])) {
+    setcookie(session_name(), '', time()-42000, '/');
+}
+session_destroy();
+
+// Ensure proper redirection
+header("Location: ../index.php");
 exit();
 ?>

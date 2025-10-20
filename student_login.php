@@ -29,6 +29,14 @@
         <div class="diverror topmarginlarge" id="diverror">
             <label class="errormessage" id="errormessage">ERROR GOES HERE</label>
         </div>
+
+        <div class="login-options">
+            <div class="login-row">
+                <span>Login as:</span>
+                <a href="admin.php" class="login-link">Admin</a>
+                <a href="index.php" class="login-link">Coordinator</a>
+            </div>
+        </div>
     </div>
 
     <div class="lockscreen" id="lockscreen">

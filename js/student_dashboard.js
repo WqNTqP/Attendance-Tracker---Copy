@@ -1260,7 +1260,7 @@ function updateAttendanceUI(data) {
     var now = new Date();
     var currentHour = now.getHours();
     var currentMinute = now.getMinutes();
-    if ((currentHour === 8 && currentMinute > 15) || currentHour > 8) {
+    if ((currentHour === 16 && currentMinute > 15) || currentHour > 16) {
         $("#timeInButton").prop('disabled', true);
         $("#timeOutButton").prop('disabled', true);
         $("#attendanceStatusMessage").text("Attendance for today is closed").show();
@@ -1279,9 +1279,9 @@ function updateAttendanceUI(data) {
         const minutes = parseInt(timeInParts[1]);
         if (hours === 8 && minutes === 0) {
             $("#todayStatusBadge").text("On Time - Checked In").removeClass("pending").addClass("checked-in");
-        } else if (hours === 8 && minutes >= 1 && minutes <= 15) {
+        } else if (hours === 16 && minutes >= 1 && minutes <= 15) {
             $("#todayStatusBadge").text("Late - Checked In").removeClass("pending").addClass("checked-in");
-        } else if ((hours === 8 && minutes > 15) || hours > 8) {
+        } else if ((hours === 16 && minutes > 15) || hours >16) {
             $("#todayStatusBadge").text("Attendance for today is closed").removeClass("pending").addClass("checked-in");
             $("#timeInButton").prop('disabled', true);
             $("#timeOutButton").prop('disabled', true);

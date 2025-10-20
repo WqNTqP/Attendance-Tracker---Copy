@@ -6,7 +6,7 @@
     <link rel="stylesheet" href ="css/login.css">
     <link rel="stylesheet" href ="css/loader.css">
     <link rel="icon" type="image/x-icon" href="icon/favicon.ico">
-    <title>Login Page</title>
+    <title>Coordinator Login</title>
 </head>
 <body>
     <div class="loginform topmarginlarge">
@@ -30,6 +30,13 @@
             <label class="errormessage" id="errormessage">ERROR GOES HERE</label>
         </div>
 
+        <div class="login-options">
+            <div class="login-row">
+                <span>Login as:</span>
+                <a href="admin.php" class="login-link">Admin</a>
+                <a href="student_login.php" class="login-link">Student</a>
+            </div>
+        </div>
 
     </div>
     <div class="lockscreen" id="lockscreen">

@@ -629,7 +629,7 @@ if (isset($_SESSION["current_user"]) && !isset($_SESSION["coordinator_user"])) {
                                     <h3>Predicted Placement</h3>
                                     <div class="predicted-placement-badge">Systems Development</div>
                                     <p class="prediction-reasoning">
-                                        <b>Reasoning:</b> Recommended for <b>Systems Development</b> due to strong performance in: <span class="subject-list">IPT 101: 92.0, CC 106: 91.0, PF 101: 90.0</span>.<br>
+                                        <b>Reasoning:</b> Recommended for <b>Systems Development</b> due to strong performance in: <span class="subject-list">IPT 101: 92, CC 106: 91, PF 101: 90</span>.<br>
                                         Both soft skill and communication skill ratings reinforce the suitability of this placement.
                                     </p>
                                 </div>

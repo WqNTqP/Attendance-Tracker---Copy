@@ -47,8 +47,8 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// For admin dashboard access to weekly reports, allow admin users
-if ($_SESSION['user_type'] !== 'coordinator') {
+// Allow access for coordinator, admin, or superadmin
+if (!in_array($_SESSION['user_type'], ['coordinator', 'admin', 'SUPERADMIN'])) {
     echo json_encode(['status' => 'error', 'message' => 'Unauthorized access']);
     exit;
 }

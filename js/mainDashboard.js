@@ -619,39 +619,101 @@ function loadPostAssessmentEvaluation(studentId) {
         }
     });
 
-    // Run prediction only updates placement columns
+    // Run prediction and update database
     $(document).on('click', '#runPredictionBtn', function() {
         if (!window.predictionStudents) return;
         $('#predictionSpinner').show();
+        let totalStudents = window.predictionStudents.length;
+        let processedCount = 0;
+
         window.predictionStudents.forEach(function(student, idx) {
             if (student.valid) {
+                // Get grades and skills from pre_assessment
+                const grades = student.pre_assessment;
+                
                 $.ajax({
                     url: 'http://localhost:5000/predict',
                     type: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify(student.pre_assessment),
+                    data: JSON.stringify(grades),
                     success: function(mlres) {
+                        // Validate ML response
+                        if (!mlres || !mlres.placement) {
+                            console.error('Invalid ML response:', mlres);
+                            let row = $('#predictionTable tbody tr[data-row="' + idx + '"]');
+                            row.find('.predicted-placement').text('Error');
+                            row.find('.analysis-btn').css({'background-color':'red','color':'white'});
+                            return;
+                        }
+
+                        // Validate required fields first
+                        if (!mlres.placement || !mlres.reasoning || !mlres.probabilities) {
+                            console.error('Missing required data in ML response:', mlres);
+                            let row = $('#predictionTable tbody tr[data-row="' + idx + '"]');
+                            row.find('.predicted-placement').text('Error: Missing Data');
+                            row.find('.analysis-btn').css({'background-color':'red','color':'white'});
+                            return;
+                        }
+
                         let predicted = mlres.placement;
                         let row = $('#predictionTable tbody tr[data-row="' + idx + '"]');
                         row.find('.predicted-placement').text(predicted);
-                        // Store analysis data for modal (set as URI-encoded string for compatibility)
+                        
+                        // Store analysis data for modal
                         row.find('.analysis-btn').attr('data-analysis', encodeURIComponent(JSON.stringify(mlres)));
                         row.find('.analysis-btn').css({'background-color':'green','color':'white'});
 
-                        // Save prediction and analysis to DB
+                        // Prepare prediction data with required fields
+                        let predictionData = {
+                            action: 'savePrediction',
+                            student_id: student.STUDENT_ID,
+                            ojt_placement: mlres.placement,
+                            prediction_reasoning: mlres.reasoning,
+                            prediction_probabilities: JSON.stringify(mlres.probabilities)
+                        };
+                        
+                        // Log the data being sent
+                        console.log('Sending prediction data:', predictionData);
+
+                        // Add grade fields from pre_assessment selectively
+                        const preAssessmentData = { ...student.pre_assessment };
+                        
+                        // Remove fields that shouldn't override prediction data
+                        delete preAssessmentData.ojt_placement;
+                        delete preAssessmentData.prediction_reasoning;
+                        delete preAssessmentData.prediction_probabilities;
+                        delete preAssessmentData.action;
+                        
+                        // Add the grades data
+                        Object.assign(predictionData, preAssessmentData);
+                        
+                        // Save to database
                         $.ajax({
                             url: 'ajaxhandler/predictionAjax.php',
                             type: 'POST',
-                            data: {
-                                action: 'savePrediction',
-                                student_id: student.STUDENT_ID,
-                                ojt_placement: mlres.placement,
-                                prediction_reasoning: mlres.reasoning,
-                                prediction_probabilities: JSON.stringify(mlres.probabilities),
-                                prediction_confidence: mlres.confidence
-                            },
+                            data: predictionData,
+                            dataType: 'json',
                             success: function(resp) {
-                                // Optionally handle success
+                                processedCount++;
+                                if (!resp.success) {
+                                    console.error("Failed to save prediction for student", student.STUDENT_ID, ":", resp.error);
+                                }
+                                // Hide spinner when all students are processed
+                                if (processedCount === totalStudents) {
+                                    $('#predictionSpinner').hide();
+                                    // Reload the student list to refresh the data
+                                    loadPredictionStudents();
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                processedCount++;
+                                console.error("Error saving prediction for student", student.STUDENT_ID, ":", error);
+                                // Hide spinner when all students are processed
+                                if (processedCount === totalStudents) {
+                                    $('#predictionSpinner').hide();
+                                    // Reload the student list to refresh the data
+                                    loadPredictionStudents();
+                                }
                             }
                         });
                     },
@@ -678,6 +740,10 @@ function loadPostAssessmentEvaluation(studentId) {
         let analysis = {};
         try {
             analysis = analysisRaw ? JSON.parse(decodeURIComponent(analysisRaw)) : {};
+            if (analysis.probabilities && !analysis.confidence) {
+                // Set confidence as the highest probability value
+                analysis.confidence = Math.max(...Object.values(analysis.probabilities).map(Number));
+            }
         } catch (e) {
             analysis = {};
         }
@@ -703,13 +769,13 @@ function loadPostAssessmentEvaluation(studentId) {
                         <b>Reasoning:</b>
                         ${reasoningLine}
                         <p>
-                            ${highlightGrades((analysis.reasoning || '').replace(/\s*\(average: [^)]+\)/g, ''))}
+                            ${highlightGrades(analysis.reasoning || '')}
                         </p>
                     </div>
                     <div class="prediction-probability">
                         <b>Probability Explanation:</b>
                         <p>
-                            The model is <span class="confidence-high">${analysis.confidence || ''}</span> that <span class="highlight">${analysis.placement}</span> is the best placement for this student. ${analysis.prob_explanation || ''}
+                            ${analysis.prob_explanation}
                         </p>
                     </div>
                     <div class="probability-bars">
@@ -855,8 +921,6 @@ $(document).on('click', '#closeAnalysisModal', function() {
     $(document).on('click', '#applyReportFilters', function() {
         loadApprovedReportsWithFilters();
     });
-
-    // ...existing code...
 
     // Profile button click handler
     $(document).on('click', '#btnProfile', function() {

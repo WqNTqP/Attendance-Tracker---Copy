@@ -214,6 +214,7 @@ $adminName = $name ?? 'Admin';
                             <th>Name</th>
                             <th>Email</th>
                             <th>Contact Number</th>
+                            <th>Analysis</th>
                         </tr>
                         <?php if (!empty($allStudents)): ?>
                             <?php foreach ($allStudents as $student): ?>
@@ -222,11 +223,12 @@ $adminName = $name ?? 'Admin';
                                 <td><?php echo htmlspecialchars($student['SURNAME']); ?></td>
                                 <td><?php echo htmlspecialchars($student['EMAIL']); ?></td>
                                 <td><?php echo htmlspecialchars($student['CONTACT_NUMBER']); ?></td>
+                                <td><button class="analysis-btn" data-student-id="<?php echo htmlspecialchars($student['STUDENT_ID']); ?>">Analysis</button></td>
                             </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="4">No students found under your management.</td>
+                                <td colspan="5">No students found under your management.</td>
                             </tr>
                         <?php endif; ?>
                     </table>
